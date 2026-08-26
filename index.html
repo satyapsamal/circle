@@ -858,8 +858,7 @@
         }
 
         async function logToGoogleSheets(data) {
-            if (GOOGLE_SHEETS_ENDPOINT === "https://script.google.com/macros/s/AKfycbz-lZT2sgrNk7xHSEEOHAtD97feo9H9EZcufbJ99WZ8Ywris93zawFE2g3hRhceU4x97w/exec") return;
-            try {
+                       try {
                 await fetch(GOOGLE_SHEETS_ENDPOINT, {
                     method: 'POST',
                     mode: 'no-cors',
