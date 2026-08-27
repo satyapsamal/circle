@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Page Title -->
-<title>Circle | BBA Assistant</title>
+    <title>Circle | BBA Assistant</title>
 
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="circle.png">
-<link rel="apple-touch-icon" href="circle.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="circle.png">
+    <link rel="apple-touch-icon" href="circle.png">
 
-<!-- SEO Description -->
-<meta name="description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
+    <!-- SEO Description -->
+    <meta name="description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
 
-<!-- Open Graph / Social Sharing -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Circle | BBA Assistant">
-<meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
-<meta property="og:image" content="circle.png">
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Circle | BBA Assistant">
+    <meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
+    <meta property="og:image" content="circle.png">
 
-<!-- Twitter / X Sharing -->
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Circle | BBA Assistant">
-<meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
-<meta name="twitter:image" content="circle.png">
+    <!-- Twitter / X Sharing -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Circle | BBA Assistant">
+    <meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
+    <meta name="twitter:image" content="circle.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,9 +53,9 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10 and IE 11 */
-            user-select: none; /* Standard syntax */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* Allow selection in input fields specifically */
@@ -72,7 +72,6 @@
             color: var(--text-primary);
             font-family: var(--font-ui);
             overflow: hidden;
-            /* Prevent casual drag behavior on the body */
             -webkit-user-drag: none;
         }
 
@@ -109,6 +108,122 @@
         }
         .main-layer-visible {
             opacity: 1 !important;
+        }
+
+        /* Promotional Modal Styles */
+        #promo-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        #promo-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .promo-content {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 4/5;
+            max-height: 85vh;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #080808;
+        }
+        .promo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* Modal X Button with 3s Countdown */
+        #promo-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            pointer-events: auto;
+            padding: 0;
+        }
+        #promo-close.promo-disabled {
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        #promo-close:not(.promo-disabled):hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .promo-ring {
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 40px; height: 40px;
+            /* scaleX(-1) mirrors it so clockwise animation acts anti-clockwise */
+            transform: scaleX(-1) rotate(-90deg);
+            pointer-events: none;
+        }
+        .promo-ring-progress {
+            /* Circumference of r=18 is ~113.1 */
+            stroke-dasharray: 113.1;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+        @keyframes ring-erase {
+            to { stroke-dashoffset: 113.1; }
+        }
+
+        /* Modal LinkedIn CTA */
+        .promo-linkedin-btn {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 15px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            z-index: 20;
+            pointer-events: auto;
+        }
+        .promo-linkedin-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateX(-50%) scale(1.02);
         }
 
         /* Onboarding Sequence Styles */
@@ -270,6 +385,7 @@
             font-size: 16px;
             line-height: 1.7;
             cursor: default;
+            width: 100%;
         }
 
         .msg-ai h2 {
@@ -302,6 +418,147 @@
             50% { transform: scale(1.1); opacity: 1; }
         }
 
+        /* Dream Labs Terminal Widget */
+        .dl-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .dl-container {
+            background-color: #080808;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+        .dl-header {
+            text-align: center;
+            color: #ffffff;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .dl-header-sub {
+            font-family: var(--font-conversational);
+            font-size: 11px;
+            opacity: 0.5;
+            font-weight: 400;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+            text-transform: none;
+        }
+        .dl-terminal-area-wrapper {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+        .dl-line {
+            font-family: monospace;
+            color: #a0a0a0;
+            font-size: 13px;
+            text-align: center;
+            transition: opacity 0.3s ease, text-shadow 0.3s ease;
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            left: 0;
+            pointer-events: none;
+        }
+        .dl-line.active {
+            opacity: 1;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+        .dl-breathing-area {
+            text-align: center;
+            width: 100%;
+            display: none;
+        }
+        .dl-phase {
+            font-size: 15px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .dl-timer {
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 16px;
+            font-weight: 400;
+        }
+        .dl-box-container {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
+        .dl-box {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: transform 4s linear;
+        }
+        .dl-box.expand {
+            transform: scale(1.7);
+        }
+        .dl-box.contract {
+            transform: scale(1);
+        }
+        
+        /* Dream Labs Source Expander */
+        .dl-source-toggle {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+            width: 100%;
+        }
+        .dl-source-toggle:hover {
+            opacity: 1;
+        }
+        .dl-source-content {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #888;
+            overflow-x: auto;
+            white-space: pre;
+            border: 1px solid rgba(255,255,255,0.05);
+            scrollbar-width: thin;
+            width: 100%;
+            text-align: left;
+        }
+        .dl-source-content::-webkit-scrollbar { height: 4px; }
+        .dl-source-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
         /* Input Area & Suggestion Pills */
         #input-container {
             width: 100%;
@@ -321,22 +578,24 @@
             white-space: nowrap;
             margin-bottom: 16px;
             padding-bottom: 4px;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
             scroll-snap-type: x mandatory;
-            transition: opacity 0.6s ease;
-            cursor: grab; /* Indicates scrolling behavior on desktop */
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            cursor: grab;
         }
-        #suggestion-pills:active {
-            cursor: grabbing;
-        }
+        #suggestion-pills:active { cursor: grabbing; }
         #suggestion-pills::-webkit-scrollbar { display: none; }
         
+        /* Liquid Glass Suggestion Pills */
         .suggestion-pill {
             display: inline-flex;
             align-items: center;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #c0c0c0;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            color: #d0d0d0;
             padding: 10px 18px;
             border-radius: 20px;
             font-size: 14px;
@@ -345,11 +604,14 @@
             transition: all 0.3s ease;
             scroll-snap-align: start;
             flex-shrink: 0;
+            pointer-events: auto;
         }
         .suggestion-pill:hover {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             color: #ffffff;
-            border-color: rgba(255,255,255,0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
         }
 
         /* Input Glow Layering */
@@ -453,6 +715,7 @@
             transition: all 0.3s ease;
             align-self: flex-start;
             pointer-events: auto;
+            cursor: pointer;
         }
         .source-btn:hover { background: rgba(255,255,255,0.08); color: #ffffff; border-color: rgba(255,255,255,0.4); }
 
@@ -464,7 +727,7 @@
             padding: 4px 24px 20px 24px;
             opacity: 0.6;
             z-index: 20;
-            pointer-events: none; /* Make container unclickable except for the link */
+            pointer-events: none;
         }
         #footer-disclaimer a {
             color: inherit;
@@ -472,7 +735,7 @@
             text-decoration: underline;
             cursor: pointer;
             transition: color 0.3s ease;
-            pointer-events: auto; /* Re-enable pointer events for the actual link */
+            pointer-events: auto;
         }
         #footer-disclaimer a:hover { color: #ffffff; }
 
@@ -511,13 +774,7 @@
         }
         
         @media (max-width: 768px) {
-            #new-chat-btn {
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-                font-size: 22px;
-            }
+            #new-chat-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 22px; }
         }
 
         /* Accessibility: Reduced Motion */
@@ -527,6 +784,8 @@
             .glow-spinner { animation: none !important; background: rgba(255,255,255,0.1); }
             .thinking-dot { animation: none !important; opacity: 0.7; }
             #new-chat-btn { transition: none !important; }
+            .promo-ring-progress { animation: none !important; stroke-dashoffset: 113.1 !important; }
+            .dl-box { transition: none !important; }
         }
     </style>
 </head>
@@ -536,9 +795,7 @@
         <!-- New User Onboarding Layer -->
         <div id="onboarding-layer" class="hidden">
             <img id="intro-logo" src="circle.png" alt="Circle Logo" class="anim-element anim-enter hidden">
-            
             <h1 id="intro-brand" class="font-ui anim-element anim-enter hidden">Circle.</h1>
-            
             <div id="intro-name-step" class="anim-element anim-enter hidden">
                 <h2 class="font-ui">What's your name?</h2>
                 <div class="name-input-wrapper" id="name-wrapper">
@@ -546,8 +803,21 @@
                     <button id="name-submit" class="font-ui" aria-label="Submit Name">→</button>
                 </div>
             </div>
-            
             <h1 id="intro-welcome" class="font-ui anim-element anim-enter hidden"></h1>
+        </div>
+
+        <!-- Promotional Modal -->
+        <div id="promo-modal" class="hidden font-ui">
+            <div class="promo-content">
+                <button id="promo-close" class="promo-disabled" aria-disabled="true">
+                    <svg class="promo-ring" viewBox="0 0 40 40">
+                        <circle class="promo-ring-progress" cx="20" cy="20" r="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+                    </svg>
+                    <span class="promo-x">×</span>
+                </button>
+                <img src="circle-promo.png" alt="Promotional Content" class="promo-image">
+                <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" class="promo-linkedin-btn font-ui">Follow on LinkedIn</a>
+            </div>
         </div>
 
         <!-- Main Conversational Interface -->
@@ -565,11 +835,9 @@
             </div>
 
             <div id="input-container">
-                
                 <div id="suggestion-pills">
                     <!-- Pills injected via JS -->
                 </div>
-
                 <div class="input-wrapper-relative">
                     <div class="glow-clip">
                         <div class="glow-spinner" id="glow-spinner-elem"></div>
@@ -579,7 +847,6 @@
                         <button id="chat-submit" class="font-ui" aria-label="Send Message">→</button>
                     </div>
                 </div>
-
             </div>
             
             <div id="footer-disclaimer" class="font-ui">
@@ -593,170 +860,127 @@
         /*******************************************************
          * 0. ANTI-COPY & DEVTOOLS DETERRENTS (UX Only)
          *******************************************************/
-        // Prevent right-click context menu globally (except in inputs)
         document.addEventListener('contextmenu', e => {
             if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
             }
         });
 
-        // Prevent dragging visual elements and non-editable text
         document.addEventListener('dragstart', e => {
             if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
             }
         });
 
-        // Prevent copying text
         document.addEventListener('copy', e => {
             if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                 e.preventDefault();
             }
         });
 
-        // Prevent common DevTools shortcuts as a casual deterrent
         document.addEventListener('keydown', e => {
-            // Avoid blocking if user is typing in an input field (except F12/Ctrl+Shift+I which are universal)
             const isInput = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
-            
-            // F12
             if (e.key === 'F12') e.preventDefault();
-            // Ctrl/Cmd + U (View Source)
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') e.preventDefault();
-            // Ctrl/Cmd + Shift + I/C/J
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(e.key.toLowerCase())) e.preventDefault();
-            // Ctrl/Cmd + S (Save)
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') e.preventDefault();
-            // Ctrl/Cmd + C (Copy) - if not in an input
             if (!isInput && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') e.preventDefault();
         });
 
-
         /*******************************************************
          * 1. GOOGLE SHEETS CONFIGURATION
-         * Replace this with your deployed Google Apps Script URL
          *******************************************************/
         const GOOGLE_SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbz-lZT2sgrNk7xHSEEOHAtD97feo9H9EZcufbJ99WZ8Ywris93zawFE2g3hRhceU4x97w/exec";
-
 
         /*******************************************************
          * 2. KNOWLEDGE BASE & INTENTS (Hardcoded Local Data)
          *******************************************************/
         const knowledgeBase = [
             {
-    id: 'bba_connect_fees',
-    
-    keywords: [
-        // Main English queries
-        'bba connect fees',
-        '500 fee',
-        'bba connect fee',
-        'connect fees',
-        'connect fee',
-'bba connect',
-        'bba connect charges',
-        'bba connect payment',
-        'bba connect cost',
-        'bba connect amount',
-        'bba connect money',
-        'fees for bba connect',
-        'fee for bba connect',
-        'what is bba connect fee',
-        'what is bba connect fees',
-        'what are bba connect fees',
-        'why bba connect fee',
-        'why bba connect fees',
-        'bba connect fees for',
-        'bba connect payment for',
-        'bba connect charges for',
-
-        // Examination-related
-        'exam fees',
-        'exam fee',
-        'examination fee',
-        'examination fees',
-        'mid sem fee',
-        'mid sem fees',
-        'midsem fee',
-        'midsem fees',
-        'mid sem examination fee',
-        'mid semester fee',
-        'mid semester fees',
-        '13 september fee',
-        '13th september fee',
-        '13 sep fee',
-
-        // Hinglish
-        'bba connect ki fees',
-        'bba connect ka fee',
-        'bba connect ka fees',
-        'bba connect ki fee',
-        'bba connect ke fees',
-        'bba connect ke liye fees',
-        'bba connect ke paise',
-        'bba connect ke liye payment',
-        'bba connect ka payment kya hai',
-        'bba connect ki fees kis liye hai',
-        'bba connect ka fees kis liye hai',
-        'bba connect fee kisliye',
-        'bba connect fees kisliye',
-        'bba connect ke paise kisliye',
-        'ye fees kis liye hai',
-        'ye fee kis liye hai',
-        'fees kis liye hai',
-        'fee kis liye hai',
-        'ye bba connect kya hai',
-        'bba connect mein fees kyu hai',
-        'bba connect me fees kyu hai',
-
-        // Common spelling mistakes / informal typing
-        'bba conect fees',
-        'bba conect fee',
-        'bba connect feez',
-        'bba connect fess',
-        'bba connect feees',
-        'bba conect fess',
-        'bba connet fees',
-        'bba connec fees',
-        'bba connect fees kya h',
-        'bba connect fee kya h',
-        'bba connect fees kya hai',
-        'bba connect fee kya hai',
-        'bba connect kis liye',
-        'bba connect k liye',
-        'bba connect kyu',
-        'bba connect kyun',
-        'connect fees kya hai',
-        'connect fee kya hai',
-
-        // Meetup possibility
-        'meetup fee',
-        'meetup fees',
-        'meet up fee',
-        'meet up fees',
-        'in person meetup fee',
-        'in person meetup fees',
-        'physical meetup fee',
-        'physical meetup fees'
-    ],
-
-    markdown: `{{Name}}, **BBA Connect fees are most likely related to the upcoming Mid-Term Examination scheduled for 13 September.**
-
-Based on the information currently available, the fee appears **more likely to be an examination-related payment** rather than a payment for an in-person meetup.
-
-The possibility of it being related to an **in-person meetup is comparatively less likely**.
-
-Since this information may be subject to change, please verify the purpose of the fee through the latest official communication before making any payment.
-
-If you have the BBA Connect payment notice or screenshot, you can also share the details with your peers in **The Circle** community for discussion.`,
-
-    sources: [
-        {
-            label: 'Join The Circle →',
-            url: 'https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO'
-        }
-    ]
-},
+                id: 'student_wellbeing',
+                keywords_severe: [
+                    'self harm', 'self-harm', 'hurt myself', 'hurting myself', 'harm myself', 'cut myself', 'cutting myself', 
+                    'want to hurt myself', 'khud ko hurt', 'khud ko nuksan', 'khud ko harm', 'khud ko hurt karna', 'khud ko nuksan pahuchana', 
+                    'suicide', 'suicidal', 'suicide thoughts', 'suicidal thoughts', 'want to die', 'i want to die', 'wanna die', 
+                    'kill myself', 'want to kill myself', 'end my life', 'ending my life', 'end it all', 'marna hai', 'mar jana hai', 
+                    'marna chahta hu', 'marna chahti hu', 'khud ko maarna', 'khud ko marna', 'zindagi khatam', 'life khatam karni hai', 
+                    'suicde', 'suicid', 'suicide thought', 'suicidal thought', 'selfharm', 'cant live', 'cant go on', 'dont want to live', 
+                    'dont wanna live', 'dont want live', 'wish i was dead', 'i wish i was dead', 'wish i were dead', 'i wish i could die', 
+                    'wish i could die', 'i want to be dead', 'i wanna be dead', 'want to be dead', 'better off dead', 'everyone would be better without me', 
+                    'nobody would miss me', 'no one would miss me', 'they would not miss me', 'i don\'t want to be here', 'i dont want to be here', 
+                    'i don\'t want to exist', 'i dont want to exist', 'i don\'t want to live anymore', 'i dont want to live anymore', 
+                    'i don\'t wanna live anymore', 'i dont wanna live anymore', 'i can\'t go on', 'i cant go on', 'i can\'t do this anymore', 
+                    'i cant do this anymore', 'i want everything to end', 'i want it all to end', 'i just want it to end', 'life isn\'t worth it', 
+                    'life is not worth it', 'life not worth living', 'no point living', 'no point in living', 'tired of living', 'tired of life', 
+                    'done with life', 'done with everything', 'want to disappear', 'i want to disappear', 'wish i could disappear', 
+                    'wish i wasn\'t here', 'wish i werent here', 'mar jana chahta hu', 'mar jana chahti hu', 'kaash main mar jata', 
+                    'kaash main mar jaati', 'kaash mai mar jata', 'kaash mai mar jaati', 'kaash main zinda nahi hota', 'kaash main zinda nahi hoti', 
+                    'jeena nahi hai', 'jeena nahi chahta', 'jeena nahi chahti', 'ab jeena nahi hai', 'zindagi nahi jeeni', 'zindagi khatam karni hai', 
+                    'sab khatam karna hai', 'sab kuch khatam karna hai', 'marne ka mann hai', 'marne ka man hai', 'marne ka mann kar raha hai', 
+                    'marne ka man kar raha hai', 'khud ko khatam karna', 'khud ko nuksaan', 'kash main mar jata', 'kash mai mar jata'
+                ],
+                keywords_general: [
+                    'depression', 'depressed', 'depress', 'feeling depressed', 'i am depressed', 'im depressed', 'very depressed', 
+                    'really depressed', 'sad', 'very sad', 'feeling sad', 'really sad', 'lonely', 'feeling lonely', 'alone', 'i feel alone', 
+                    'i feel lonely', 'empty', 'emotionally empty', 'hopeless', 'hopelessness', 'no hope', 'nothing matters', 'nothing feels right', 
+                    'feeling lost', 'lost in life', 'depression mein', 'depression me', 'depression ho raha hai', 'depression ho rha hai', 
+                    'depressed hu', 'depressed hoon', 'main depressed hu', 'mai depressed hu', 'mann udaas hai', 'man udaas hai', 'bahut udaas', 
+                    'bohot udaas', 'akela', 'akeli', 'akela feel ho raha hai', 'akela feel kar raha hu', 'akela feel kar rahi hu', 'mann nahi lag raha', 
+                    'bahut pareshaan', 'bohot pareshaan', 'life difficult lag rahi hai', 'sab kuch difficult lag raha hai', 'anxiety', 'anxious', 
+                    'feeling anxious', 'feel anxious', 'i feel anxious', 'i am anxious', 'im anxious', 'i\'m anxious', 'very anxious', 'really anxious', 
+                    'so anxious', 'too anxious', 'extremely anxious', 'my anxiety', 'i have anxiety', 'my anxiety is bad', 'anxiety attack', 
+                    'anxiety attacks', 'panic', 'panicking', 'panic attack', 'panic attacks', 'feeling panicked', 'i feel panicked', 'nervous', 
+                    'very nervous', 'feeling nervous', 'nervousness', 'restless', 'uneasy', 'worried', 'worrying', 'constant worry', 'overthinking', 
+                    'overthink', 'overthinking too much', 'cant stop thinking', 'can\'t stop thinking', 'anxiety ho rahi hai', 'anxiety ho raha hai', 
+                    'anxiety ho rha hai', 'anxious hu', 'anxious hoon', 'main anxious hu', 'mai anxious hu', 'bahut anxious', 'bohot anxious', 
+                    'bahut anxiety', 'bohot anxiety', 'mujhe anxiety ho rahi hai', 'mujhe anxiety ho raha hai', 'mujhe anxiety ho rha hai', 
+                    'panic ho raha hai', 'panic ho rhi hai', 'panic ho rha hai', 'bahut tension', 'bohot tension', 'bahut stress', 'bohot stress', 
+                    'exam ki tension', 'exam ko lekar tension', 'exam ke wajah se tension', 'exam ki wajah se anxiety', 'exam ko lekar anxiety', 
+                    'exam ka pressure', 'exam ke pressure mein', 'mann bahut pareshaan hai', 'dimag bahut chal raha hai', 'bahut overthink kar raha hu', 
+                    'bahut overthink kar rahi hu', 'stress', 'stressed', 'very stressed', 'too much stress', 'extreme stress', 'exam stress', 
+                    'academic stress', 'student stress', 'study stress', 'pressure', 'too much pressure', 'feeling pressured', 'overwhelmed', 
+                    'overwhelming', 'burnout', 'burnt out', 'mentally exhausted', 'emotionally exhausted', 'anxeity', 'anxity', 'depresion', 
+                    'depresed', 'cant cope', 'i cant handle this', 'handle nahi ho raha', 'handle nhi ho raha', 'sab kuch difficult lag raha hai', 
+                    'bahut pressure hai', 'bohot pressure hai', 'life difficult hai', 'life is difficult', 'give up', 'giving up', 'i want to give up', 
+                    'mann nahi kar raha', 'jeene ka mann nahi', 'life nahi chahiye', 'emotionally drained', 'mentally drained', 'feeling broken', 
+                    'feeling helpless', 'helpless', 'not coping', 'struggling mentally', 'mental struggle', 'bad mental health', 'not feeling okay', 
+                    'i\'m not okay', 'im not okay', 'feel terrible', 'feeling terrible', 'feeling horrible', 'feeling low', 'feeling down', 
+                    'mann pareshaan hai', 'man pareshaan hai', 'akeli feel ho rahi hai', 'akeli feel kar rahi hu', 'mental pressure', 'mental stress', 
+                    'dimag kharab ho raha hai', 'scared', 'afraid', 'mentally tired'
+                ],
+                markdown_severe: `"{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**."`,
+                markdown_general: `"{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below."`
+            },
+            {
+                id: 'bba_connect_fees',
+                keywords: [
+                    'bba connect', 'BBA Connect', 'bba connect fees', 'bba connect fee', 'bba connect charges', 'bba connect cost', 'bba connect price', 
+                    'bba connect payment', 'bba connect registration fee', 'bba connect participation fee', 'bba connect event', 'bba connect meetup', 
+                    'bba connect meet up', 'bba connect meeting', 'bba connect programme', 'bba connect program', 'what is bba connect', 'what\'s bba connect', 
+                    'what is bba connect fees', 'what is bba connect fee', 'why bba connect fee', 'why bba connect fees', 'what does bba connect fee cover', 
+                    'what does the 500 cover', 'what is the 500 for', '500 rupees bba connect', '500 rs bba connect', '500 bba connect', 'bba connect 500', 
+                    'bba connect 500 rupees', 'bba connect 500 rs', 'bba connect september', 'bba connect september 26', 'bba connect 26 september', 
+                    'bba connect date', 'bba connect time', 'bba connect venue', 'bba connect location', 'bba connect campus', 'bba connect accommodation', 
+                    'bba connect food', 'bba connect lunch', 'bba connect snacks', 'bba connect eligibility', 'who can attend bba connect', 
+                    'is bba connect compulsory', 'is bba connect mandatory', 'is bba connect optional', 'bba connect optional', 'bba connect attendance', 
+                    'bba connect meetup fees', 'bba connect event fees', 'bba connect in person', 'bba connect in-person', 'bba connect campus meetup', 
+                    'bba connect activities', 'bba connect kya hai', 'bba connect kya h', 'bba connect kya hota hai', 'bba connect kya hota h', 
+                    'bba connect kisliye hai', 'bba connect ka kya hai', 'bba connect ka fee', 'bba connect ki fee', 'bba connect ke fees', 
+                    'bba connect ki fees', 'bba connect ka paisa', 'bba connect ka payment', 'bba connect ke paise', 'bba connect ke 500', 
+                    'bba connect ka 500', '500 rupay bba connect', '500 rupees bba connect', '500 rs bba connect', 'bba connect mein kya milega', 
+                    'bba connect me kya milega', 'bba connect mein kya hai', 'bba connect me kya hai', 'bba connect ka paisa kisliye', '500 kisliye hai', 
+                    '500 ka kya hai', '500 kyu dena hai', '500 kyun dena hai', 'bba connect compulsory hai', 'bba connect mandatory hai', 
+                    'bba connect optional hai', 'bba connect jana zaroori hai', 'bba connect jaana zaroori hai', 'bba connect mein jana hai', 
+                    'bba connect me jana hai', 'bba connect kab hai', 'bba connect kaha hai', 'bba connect kahan hai', 'bba connect kitne baje hai', 
+                    'bba connect mein food milega', 'bba connect me lunch milega', 'bba connect me snacks milega', 'bba connect accommodation', 
+                    'bba connect stay', 'bba connect campus mein', 'bba connect campus me', 'bba connect meetup kya hai', 'bba connect event kya hai', 
+                    'bba conect', 'bba connnect', 'bba connectt', 'bba connet', 'bba con', 'bba meet', 'bba meetup fee', 'bba meet up fee', 
+                    'bba connect fees kya', 'bba connect fee kya', 'bba connect ka fee kya', 'bba connect ka fees kya', 'bba connect 500 kyun', 
+                    'bba connect 500 kyu', 'bba connect 500 kisliye'
+                ],
+                markdown: `"BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional."`,
+                sources: []
+            },
             {
                 id: 'casual_conversation',
                 keywords: [
@@ -898,7 +1122,7 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
         ];
 
         const fallbackResponse = {
-            markdown: `{{Name}}, I don't have enough verified information to answer that reliably.\n\nI don't want to guess and give you incorrect information.\n\nFor questions outside my current knowledge base, you can also ask the student community at BBA Circle, where students share resources, discuss academics, participate in revision sessions, and help each other out.`,
+            markdown: `{{Name}}, I don't have enough verified information to answer that reliably.\n\nI don't want to guess and give you incorrect information.\n\nFor questions outside my current knowledge base, you can also ask the student community at **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**, where students share resources, discuss academics, participate in revision sessions, and help each other out.`,
             sources: [
                 { label: 'BBA Circle WhatsApp →', url: 'https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO' }
             ]
@@ -928,12 +1152,12 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
         ];
 
         const circleRecommendations = [
-            "Need more help? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO), a student-led BBA community for learning, resources, and peer discussion.",
-            "Still stuck? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO) for peer learning, resources, revision sessions, and academic discussions.",
-            "Have more doubts? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO) for academic discussions and peer-to-peer learning.",
-            "Looking for more resources or peer help? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO).",
-            "Need help beyond this answer? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO) to learn, share, and grow with other BBA students.",
-            "Want to study with your peers? [Join The Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)."
+            "Need more help? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**, a student-led BBA community for learning, resources, and peer discussion.",
+            "Still stuck? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)** for peer learning, resources, revision sessions, and academic discussions.",
+            "Have more doubts? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)** for academic discussions and peer-to-peer learning.",
+            "Looking for more resources or peer help? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**.",
+            "Need help beyond this answer? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)** to learn, share, and grow with other BBA students.",
+            "Want to study with your peers? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**."
         ];
 
         const randomQuestionsForPills = [
@@ -956,6 +1180,8 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
         let greetingLoopActive = false;
         let isChatMode = false;
         let isProcessing = false;
+        let promoTimer = null;
+        let promoShownThisChat = false; 
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -972,7 +1198,7 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
         }
 
         async function logToGoogleSheets(data) {
-                       try {
+            try {
                 await fetch(GOOGLE_SHEETS_ENDPOINT, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -987,6 +1213,8 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
         document.addEventListener("DOMContentLoaded", () => {
             const isRegistered = localStorage.getItem('circle_user_registered');
             userName = localStorage.getItem('circle_username') || "";
+            
+            localStorage.removeItem('circle_promo_shown');
 
             if (isRegistered && userName) {
                 startMainInterface();
@@ -1079,7 +1307,6 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             const container = document.getElementById('suggestion-pills');
             container.innerHTML = '';
             
-            // Fixed Pill 1: LinkedIn
             const lnBtn = document.createElement('a');
             lnBtn.className = 'suggestion-pill font-ui';
             lnBtn.textContent = 'Follow on LinkedIn';
@@ -1088,7 +1315,6 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             lnBtn.rel = 'noopener noreferrer';
             container.appendChild(lnBtn);
 
-            // Fixed Pill 2: BBA Circle
             const whatsappBtn = document.createElement('a');
             whatsappBtn.className = 'suggestion-pill font-ui';
             whatsappBtn.textContent = 'Want to join BBA Circle?';
@@ -1097,7 +1323,6 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             whatsappBtn.rel = 'noopener noreferrer';
             container.appendChild(whatsappBtn);
 
-            // 2 to 3 Random Questions
             const numQuestions = Math.floor(Math.random() * 2) + 2;
             const shuffled = [...randomQuestionsForPills].sort(() => 0.5 - Math.random()).slice(0, numQuestions);
             
@@ -1113,7 +1338,14 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             });
             
             container.classList.remove('hidden');
+            
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(6px)';
+            
+            void container.offsetWidth;
+            
             container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
         }
 
         async function startMainInterface() {
@@ -1163,7 +1395,46 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
 
 
         /*******************************************************
-         * 6. EVENT LISTENERS & HORIZONTAL SCROLLING
+         * 6. PROMOTIONAL POPUP LOGIC
+         *******************************************************/
+        function showPromoModal() {
+            const modal = document.getElementById('promo-modal');
+            const closeBtn = document.getElementById('promo-close');
+            const ring = document.querySelector('.promo-ring-progress');
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.add('show');
+            
+            closeBtn.classList.add('promo-disabled');
+            closeBtn.setAttribute('aria-disabled', 'true');
+            
+            ring.style.display = 'block';
+            ring.style.animation = 'none';
+            void ring.offsetWidth;
+            ring.style.animation = 'ring-erase 3s linear forwards';
+            
+            if (promoTimer) clearTimeout(promoTimer);
+            
+            promoTimer = setTimeout(() => {
+                closeBtn.classList.remove('promo-disabled');
+                closeBtn.setAttribute('aria-disabled', 'false');
+                ring.style.display = 'none';
+            }, 3000);
+        }
+
+        function closePromoModal() {
+            const modal = document.getElementById('promo-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if (promoTimer) clearTimeout(promoTimer);
+            }, 500);
+        }
+
+
+        /*******************************************************
+         * 7. EVENT LISTENERS & HORIZONTAL SCROLLING
          *******************************************************/
         function setupEventListeners() {
             document.getElementById('name-submit').addEventListener('click', submitName);
@@ -1174,6 +1445,7 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             const chatInput = document.getElementById('chat-input');
             const chatSubmit = document.getElementById('chat-submit');
             const newChatBtn = document.getElementById('new-chat-btn');
+            const promoCloseBtn = document.getElementById('promo-close');
 
             chatInput.addEventListener('focus', stopGreetingRotation);
             chatInput.addEventListener('input', stopGreetingRotation);
@@ -1184,8 +1456,8 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             });
 
             newChatBtn.addEventListener('click', startNewChat);
+            promoCloseBtn.addEventListener('click', closePromoModal);
 
-            // Horizontal scrolling for prompt pills via mouse wheel
             const pillsContainer = document.getElementById('suggestion-pills');
             pillsContainer.addEventListener('wheel', (e) => {
                 if (e.deltaY !== 0) {
@@ -1212,36 +1484,30 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
 
 
         /*******************************************************
-         * 7. START NEW CHAT (The '+' Button logic)
+         * 8. START NEW CHAT (The '+' Button logic)
          *******************************************************/
         async function startNewChat() {
             if (isProcessing || !isChatMode) return;
             
             const chatContainer = document.getElementById('chat-container');
-            
-            // Fade out chat contents smoothly
             chatContainer.style.opacity = '0';
             
             await sleep(600);
-            
-            // Clear chat completely
             chatContainer.innerHTML = '';
             
-            // Revert state
             isChatMode = false;
+            promoShownThisChat = false; 
+            
             document.body.classList.remove('chat-active');
             document.getElementById('new-chat-btn').classList.add('hidden');
             
             const chatInput = document.getElementById('chat-input');
             chatInput.value = '';
             
-            // Restart Rainbow Spinner
             document.getElementById('glow-spinner-elem').classList.add('glow-spinner-reset');
             
-            // Restore Suggestion Pills
             renderSuggestionPills();
             
-            // Restart Landing Greeting Loop
             const rot = document.getElementById('greeting-rotator');
             let currentIdx = Math.floor(Math.random() * greetingsList.length);
             rot.textContent = formatText(greetingsList[currentIdx], userName);
@@ -1258,13 +1524,12 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             greetingLoopActive = true;
             rotateGreetingsLoop(rot, currentIdx);
             
-            // Fade in the clean chat container for future use
             chatContainer.style.opacity = '1';
         }
 
 
         /*******************************************************
-         * 8. CHAT INTERACTION LOGIC
+         * 9. CHAT INTERACTION LOGIC
          *******************************************************/
         async function handleChatSubmission() {
             if (isProcessing) return;
@@ -1275,22 +1540,26 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
 
             chatInput.value = "";
             stopGreetingRotation();
+            
+            if (!promoShownThisChat) {
+                promoShownThisChat = true;
+                setTimeout(showPromoModal, 1500); 
+            }
 
-            // Hide pills smoothly on first prompt
             const pills = document.getElementById('suggestion-pills');
             if (pills && !pills.classList.contains('hidden')) {
                 pills.style.opacity = '0';
+                pills.style.transform = 'translateY(6px)';
                 setTimeout(() => pills.classList.add('hidden'), 600);
             }
 
-            // Show New Chat button and transition layout
             if (!isChatMode) {
                 document.body.classList.add('chat-active');
                 document.getElementById('glow-spinner-elem').classList.remove('glow-spinner-reset');
                 
                 setTimeout(() => {
                     document.getElementById('new-chat-btn').classList.remove('hidden');
-                }, 600); // Wait for smooth transition before showing button
+                }, 600);
                 
                 isChatMode = true;
             }
@@ -1316,13 +1585,40 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             document.getElementById('chat-container').appendChild(aiContainer);
 
             const personalizedMarkdown = formatText(responseData.markdown, userName);
+            let finalCombinedMarkdown = personalizedMarkdown;
             
-            const recIdx = Math.floor(Math.random() * circleRecommendations.length);
-            const recommendationText = circleRecommendations[recIdx];
-            
-            const finalCombinedMarkdown = personalizedMarkdown + "\n\n" + recommendationText;
+            if (responseData.intentId !== 'student_wellbeing') {
+                const recIdx = Math.floor(Math.random() * circleRecommendations.length);
+                const recommendationText = circleRecommendations[recIdx];
+                finalCombinedMarkdown += "\n\n" + recommendationText;
+            }
 
             await typewriteHTML(aiContainer, parseBasicMarkdown(finalCombinedMarkdown));
+            
+            if (responseData.intentId === 'student_wellbeing' && responseData.severity === 'general') {
+                const dlBtnContainer = document.createElement('div');
+                dlBtnContainer.className = 'sources-container font-ui';
+                
+                const dlBtn = document.createElement('button');
+                dlBtn.className = 'source-btn font-ui';
+                dlBtn.innerHTML = 'Try Dream Labs &rarr;';
+                
+                dlBtn.onclick = async () => {
+                    dlBtnContainer.remove();
+                    isProcessing = true; 
+                    await startDreamLabsFlow(aiContainer);
+                    isProcessing = false;
+                };
+                
+                dlBtnContainer.appendChild(dlBtn);
+                dlBtnContainer.style.opacity = '0';
+                dlBtnContainer.style.transition = 'opacity 0.8s ease';
+                aiContainer.appendChild(dlBtnContainer);
+                
+                void dlBtnContainer.offsetWidth;
+                dlBtnContainer.style.opacity = '1';
+                scrollToBottom();
+            }
 
             if (responseData.sources && responseData.sources.length > 0) {
                 appendSources(aiContainer, responseData.sources);
@@ -1330,10 +1626,13 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             }
 
             isProcessing = false;
+
+            renderSuggestionPills();
+            scrollToBottom();
         }
 
         /*******************************************************
-         * 9. DOM MANIPULATION & UI RENDERING
+         * 10. DOM MANIPULATION & UI RENDERING
          *******************************************************/
         function appendUserMessage(text) {
             const div = document.createElement('div');
@@ -1370,9 +1669,191 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
             void sourceDiv.offsetWidth;
             sourceDiv.style.opacity = '1';
         }
+        
+        async function startDreamLabsFlow(container) {
+            const dotId = 'dl-dot-' + Date.now();
+            const dot = document.createElement('div');
+            dot.className = 'thinking-dot';
+            dot.id = dotId;
+            container.appendChild(dot);
+            scrollToBottom();
+            
+            const pills = document.getElementById('suggestion-pills');
+            if (pills && !pills.classList.contains('hidden')) {
+                pills.style.opacity = '0';
+                pills.style.transform = 'translateY(6px)';
+                setTimeout(() => pills.classList.add('hidden'), 600);
+            }
+
+            await sleep(1000); 
+            
+            dot.remove(); 
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'dl-wrapper';
+            
+            const terminal = document.createElement('div');
+            terminal.className = 'dl-container';
+            
+            const header = document.createElement('div');
+            header.className = 'dl-header';
+            header.innerHTML = 'DREAM LABS <div class="dl-header-sub">• breathing tool</div>';
+            terminal.appendChild(header);
+            
+            const terminalAreaWrapper = document.createElement('div');
+            terminalAreaWrapper.className = 'dl-terminal-area-wrapper';
+            terminal.appendChild(terminalAreaWrapper);
+            
+            wrapper.appendChild(terminal);
+            container.appendChild(wrapper);
+            scrollToBottom();
+            
+            const sequence = [
+                { wait: 800, text: "initializing environment..." },
+                { wait: 800, text: "checking breathing sequence..." },
+                { wait: 800, text: "grounding protocol selected" },
+                { wait: 800, text: "box breathing selected" },
+                { wait: 900, text: "preparing 4-second rhythm..." },
+                { wait: 900, text: "synchronizing inhale..." },
+                { wait: 900, text: "synchronizing hold..." },
+                { wait: 900, text: "synchronizing exhale..." },
+                { wait: 800, text: "ready" }
+            ];
+            
+            for (let step of sequence) {
+                const line = document.createElement('div');
+                line.className = 'dl-line';
+                line.textContent = step.text;
+                terminalAreaWrapper.appendChild(line);
+                
+                void line.offsetWidth; 
+                line.classList.add('active');
+                scrollToBottom();
+                
+                await sleep(step.wait - 300);
+                line.classList.remove('active');
+                await sleep(300);
+                line.remove();
+            }
+            
+            terminalAreaWrapper.style.opacity = '0';
+            await sleep(400);
+            terminalAreaWrapper.style.display = 'none';
+            
+            const breathingArea = document.createElement('div');
+            breathingArea.className = 'dl-breathing-area';
+            breathingArea.innerHTML = `
+                <div class="dl-phase">INHALE</div>
+                <div class="dl-timer">4</div>
+                <div class="dl-box-container">
+                    <div class="dl-box expand"></div>
+                </div>
+                <div style="margin-top: 24px; font-size: 11px; opacity: 0.5; letter-spacing: 1px; text-transform: none; font-family: var(--font-conversational);">inhale • hold • exhale</div>
+            `;
+            terminal.appendChild(breathingArea);
+            
+            const sourceCodeText = `<!-- HTML -->
+<div class="dl-breathing-area">
+    <div class="dl-phase">INHALE</div>
+    <div class="dl-timer">4</div>
+    <div class="dl-box-container">
+        <div class="dl-box expand"></div>
+    </div>
+</div>
+
+/* CSS */
+.dl-box {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 4s linear;
+}
+.dl-box.expand { transform: scale(1.7); }
+.dl-box.contract { transform: scale(1); }
+
+// JavaScript
+let t = 4, pIdx = 0;
+const phases = [
+    { name: 'INHALE', class: 'expand' },
+    { name: 'HOLD', class: 'expand' },
+    { name: 'EXHALE', class: 'contract' },
+    { name: 'HOLD', class: 'contract' }
+];
+setInterval(() => {
+    t--;
+    if (t < 1) {
+        t = 4;
+        pIdx = (pIdx + 1) % 4;
+        phaseEl.textContent = phases[pIdx].name;
+        boxEl.className = 'dl-box ' + phases[pIdx].class;
+    }
+    timerEl.textContent = t;
+}, 1000);`;
+
+            const sourceToggle = document.createElement('div');
+            sourceToggle.className = 'dl-source-toggle font-conversational';
+            sourceToggle.innerHTML = `<span>Source Code</span> <span class="dl-chevron">▼</span>`;
+            
+            const sourceContent = document.createElement('div');
+            sourceContent.className = 'dl-source-content';
+            sourceContent.textContent = sourceCodeText;
+            
+            sourceToggle.onclick = () => {
+                const chevron = sourceToggle.querySelector('.dl-chevron');
+                if (sourceContent.style.display === 'none' || !sourceContent.style.display) {
+                    sourceContent.style.display = 'block';
+                    chevron.textContent = '▲';
+                } else {
+                    sourceContent.style.display = 'none';
+                    chevron.textContent = '▼';
+                }
+                scrollToBottom();
+            };
+            
+            terminal.appendChild(sourceToggle);
+            terminal.appendChild(sourceContent);
+            
+            breathingArea.style.opacity = '0';
+            breathingArea.style.display = 'block';
+            breathingArea.style.transition = 'opacity 1s ease';
+            void breathingArea.offsetWidth;
+            breathingArea.style.opacity = '1';
+            scrollToBottom();
+            
+            const phaseEl = breathingArea.querySelector('.dl-phase');
+            const timerEl = breathingArea.querySelector('.dl-timer');
+            const boxEl = breathingArea.querySelector('.dl-box');
+            
+            const phases = [
+                { name: 'INHALE', class: 'expand' },
+                { name: 'HOLD', class: 'expand' },
+                { name: 'EXHALE', class: 'contract' },
+                { name: 'HOLD', class: 'contract' }
+            ];
+            
+            let pIdx = 0;
+            let t = 4;
+            
+            void boxEl.offsetWidth;
+            boxEl.className = 'dl-box expand'; 
+            
+            setInterval(() => {
+                t--;
+                if (t < 1) {
+                    t = 4;
+                    pIdx = (pIdx + 1) % 4;
+                    phaseEl.textContent = phases[pIdx].name;
+                    boxEl.className = 'dl-box ' + phases[pIdx].class;
+                }
+                timerEl.textContent = t;
+            }, 1000);
+
+            renderSuggestionPills();
+            scrollToBottom();
+        }
 
         /*******************************************************
-         * 10. INTENT MATCHING ENGINE (No Backend/API)
+         * 11. INTENT MATCHING ENGINE (No Backend/API)
          *******************************************************/
         function matchIntent(query) {
             const normalizedQuery = query.toLowerCase().replace(/[^\w\s-]/gi, ' ');
@@ -1381,19 +1862,56 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
 
             knowledgeBase.forEach(intent => {
                 let score = 0;
-                intent.keywords.forEach(kw => {
-                    if (intent.id === 'casual_conversation') {
+                let severity = 'none';
+
+                if (intent.id === 'casual_conversation') {
+                    intent.keywords.forEach(kw => {
                         if (paddedQuery.includes(kw)) {
                             score += kw.length;
                         }
-                    } else {
+                    });
+                    if (score >= 3) {
+                        matchedIntents.push({ intent: intent, score: score, severity: severity });
+                    }
+                } else if (intent.id === 'student_wellbeing') {
+                    let isSevere = false;
+                    let isGeneral = false;
+
+                    intent.keywords_severe.forEach(kw => {
+                        let regex = new RegExp('\\b' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+                        if (regex.test(normalizedQuery)) {
+                            score += kw.length;
+                            isSevere = true;
+                        }
+                    });
+
+                    intent.keywords_general.forEach(kw => {
+                        let regex = new RegExp('\\b' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+                        if (regex.test(normalizedQuery)) {
+                            score += kw.length;
+                            isGeneral = true;
+                        }
+                    });
+
+                    if (score > 0) {
+                        if (isSevere) {
+                            score += 10000;
+                            severity = 'severe';
+                        } else {
+                            score += 5000;
+                            severity = 'general';
+                        }
+                        matchedIntents.push({ intent: intent, score: score, severity: severity });
+                    }
+                } else {
+                    intent.keywords.forEach(kw => {
                         if (normalizedQuery.includes(kw.toLowerCase())) {
                             score += kw.length; 
                         }
+                    });
+                    if (score >= 3) {
+                        matchedIntents.push({ intent: intent, score: score, severity: severity });
                     }
-                });
-                if (score >= 3) {
-                    matchedIntents.push({ intent: intent, score: score });
                 }
             });
 
@@ -1409,14 +1927,20 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
                 if (matchedIntents.length > 1) {
                     let secondMatch = matchedIntents[1];
                     if (secondMatch.score >= 4 && secondMatch.intent.id !== topMatches[0].intent.id) {
-                        topMatches.push(secondMatch);
+                        let topIsWellbeing = topMatches[0].intent.id === 'student_wellbeing';
+                        let secondIsWellbeing = secondMatch.intent.id === 'student_wellbeing';
+                        
+                        if (!topIsWellbeing && !secondIsWellbeing) {
+                            topMatches.push(secondMatch);
+                        }
                     }
                 }
                 
                 topMatches.forEach(m => {
                     if (m.intent.id === 'casual_conversation') {
-                        const randomResp = casualResponses[Math.floor(Math.random() * casualResponses.length)];
-                        m.intent.markdown = randomResp;
+                        m.intent.markdown = casualResponses[Math.floor(Math.random() * casualResponses.length)];
+                    } else if (m.intent.id === 'student_wellbeing') {
+                        m.intent.markdown = m.severity === 'severe' ? m.intent.markdown_severe : m.intent.markdown_general;
                     }
                 });
 
@@ -1429,14 +1953,14 @@ If you have the BBA Connect payment notice or screenshot, you can also share the
                     }
                 });
                 
-                return { markdown: finalMarkdown, sources: finalSources };
+                return { markdown: finalMarkdown, sources: finalSources, intentId: topMatches[0].intent.id, severity: topMatches[0].severity };
             }
 
-            return fallbackResponse;
+            return { ...fallbackResponse, intentId: 'fallback', severity: 'none' };
         }
 
         /*******************************************************
-         * 11. MARKDOWN PARSER & TYPEWRITER ANIMATION
+         * 12. MARKDOWN PARSER & TYPEWRITER ANIMATION
          *******************************************************/
         function parseBasicMarkdown(md) {
             let html = md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
