@@ -388,15 +388,26 @@
             width: 100%;
         }
 
-        .msg-ai h2 {
+        /* Markdown Heading Styles */
+        .msg-ai h1, .msg-ai h2, .msg-ai h3 {
             font-family: var(--font-conversational);
-            font-size: 18px;
             font-weight: 600;
+            color: #ffffff;
             margin-top: 24px;
             margin-bottom: 12px;
-            color: #ffffff;
         }
+        .msg-ai h1 { font-size: 22px; }
+        .msg-ai h2 { font-size: 20px; }
+        .msg-ai h3 { font-size: 18px; }
         
+        .msg-ai blockquote {
+            border-left: 4px solid rgba(255,255,255,0.3);
+            padding-left: 12px;
+            margin: 16px 0;
+            color: #d0d0d0;
+            font-style: italic;
+        }
+
         /* Table Styles for Markdown */
         .msg-ai table {
             width: 100%;
@@ -605,9 +616,10 @@
             margin-bottom: 16px;
             padding-bottom: 4px;
             scrollbar-width: none;
-            scroll-snap-type: x mandatory;
+            /* Using touch panning for mobile and our custom JS scrolling for desktop */
             transition: opacity 0.6s ease, transform 0.6s ease;
             cursor: grab;
+            scroll-behavior: auto; /* Ensure smooth native scrolling applies correctly or JS controls it */
         }
         #suggestion-pills:active { cursor: grabbing; }
         #suggestion-pills::-webkit-scrollbar { display: none; }
@@ -628,9 +640,9 @@
             text-decoration: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            scroll-snap-align: start;
             flex-shrink: 0;
             pointer-events: auto;
+            user-select: none;
         }
         .suggestion-pill:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -924,6 +936,17 @@
         const knowledgeBase = [
             {
                 id: 'student_wellbeing',
+                category: 'Dream Labs',
+                suggestionPool: [
+                    "I feel anxious",
+                    "How to handle exam stress?",
+                    "I feel overwhelmed",
+                    "Need a break from studying",
+                    "I feel stressed out",
+                    "I am panicking",
+                    "Feeling very sad",
+                    "Need some motivation"
+                ],
                 keywords_severe: [
                     'self harm', 'self-harm', 'hurt myself', 'hurting myself', 'harm myself', 'cut myself', 'cutting myself', 
                     'want to hurt myself', 'khud ko hurt', 'khud ko nuksan', 'khud ko harm', 'khud ko hurt karna', 'khud ko nuksan pahuchana', 
@@ -974,11 +997,19 @@
                     'mann pareshaan hai', 'man pareshaan hai', 'akeli feel ho rahi hai', 'akeli feel kar rahi hu', 'mental pressure', 'mental stress', 
                     'dimag kharab ho raha hai', 'scared', 'afraid', 'mentally tired'
                 ],
-                markdown_severe: `{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join <a href="https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">BBA Circle</a>.`,
-                markdown_general: `{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below.`
+                markdown_severe: `"{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join [BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)."`,
+                markdown_general: `"{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below."`
             },
             {
                 id: 'msq_marking',
+                category: 'MSQ Marking Scheme',
+                suggestionPool: [
+                    "What is the MSQ marking scheme?",
+                    "MSQ mein wrong option select kiya toh kya hoga?",
+                    "How are MSQs marked?",
+                    "MSQ mein partial marks kaise milte hain?",
+                    "Do MSQs have negative marking?"
+                ],
                 keywords: [
                     'msq', 'mqs', 'msqs', 'multiple select questions', 'multiple selection questions', 'msq marking scheme', 'msq marks', 
                     'msq marking', 'msq exam marking', 'multiple select marking', 'multiple selection marking', 'multiple correct options', 
@@ -996,6 +1027,14 @@
             },
             {
                 id: 'question_pattern',
+                category: 'Question Pattern',
+                suggestionPool: [
+                    "What is the exam question pattern?",
+                    "paper ka pattern kya hai?",
+                    "mid sem mein MCQ honge?",
+                    "MCQ aur MSQ dono honge kya?",
+                    "exam difficulty kaisi hogi?"
+                ],
                 keywords: [
                     'question pattern', 'exam pattern', 'paper pattern', 'exam format', 'question format', 'mid sem pattern', 'midterm pattern', 
                     'mid term pattern', 'exam mein kya aayega', 'exam me kya aayega', 'paper mein kya hoga', 'paper me kya hoga', 'questions kaise honge', 
@@ -1009,6 +1048,14 @@
             },
             {
                 id: 'passing_criteria',
+                category: 'Passing Criteria',
+                suggestionPool: [
+                    "What is the passing criteria?",
+                    "Pass hone ke liye kitna percentage chahiye?",
+                    "How much do I need to pass?",
+                    "40% pass hai kya?",
+                    "agar exam bahut hard hua toh passing ka kya hoga?"
+                ],
                 keywords: [
                     'passing marks', 'pass marks', 'passing criteria', 'pass criteria', 'minimum marks', 'minimum percentage', 'how much to pass', 
                     'how many marks to pass', 'exam pass marks', 'mid sem pass marks', 'midterm pass marks', '40 percent', '40%', '40 marks', 
@@ -1019,6 +1066,13 @@
             },
             {
                 id: 'faculty_bc',
+                category: 'Business Communication Faculty',
+                suggestionPool: [
+                    "Who is the Business Communication instructor?",
+                    "business communication faculty kaun hai?",
+                    "BC ke teacher kaun hain?",
+                    "Who teaches Business Communication?"
+                ],
                 keywords: [
                     'business communication faculty', 'business communication instructor', 'business communication teacher', 'business communication professor',
                     'bc faculty', 'bc instructor', 'bc teacher', 'bc professor', 'communicaton faculty', 'communcation instructor', 'business comunication teacher'
@@ -1027,6 +1081,13 @@
             },
             {
                 id: 'faculty_bm',
+                category: 'Business Mathematics Faculty',
+                suggestionPool: [
+                    "Who is the Business Mathematics faculty?",
+                    "maths instructor kaun hai?",
+                    "Who teaches Business Mathematics?",
+                    "Business Maths teacher?"
+                ],
                 keywords: [
                     'business mathematics faculty', 'business mathematics instructor', 'business mathematics teacher', 'business mathematics professor',
                     'business maths faculty', 'business maths instructor', 'maths faculty', 'maths instructor', 'maths teacher', 'mathematcs faculty', 'mathematic instructor', 'business mathmatics teacher'
@@ -1035,6 +1096,13 @@
             },
             {
                 id: 'faculty_cab',
+                category: 'Computer Applications Faculty',
+                suggestionPool: [
+                    "Who is the Computer Applications faculty?",
+                    "CAB faculty?",
+                    "computer application faculty?",
+                    "Who teaches CAB?"
+                ],
                 keywords: [
                     'computer applications for business faculty', 'computer applications faculty', 'computer applications instructor', 'computer applications teacher',
                     'cab faculty', 'cab instructor', 'cab teacher', 'computer application faculty', 'computer aplications instructor'
@@ -1043,6 +1111,13 @@
             },
             {
                 id: 'faculty_msm',
+                category: 'Marketing Faculty',
+                suggestionPool: [
+                    "Who is teaching Marketing and Sales Management?",
+                    "marketing faculty kaun hai?",
+                    "Who teaches Marketing and Sales?",
+                    "marketing instructor?"
+                ],
                 keywords: [
                     'marketing and sales management faculty', 'marketing and sales faculty', 'marketing faculty', 'marketing instructor', 'marketing teacher',
                     'sales management faculty', 'msm faculty', 'msm instructor', 'marketing managment faculty', 'marketing sales managment instructor', 'sales managment teacher'
@@ -1051,6 +1126,13 @@
             },
             {
                 id: 'faculty_eb',
+                category: 'Entrepreneurship Faculty',
+                suggestionPool: [
+                    "Who teaches Entrepreneurship Basics?",
+                    "Entrepreneurship ka instructor kaun hai?",
+                    "entrepreneurship faculty kaun hai?",
+                    "Who is the EB instructor?"
+                ],
                 keywords: [
                     'entrepreneurship basics faculty', 'entrepreneurship faculty', 'entrepreneurship instructor', 'entrepreneurship teacher',
                     'eb faculty', 'eb instructor', 'entreprenuership faculty', 'entrepreneurhsip instructor', 'entrepreneruship teacher'
@@ -1059,6 +1141,13 @@
             },
             {
                 id: 'faculty_general',
+                category: 'Faculty General',
+                suggestionPool: [
+                    "Who are the faculty for our subjects?",
+                    "subject faculty list",
+                    "who teaches what?",
+                    "instructor details"
+                ],
                 keywords: [
                     'who teaches', 'who is faculty', 'who is instructor', 'teacher', 'professor', 'sir', 'maam', 'mam', 'faculty kaun hai', 'faculty kon hai', 
                     'teacher kaun hai', 'teacher kon hai', 'instructor kaun hai', 'instructor kon hai', 'kis professor ke under', 'kaun padha raha hai', 
@@ -1068,6 +1157,13 @@
             },
             {
                 id: 'recordings_bc',
+                category: 'BC Recordings',
+                suggestionPool: [
+                    "Business Communication ki recording kaha milegi?",
+                    "business communication ki recording chahiye",
+                    "I missed the BC live session",
+                    "Where is the Business Communication recording?"
+                ],
                 keywords: [
                     'business communication recording', 'bc recording', 'business communication missed class', 'business communication recorded session', 
                     'bc recorded class', 'business communication lecture recording', 'business communication video'
@@ -1077,6 +1173,13 @@
             },
             {
                 id: 'recordings_bm',
+                category: 'Maths Recordings',
+                suggestionPool: [
+                    "maths ka recorded lecture chahiye",
+                    "Where are the business maths recordings?",
+                    "I missed the maths class",
+                    "business mathematics recorded video"
+                ],
                 keywords: [
                     'business mathematics recording', 'business maths recording', 'maths recording', 'bm recording', 'business mathematics missed class', 
                     'maths recorded session', 'maths lecture recording', 'business maths video'
@@ -1086,6 +1189,13 @@
             },
             {
                 id: 'recordings_cab',
+                category: 'CAB Recordings',
+                suggestionPool: [
+                    "computer applications ka session miss ho gaya",
+                    "Where is the CAB recording?",
+                    "computer applications recorded lecture",
+                    "CAB video link"
+                ],
                 keywords: [
                     'computer applications recording', 'cab recording', 'computer application missed class', 'computer applications recorded session', 
                     'computer application lecture recording', 'cab video'
@@ -1095,6 +1205,13 @@
             },
             {
                 id: 'recordings_msm',
+                category: 'Marketing Recordings',
+                suggestionPool: [
+                    "marketing recording",
+                    "Where can I find marketing recorded sessions?",
+                    "I missed the marketing class",
+                    "marketing and sales video"
+                ],
                 keywords: [
                     'marketing recording', 'sales recording', 'msm recording', 'marketing and sales missed class', 'marketing recorded session', 
                     'marketing lecture recording', 'marketing video'
@@ -1104,6 +1221,13 @@
             },
             {
                 id: 'recordings_eb',
+                category: 'Entrepreneurship Recordings',
+                suggestionPool: [
+                    "entrepreneurship ki video kaha hai?",
+                    "Where are the entrepreneurship recordings?",
+                    "I missed the EB live session",
+                    "entrepreneurship basics recorded lecture"
+                ],
                 keywords: [
                     'entrepreneurship recording', 'eb recording', 'entrepreneurship basics missed class', 'entrepreneurship recorded session', 
                     'entrepreneurship lecture recording', 'entrepreneurship video'
@@ -1113,6 +1237,14 @@
             },
             {
                 id: 'recordings_general',
+                category: 'Recordings General',
+                suggestionPool: [
+                    "Can I access the recorded sessions?",
+                    "Where are recorded classes?",
+                    "recording kaha milegi?",
+                    "I missed the live session",
+                    "Where can I watch recording?"
+                ],
                 keywords: [
                     'recorded class', 'recorded lecture', 'recorded session', 'recording', 'recorded video', 'class recording', 'lecture recording', 
                     'missed class', 'missed lecture', 'missed live session', 'couldn\'t attend class', 'could not attend class', 'missed the session', 
@@ -1132,6 +1264,13 @@
             },
             {
                 id: 'bba_connect_fees',
+                category: 'BBA Connect',
+                suggestionPool: [
+                    "What is BBA Connect?",
+                    "bba connect ka 500 kisliye hai?",
+                    "Is BBA Connect compulsory?",
+                    "bba connect kab hai?"
+                ],
                 keywords: [
                     'bba connect', 'BBA Connect', 'bba connect fees', 'bba connect fee', 'bba connect charges', 'bba connect cost', 'bba connect price', 
                     'bba connect payment', 'bba connect registration fee', 'bba connect participation fee', 'bba connect event', 'bba connect meetup', 
@@ -1157,11 +1296,13 @@
                     'bba connect fees kya', 'bba connect fee kya', 'bba connect ka fee kya', 'bba connect ka fees kya', 'bba connect 500 kyun', 
                     'bba connect 500 kyu', 'bba connect 500 kisliye'
                 ],
-                markdown: `BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional.`,
+                markdown: `"BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional."`,
                 sources: []
             },
             {
                 id: 'casual_conversation',
+                category: 'Casual Conversation',
+                suggestionPool: [],
                 keywords: [
                     ' hi ', ' hello ', ' hey ', ' hii ', ' hiii ', ' helo ', ' helloo ', ' heyy ', 
                     ' heyyy ', ' yo ', ' hi circle ', ' hello circle ', ' hey circle ', ' hi satya ', 
@@ -1171,6 +1312,13 @@
             },
             {
                 id: 'mid_sem_exam_allowed_items',
+                category: 'Exam Allowed Items',
+                suggestionPool: [
+                    "What can I take to the exam centre?",
+                    "exam mein kya allowed hai?",
+                    "Can I take a water bottle to the exam?",
+                    "pen pencil allowed hai?"
+                ],
                 keywords: [
                     'exam centre', 'exam center', 'examination centre', 'examination center', 
                     'mid sem', 'mid-sem', 'midsem', 'mid sem exam', 'mid semester exam', 
@@ -1205,6 +1353,12 @@
             },
             {
                 id: 'business_mathematics_onscreen_calculator',
+                category: 'Maths Calculator',
+                suggestionPool: [
+                    "Maths exam mein calculator milega kya?",
+                    "Will there be a calculator in the maths exam?",
+                    "on screen calculator hoga?"
+                ],
                 keywords: [
                     'calculator', 'calculator allowed', 'is calculator allowed', 'can we use calculator', 
                     'can I use calculator', 'can we bring calculator', 'can I bring calculator', 
@@ -1235,16 +1389,37 @@
             },
             {
                 id: 'mid_term_syllabus',
+                category: 'Mid-Term Syllabus',
+                suggestionPool: [
+                    "What's included in the Mid-Term syllabus?",
+                    "Are all Mid-Term videos uploaded?",
+                    "When is the Mid-Term exam?",
+                    "mid sem syllabus kya hai?"
+                ],
                 keywords: ['mid term', 'midterm', 'mid sem', 'syllabus', 'portions', '13 september', 'mid-term', 'exam syllabus'],
                 markdown: `## Mid-Term Examination Syllabus\n\n{{Name}}, here's what you need to know about the Mid-Term Examination syllabus.\n\nCurrently, only the videos and material relevant to the Mid-Term syllabus are being uploaded.\n\nAll videos and material available on the LMS up to 31 August will be considered part of the Mid-Term syllabus and will be included in the 13 September Mid-Term Examination.\n\nCurrent status:\n\n- **Business Communication**: All videos covering the Mid-Term syllabus are live.\n- **Business Mathematics**: All videos covering the Mid-Term syllabus are live.\n- **Computer Applications for Business**: All videos covering the Mid-Term syllabus are live.\n- **Entrepreneurship Basics**: All videos covering the Mid-Term syllabus are live.\n- **Marketing and Sales Management**: Approximately 10 videos relevant to the Mid-Term syllabus are yet to be made live and are expected to be uploaded this week.\n\nWhat should you study?\n\nAs a safe rule, anything uploaded on the LMS by 31 August should be considered relevant for the Mid-Term Examination.\n\nNo additional videos or material beyond the Mid-Term syllabus are expected to be included at this stage.\n\nMid-Term Examination: 13 September\nSyllabus cutoff: 31 August`
             },
             {
                 id: 'material_pages_to_study',
+                category: 'Study Material Pages',
+                suggestionPool: [
+                    "How much of the booklet to study?",
+                    "notes kaha tak padhne hai?",
+                    "till what page to read?",
+                    "material syllabus cutoff"
+                ],
                 keywords: ['how many pages', 'booklet', 'till what page', 'material kaha tak', 'notes kaha tak', 'how much material', 'how much is included', 'what to read', 'cutoff'],
                 markdown: `## How Much of the Booklet or Material Should You Study?\n\n{{Name}}, for the 13 September Mid-Term Examination, the safest approach is to prepare all the material that has been uploaded to the Drive/LMS by 31 August.\n\nThere isn't a separate page-wise cutoff for the booklet or study material. If the material has been uploaded by 31 August, treat it as part of your Mid-Term preparation.\n\nSo rather than stopping at a particular page, make sure you cover all relevant material available by the 31 August cutoff.\n\nIn short:\n\nUploaded by 31 August = Prepare it for the 13 September Mid-Term Examination.`
             },
             {
                 id: 'course_resources',
+                category: 'Drive Resources',
+                suggestionPool: [
+                    "Where can I find the subject notes?",
+                    "Where are the subject notes?",
+                    "drive link chahiye",
+                    "pdf notes kaha milenge?"
+                ],
                 keywords: ['resources', 'notes', 'drive link', 'drive folder', 'pdf', 'study material', 'drive'],
                 markdown: `{{Name}}, here are the resources and study materials for your courses. You can access the respective Drive folders below:`,
                 sources: [
@@ -1257,6 +1432,13 @@
             },
             {
                 id: 'live_doubt_sessions',
+                category: 'Zoom Links',
+                suggestionPool: [
+                    "Where are the Zoom links?",
+                    "live class link",
+                    "doubt session zoom link",
+                    "zoom password kya hai?"
+                ],
                 keywords: ['live session', 'doubt session', 'zoom link', 'class link', 'live class', 'zoom'],
                 markdown: `{{Name}}, here are the Zoom links for the live doubt sessions across all subjects.\n\n**Zoom Password:** \`BBA@\``,
                 sources: [
@@ -1269,6 +1451,12 @@
             },
             {
                 id: 'about_circle',
+                category: 'About Circle',
+                suggestionPool: [
+                    "What is BBA Circle?",
+                    "about circle",
+                    "who are you?"
+                ],
                 keywords: ['about circle', 'what is circle', 'who are you', 'bba circle', 'what is bba circle'],
                 markdown: `Well {{Name}}, BBA Circle is a community for BBA students to learn, connect, collaborate, and grow together.\n\nBenefits include:\n- Academic discussions and peer-to-peer learning\n- Crash courses and revision sessions by students\n- Masterclasses and learning sessions led by entrepreneurs\n- Study resources, notes, and useful materials\n- Discussions around assignments and examinations\n- Opportunities to teach, learn, and collaborate\n\n**Peer-Led Crash Courses:**\nFrom 6 September to 10 September, students interested in teaching can volunteer to conduct crash course sessions and help their peers while revising their own syllabus.\n\nBBA Circle handles coordination, moderation, and promotion. The community is entirely student-led.`,
                 sources: [
@@ -1277,6 +1465,13 @@
             },
             {
                 id: 'backlogs_syllabus_completion',
+                category: 'Backlogs',
+                suggestionPool: [
+                    "How to cover my backlog?",
+                    "How can I finish my syllabus quickly?",
+                    "missed class cover kaise karu?",
+                    "syllabus completion strategy"
+                ],
                 keywords: ['backlog', 'missed class', 'complete syllabus', 'how to cover', 'cover syllabus'],
                 markdown: `If you are trying to cover backlogs or complete the syllabus, {{Name}}, your primary focus should be preparing all the material uploaded to the Drive/LMS by the 31 August cutoff.\n\nAdditionally, **Peer-Led Crash Courses** are being organized within the BBA Circle community from 6 September to 10 September. These are highly recommended for revising and catching up on missed concepts with the help of your peers.`,
                 sources: [
@@ -1285,16 +1480,22 @@
             },
             {
                 id: 'casual_intent',
+                category: 'Casual Conversation',
+                suggestionPool: [],
                 keywords: ['how are you', 'how are u', 'hows it going', 'how are you doing'],
                 markdown: `Doing well, {{Name}}. What can I help you figure out?`
             },
             {
                 id: 'thanks_intent',
+                category: 'Casual Conversation',
+                suggestionPool: [],
                 keywords: ['thank you', 'thanks', 'thx', 'tysm'],
                 markdown: `You're welcome, {{Name}}.`
             },
             {
                 id: 'goodbye_intent',
+                category: 'Casual Conversation',
+                suggestionPool: [],
                 keywords: ['bye', 'goodbye', 'see ya', 'cya', 'good night', 'catch you later'],
                 markdown: `See you, {{Name}}. Good luck with your preparation.`
             }
@@ -1339,30 +1540,74 @@
             "Want to study with your peers? Join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**."
         ];
 
-        const randomQuestionsForPills = [
-            "What's included in the Mid-Term syllabus?",
-            "What can I take to the exam centre?",
-            "Is there a calculator in the Maths exam?",
-            "Where can I find the subject notes?",
-            "How can I finish my syllabus quickly?",
-            "What resources are available for BBA students?",
-            "Are all Mid-Term videos uploaded?",
-            "Can I take a water bottle to the exam?",
-            "Will there be an on-screen calculator?",
-            "What is the MSQ marking scheme?",
-            "Who teaches Business Mathematics?",
-            "Where can I find the missed lecture?",
-            "What is the exam question pattern?",
-            "What are the passing criteria?",
-            "Who is the Business Communication instructor?",
-            "Can I access the recorded sessions?",
-            "What is BBA Connect?",
-            "Is BBA Connect compulsory?",
-            "Where are the subject notes?",
-            "How to cover my backlog?",
-            "When is the Mid-Term exam?"
+        /*******************************************************
+         * INFINITE SUGGESTION PILL SYSTEM
+         *******************************************************/
+        const fixedSuggestions = [
+            { text: 'Follow on LinkedIn', url: 'https://www.linkedin.com/in/satyaprakashsamal/' },
+            { text: 'Want to join BBA Circle?', url: 'https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO' }
         ];
 
+        // Gather all suggestions grouped by category
+        const categorizedSuggestions = {};
+        knowledgeBase.forEach(intent => {
+            if (intent.suggestionPool && intent.suggestionPool.length > 0) {
+                if (!categorizedSuggestions[intent.category]) {
+                    categorizedSuggestions[intent.category] = [];
+                }
+                categorizedSuggestions[intent.category].push(...intent.suggestionPool);
+            }
+        });
+
+        const availableCategories = Object.keys(categorizedSuggestions);
+        
+        let lastCategory = null;
+        let recentPrompts = [];
+        
+        // Generator function for infinite suggestions
+        function* suggestionGenerator() {
+            while (true) {
+                let cat;
+                // Choose a random category different from the last one
+                do {
+                    cat = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+                } while (cat === lastCategory && availableCategories.length > 1);
+                
+                lastCategory = cat;
+                
+                // Shuffle the prompts in the chosen category
+                let prompts = [...categorizedSuggestions[cat]].sort(() => 0.5 - Math.random());
+                
+                let selectedPrompt = null;
+                for (let p of prompts) {
+                    if (!recentPrompts.includes(p)) {
+                        selectedPrompt = p;
+                        break;
+                    }
+                }
+                
+                // If all prompts in this category have been used recently, just pick the first one
+                if (!selectedPrompt) {
+                    selectedPrompt = prompts[0];
+                }
+                
+                // Manage recent prompts history to avoid immediate repetition
+                recentPrompts.push(selectedPrompt);
+                if (recentPrompts.length > 15) {
+                    recentPrompts.shift();
+                }
+                
+                yield selectedPrompt;
+            }
+        }
+        
+        let suggGen = null;
+        
+        function resetSuggestionGenerator() {
+            lastCategory = null;
+            recentPrompts = [];
+            suggGen = suggestionGenerator();
+        }
 
         /*******************************************************
          * 3. STATE, UTILS & INITIALIZATION
@@ -1494,42 +1739,67 @@
         /*******************************************************
          * 5. MAIN LANDING EXPERIENCE & PILLS
          *******************************************************/
+        function createSuggestionPillElement(text, isLink = false, url = '') {
+            const el = document.createElement(isLink ? 'a' : 'button');
+            el.className = 'suggestion-pill font-ui';
+            el.textContent = text;
+            if (isLink) {
+                el.href = url;
+                el.target = '_blank';
+                el.rel = 'noopener noreferrer';
+            } else {
+                el.onclick = () => {
+                    document.getElementById('chat-input').value = text;
+                    handleChatSubmission();
+                };
+            }
+            return el;
+        }
+
+        function loadMoreSuggestions(container, direction = 'append') {
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < 5; i++) {
+                const q = suggGen.next().value;
+                fragment.appendChild(createSuggestionPillElement(q));
+            }
+            
+            if (direction === 'append') {
+                container.appendChild(fragment);
+            } else {
+                container.insertBefore(fragment, container.firstChild);
+            }
+            
+            // To ensure browser memory/DOM limits are respected implicitly
+            // We'll limit it loosely if it gets incredibly large to avoid memory leaks
+            // But we keep it high (e.g. 150) so typical infinite scroll feels completely seamless
+            const pills = container.querySelectorAll('.suggestion-pill');
+            if (pills.length > 150) {
+                if (direction === 'append') {
+                    // Culling from the start requires scrollLeft adjustment, handled carefully in event listener.
+                    for (let i = 0; i < 10; i++) pills[i].remove();
+                } else {
+                    for (let i = pills.length - 1; i >= pills.length - 10; i--) pills[i].remove();
+                }
+            }
+        }
+
         function renderSuggestionPills() {
             const container = document.getElementById('suggestion-pills');
             container.innerHTML = '';
             
-            const lnBtn = document.createElement('a');
-            lnBtn.className = 'suggestion-pill font-ui';
-            lnBtn.textContent = 'Follow on LinkedIn';
-            lnBtn.href = 'https://www.linkedin.com/in/satyaprakashsamal/';
-            lnBtn.target = '_blank';
-            lnBtn.rel = 'noopener noreferrer';
-            container.appendChild(lnBtn);
-
-            const whatsappBtn = document.createElement('a');
-            whatsappBtn.className = 'suggestion-pill font-ui';
-            whatsappBtn.textContent = 'Want to join BBA Circle?';
-            whatsappBtn.href = 'https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO';
-            whatsappBtn.target = '_blank';
-            whatsappBtn.rel = 'noopener noreferrer';
-            container.appendChild(whatsappBtn);
-
-            const numQuestions = Math.floor(Math.random() * 2) + 2;
-            const shuffled = [...randomQuestionsForPills].sort(() => 0.5 - Math.random()).slice(0, numQuestions);
-            
-            shuffled.forEach(q => {
-                const btn = document.createElement('button');
-                btn.className = 'suggestion-pill font-ui';
-                btn.textContent = q;
-                btn.onclick = () => {
-                    document.getElementById('chat-input').value = q;
-                    handleChatSubmission();
-                };
-                container.appendChild(btn);
+            // Add fixed pills
+            fixedSuggestions.forEach(item => {
+                container.appendChild(createSuggestionPillElement(item.text, true, item.url));
             });
+
+            resetSuggestionGenerator();
+            
+            // Initial load of random pills
+            for (let i = 0; i < 15; i++) {
+                container.appendChild(createSuggestionPillElement(suggGen.next().value));
+            }
             
             container.classList.remove('hidden');
-            
             container.style.opacity = '0';
             container.style.transform = 'translateY(6px)';
             
@@ -1650,12 +1920,63 @@
             promoCloseBtn.addEventListener('click', closePromoModal);
 
             const pillsContainer = document.getElementById('suggestion-pills');
+            
+            // Middle-mouse drag to pan desktop UX
+            let isDown = false;
+            let startX;
+            let scrollLeftPos;
+
+            pillsContainer.addEventListener('mousedown', (e) => {
+                if (e.button === 1) { // Middle mouse button
+                    e.preventDefault();
+                    isDown = true;
+                    startX = e.pageX - pillsContainer.offsetLeft;
+                    scrollLeftPos = pillsContainer.scrollLeft;
+                }
+            });
+            pillsContainer.addEventListener('mouseleave', () => { isDown = false; });
+            pillsContainer.addEventListener('mouseup', (e) => { if (e.button === 1) isDown = false; });
+            pillsContainer.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - pillsContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                pillsContainer.scrollLeft = scrollLeftPos - walk;
+            });
+            
+            // Desktop horizontal scrolling via mouse wheel
             pillsContainer.addEventListener('wheel', (e) => {
                 if (e.deltaY !== 0) {
                     e.preventDefault();
                     pillsContainer.scrollLeft += e.deltaY;
                 }
             }, { passive: false });
+
+            // Infinite scroll trigger dynamically tied to scroll event
+            let isProgrammaticScroll = false;
+
+            pillsContainer.addEventListener('scroll', () => {
+                if (isProgrammaticScroll) return;
+
+                // Load more on the right
+                if (pillsContainer.scrollWidth - pillsContainer.clientWidth - pillsContainer.scrollLeft < 300) {
+                    loadMoreSuggestions(pillsContainer, 'append');
+                }
+
+                // Load more on the left
+                if (pillsContainer.scrollLeft < 50) {
+                    isProgrammaticScroll = true;
+                    const oldScrollWidth = pillsContainer.scrollWidth;
+                    
+                    loadMoreSuggestions(pillsContainer, 'prepend');
+                    
+                    const newScrollWidth = pillsContainer.scrollWidth;
+                    // Adjust scroll to maintain position seamlessly without visual jump
+                    pillsContainer.scrollLeft += (newScrollWidth - oldScrollWidth);
+                    
+                    setTimeout(() => { isProgrammaticScroll = false; }, 20);
+                }
+            });
         }
 
         function stopGreetingRotation() {
@@ -2154,9 +2475,13 @@ setInterval(() => {
          * 12. MARKDOWN PARSER & TYPEWRITER ANIMATION
          *******************************************************/
         function parseBasicMarkdown(md) {
-            let html = md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            let html = md;
+            
+            // Protect anchor tags safely
             html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">$1</a>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
             
             let lines = html.split('\n');
             let result = '';
@@ -2165,20 +2490,35 @@ setInterval(() => {
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 
-                if (line.startsWith('## ')) {
+                if (line.startsWith('### ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<h3>${line.substring(4)}</h3>`;
+                } else if (line.startsWith('## ')) {
                     if (inList) { result += '</ul>'; inList = false; }
                     result += `<h2>${line.substring(3)}</h2>`;
-                } else if (line.startsWith('- ')) {
+                } else if (line.startsWith('# ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<h1>${line.substring(2)}</h1>`;
+                } else if (line.startsWith('> ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<blockquote>${line.substring(2)}</blockquote>`;
+                } else if (line.startsWith('- ') || line.startsWith('* ')) {
                     if (!inList) { result += '<ul>'; inList = true; }
                     result += `<li>${line.substring(2)}</li>`;
                 } else if (line === '') {
                     if (inList) { result += '</ul>'; inList = false; }
+                } else if (line.startsWith('<')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += line; // Direct HTML injection (e.g. <table>, <tr>, etc)
                 } else {
                     if (inList) { result += '</ul>'; inList = false; }
                     result += `<p>${line}</p>`;
                 }
             }
             if (inList) { result += '</ul>'; }
+            
+            // Remove empty paragraph tags that might occur
+            result = result.replace(/<p><\/p>/g, '');
             
             return result;
         }
