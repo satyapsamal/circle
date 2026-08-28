@@ -396,6 +396,32 @@
             margin-bottom: 12px;
             color: #ffffff;
         }
+        
+        /* Table Styles for Markdown */
+        .msg-ai table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .msg-ai th, .msg-ai td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .msg-ai th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .msg-ai tr:last-child td {
+            border-bottom: none;
+        }
+
         .msg-ai p { margin-bottom: 16px; }
         .msg-ai p:last-child { margin-bottom: 0; }
         .msg-ai ul { margin-left: 20px; margin-bottom: 16px; list-style-type: disc; }
@@ -948,8 +974,161 @@
                     'mann pareshaan hai', 'man pareshaan hai', 'akeli feel ho rahi hai', 'akeli feel kar rahi hu', 'mental pressure', 'mental stress', 
                     'dimag kharab ho raha hai', 'scared', 'afraid', 'mentally tired'
                 ],
-                markdown_severe: `"{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join **[BBA Circle](https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO)**."`,
-                markdown_general: `"{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below."`
+                markdown_severe: `{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join <a href="https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">BBA Circle</a>.`,
+                markdown_general: `{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below.`
+            },
+            {
+                id: 'msq_marking',
+                keywords: [
+                    'msq', 'mqs', 'msqs', 'multiple select questions', 'multiple selection questions', 'msq marking scheme', 'msq marks', 
+                    'msq marking', 'msq exam marking', 'multiple select marking', 'multiple selection marking', 'multiple correct options', 
+                    'msq partial marks', 'msq full marks', 'msq zero marks', 'msq negative marking', 'msq wrong option', 'msq incorrect option', 
+                    'msq correct option', 'msq ka marking', 'msq ka marks', 'msq mein kitne marks', 'msq me kitne marks', 'msq kaise check hoga', 
+                    'msq kaise mark hoga', 'msq marking kaise hogi', 'msq mein partial marks', 'msq me partial marks', 'msq me wrong option', 
+                    'msq me galat option', 'multiple selection ka marking', 'multiple selection mein marks', 'multiple selection me marks', 
+                    'multiple option question', 'multiple options question', 'multiple correct question', 'select multiple options', 
+                    'ek se zyada option', 'one or more correct options', 'multiple selction', 'multiple selecton', 'multiple selection qustion', 
+                    'multiple selct question', 'multiple selection ques', 'multiple select ques', 'multiple choice selection', 
+                    'multiple correct selection', 'multiple answer question', 'multiple answers question'
+                ],
+                markdown: `### MSQ Marking Scheme\n\n{{Name}}, for Multiple Select Questions (MSQs), the marking scheme is as follows:\n\n<table>\n  <tr>\n    <th>Selection</th>\n    <th>Marks</th>\n  </tr>\n  <tr>\n    <td>One correct option + one wrong option selected</td>\n    <td>No marks</td>\n  </tr>\n  <tr>\n    <td>Only one correct option selected, with no incorrect option</td>\n    <td>Partial marks</td>\n  </tr>\n  <tr>\n    <td>All correct options selected, with no incorrect option</td>\n    <td>Full marks</td>\n  </tr>\n  <tr>\n    <td>Even one incorrect option selected</td>\n    <td>Zero marks</td>\n  </tr>\n</table>\n\n**Important clarification:**\n- Selecting an incorrect option results in ZERO marks for that MSQ.\n- Selecting only a correct option, without selecting any incorrect option, receives PARTIAL marks.\n- Selecting ALL correct options, without selecting any incorrect option, receives FULL marks.\n- If even one incorrect option is selected, the question receives ZERO marks.`,
+                sources: []
+            },
+            {
+                id: 'question_pattern',
+                keywords: [
+                    'question pattern', 'exam pattern', 'paper pattern', 'exam format', 'question format', 'mid sem pattern', 'midterm pattern', 
+                    'mid term pattern', 'exam mein kya aayega', 'exam me kya aayega', 'paper mein kya hoga', 'paper me kya hoga', 'questions kaise honge', 
+                    'questions kis type ke honge', 'question kis type ka hoga', 'paper kis type ka hoga', 'mcq', 'mcqs', 'multiple choice', 
+                    'multiple choice questions', 'objective questions', 'objective type', 'exam questions', 'exam question type', 'mid sem questions', 
+                    'mid sem question pattern', 'midterm questions', 'midterm question pattern', 'paper pattern kya hai', 'paper ka pattern kya hai', 
+                    'exam ka pattern kya h', 'exam kaise hoga', 'questions ka pattern', 'question ka pattern', 'kitne type ke questions', 'mcq honge kya', 
+                    'msq honge kya', 'mcq aur msq', 'mcq msq', 'multiple choice aur multiple selection', 'multiple choice and multiple selection'
+                ],
+                markdown: `### Question Pattern\n\n{{Name}}, the examination will consist of:\n\n- **Multiple Choice Questions (MCQs)**\n- **Multiple Select Questions (MSQs)**\n\nMCQs generally require the student to select the correct option from the choices provided.\n\nMSQs may require the student to select more than one correct option, and the MSQ marking scheme applies separately.\n\nThe overall difficulty may range from **Moderate → Hard**.`
+            },
+            {
+                id: 'passing_criteria',
+                keywords: [
+                    'passing marks', 'pass marks', 'passing criteria', 'pass criteria', 'minimum marks', 'minimum percentage', 'how much to pass', 
+                    'how many marks to pass', 'exam pass marks', 'mid sem pass marks', 'midterm pass marks', '40 percent', '40%', '40 marks', 
+                    'pass percentage', 'passing percentage', 'pass ka criteria', 'pass hone ke liye', 'kitne marks chahiye', 'kitna percentage chahiye', 
+                    'pass hone ke liye kitna', '40 percent pass', '40% pass', 'exam mein pass hone ke liye', 'exam me pass hone ke liye'
+                ],
+                markdown: `### Passing Criteria\n\n{{Name}}, the general passing criterion is **40%**.\n\nHowever, for a particularly difficult examination, if the overall performance is such that everyone scores below 40%, the bottom 2% of students may be considered unsuccessful under the stated criteria.`
+            },
+            {
+                id: 'faculty_bc',
+                keywords: [
+                    'business communication faculty', 'business communication instructor', 'business communication teacher', 'business communication professor',
+                    'bc faculty', 'bc instructor', 'bc teacher', 'bc professor', 'communicaton faculty', 'communcation instructor', 'business comunication teacher'
+                ],
+                markdown: `{{Name}}, for **Business Communication**:\n\n- **Faculty**: Prof. Kunal Kumar\n- **Instructor**: Prof. Bablu Ray`
+            },
+            {
+                id: 'faculty_bm',
+                keywords: [
+                    'business mathematics faculty', 'business mathematics instructor', 'business mathematics teacher', 'business mathematics professor',
+                    'business maths faculty', 'business maths instructor', 'maths faculty', 'maths instructor', 'maths teacher', 'mathematcs faculty', 'mathematic instructor', 'business mathmatics teacher'
+                ],
+                markdown: `{{Name}}, for **Business Mathematics**:\n\n- **Faculty**: Prof. Sumit Kumar\n- **Instructor**: Prof. Silony Gupta`
+            },
+            {
+                id: 'faculty_cab',
+                keywords: [
+                    'computer applications for business faculty', 'computer applications faculty', 'computer applications instructor', 'computer applications teacher',
+                    'cab faculty', 'cab instructor', 'cab teacher', 'computer application faculty', 'computer aplications instructor'
+                ],
+                markdown: `{{Name}}, for **Computer Applications for Business**:\n\n- **Faculty**: Prof. Gyanesh Raj\n- **Instructor**: Prof. Vinay Kumar Jha`
+            },
+            {
+                id: 'faculty_msm',
+                keywords: [
+                    'marketing and sales management faculty', 'marketing and sales faculty', 'marketing faculty', 'marketing instructor', 'marketing teacher',
+                    'sales management faculty', 'msm faculty', 'msm instructor', 'marketing managment faculty', 'marketing sales managment instructor', 'sales managment teacher'
+                ],
+                markdown: `{{Name}}, for **Marketing and Sales Management**:\n\n- **Faculty**: Prof. Ankur Kapoor\n- **Instructor**: Prof. Vaishali Garg`
+            },
+            {
+                id: 'faculty_eb',
+                keywords: [
+                    'entrepreneurship basics faculty', 'entrepreneurship faculty', 'entrepreneurship instructor', 'entrepreneurship teacher',
+                    'eb faculty', 'eb instructor', 'entreprenuership faculty', 'entrepreneurhsip instructor', 'entrepreneruship teacher'
+                ],
+                markdown: `{{Name}}, for **Entrepreneurship Basics**:\n\n- **Faculty**: Prof. Pradeep Hota\n- **Instructor**: Prof. Harsimar Kaur`
+            },
+            {
+                id: 'faculty_general',
+                keywords: [
+                    'who teaches', 'who is faculty', 'who is instructor', 'teacher', 'professor', 'sir', 'maam', 'mam', 'faculty kaun hai', 'faculty kon hai', 
+                    'teacher kaun hai', 'teacher kon hai', 'instructor kaun hai', 'instructor kon hai', 'kis professor ke under', 'kaun padha raha hai', 
+                    'who teaches this subject', 'subject faculty', 'subject instructor'
+                ],
+                markdown: `{{Name}}, here is the faculty and instructor information for your subjects:\n\n**Business Communication**\nFaculty: Prof. Kunal Kumar | Instructor: Prof. Bablu Ray\n\n**Business Mathematics**\nFaculty: Prof. Sumit Kumar | Instructor: Prof. Silony Gupta\n\n**Computer Applications for Business**\nFaculty: Prof. Gyanesh Raj | Instructor: Prof. Vinay Kumar Jha\n\n**Marketing and Sales Management**\nFaculty: Prof. Ankur Kapoor | Instructor: Prof. Vaishali Garg\n\n**Entrepreneurship Basics**\nFaculty: Prof. Pradeep Hota | Instructor: Prof. Harsimar Kaur`
+            },
+            {
+                id: 'recordings_bc',
+                keywords: [
+                    'business communication recording', 'bc recording', 'business communication missed class', 'business communication recorded session', 
+                    'bc recorded class', 'business communication lecture recording', 'business communication video'
+                ],
+                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Business Communication** in the folder below:`,
+                sources: [ { label: 'Business Communication Recordings →', url: 'https://drive.google.com/drive/folders/1phsWKzXuc7av-XMqNp6GqXpY8Ghay0_o' } ]
+            },
+            {
+                id: 'recordings_bm',
+                keywords: [
+                    'business mathematics recording', 'business maths recording', 'maths recording', 'bm recording', 'business mathematics missed class', 
+                    'maths recorded session', 'maths lecture recording', 'business maths video'
+                ],
+                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Business Mathematics** in the folder below:`,
+                sources: [ { label: 'Business Mathematics Recordings →', url: 'https://drive.google.com/drive/folders/1y2ihZf7El6ZI33Kq2WCgFobDAOGsnjce?usp=sharing' } ]
+            },
+            {
+                id: 'recordings_cab',
+                keywords: [
+                    'computer applications recording', 'cab recording', 'computer application missed class', 'computer applications recorded session', 
+                    'computer application lecture recording', 'cab video'
+                ],
+                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Computer Applications for Business** in the folder below:`,
+                sources: [ { label: 'Computer Applications Recordings →', url: 'https://drive.google.com/drive/folders/19MjPFcCTz0HHc3DHz-uwsxQCQ9TM9qqT?usp=sharing' } ]
+            },
+            {
+                id: 'recordings_msm',
+                keywords: [
+                    'marketing recording', 'sales recording', 'msm recording', 'marketing and sales missed class', 'marketing recorded session', 
+                    'marketing lecture recording', 'marketing video'
+                ],
+                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Marketing and Sales Management** in the folder below:`,
+                sources: [ { label: 'Marketing and Sales Recordings →', url: 'https://drive.google.com/drive/folders/1myekXrGGqqdmqCbiJAt4Ex-qR45OgMc9?usp=sharing' } ]
+            },
+            {
+                id: 'recordings_eb',
+                keywords: [
+                    'entrepreneurship recording', 'eb recording', 'entrepreneurship basics missed class', 'entrepreneurship recorded session', 
+                    'entrepreneurship lecture recording', 'entrepreneurship video'
+                ],
+                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Entrepreneurship Basics** in the folder below:`,
+                sources: [ { label: 'Entrepreneurship Basics Recordings →', url: 'https://drive.google.com/drive/folders/1EnolLSEK-ZUMNwE4_gkhld3Bpj-u76Xc?usp=sharing' } ]
+            },
+            {
+                id: 'recordings_general',
+                keywords: [
+                    'recorded class', 'recorded lecture', 'recorded session', 'recording', 'recorded video', 'class recording', 'lecture recording', 
+                    'missed class', 'missed lecture', 'missed live session', 'couldn\'t attend class', 'could not attend class', 'missed the session', 
+                    'missed today\'s class', 'missed live class', 'where is recording', 'where can i watch recording', 'recording kaha milegi', 
+                    'recording kahan milegi', 'recording kaha hai', 'recording kidhar hai', 'class ki recording', 'lecture ki recording', 
+                    'live session ki recording', 'miss ho gaya', 'class miss ho gayi', 'session miss ho gaya', 'live class miss ho gayi', 
+                    'video kaha milega', 'video kahan milega', 'recorded video kaha hai', 'recording bhejo', 'recorded lecture chahiye'
+                ],
+                markdown: `{{Name}}, here are the folders containing the recorded sessions and missed live classes for all subjects:`,
+                sources: [
+                    { label: 'Business Communication Recordings →', url: 'https://drive.google.com/drive/folders/1phsWKzXuc7av-XMqNp6GqXpY8Ghay0_o' },
+                    { label: 'Business Mathematics Recordings →', url: 'https://drive.google.com/drive/folders/1y2ihZf7El6ZI33Kq2WCgFobDAOGsnjce?usp=sharing' },
+                    { label: 'Computer Applications Recordings →', url: 'https://drive.google.com/drive/folders/19MjPFcCTz0HHc3DHz-uwsxQCQ9TM9qqT?usp=sharing' },
+                    { label: 'Marketing and Sales Recordings →', url: 'https://drive.google.com/drive/folders/1myekXrGGqqdmqCbiJAt4Ex-qR45OgMc9?usp=sharing' },
+                    { label: 'Entrepreneurship Basics Recordings →', url: 'https://drive.google.com/drive/folders/1EnolLSEK-ZUMNwE4_gkhld3Bpj-u76Xc?usp=sharing' }
+                ]
             },
             {
                 id: 'bba_connect_fees',
@@ -978,7 +1157,7 @@
                     'bba connect fees kya', 'bba connect fee kya', 'bba connect ka fee kya', 'bba connect ka fees kya', 'bba connect 500 kyun', 
                     'bba connect 500 kyu', 'bba connect 500 kisliye'
                 ],
-                markdown: `"BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional."`,
+                markdown: `BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional.`,
                 sources: []
             },
             {
@@ -1169,7 +1348,19 @@
             "What resources are available for BBA students?",
             "Are all Mid-Term videos uploaded?",
             "Can I take a water bottle to the exam?",
-            "Will there be an on-screen calculator?"
+            "Will there be an on-screen calculator?",
+            "What is the MSQ marking scheme?",
+            "Who teaches Business Mathematics?",
+            "Where can I find the missed lecture?",
+            "What is the exam question pattern?",
+            "What are the passing criteria?",
+            "Who is the Business Communication instructor?",
+            "Can I access the recorded sessions?",
+            "What is BBA Connect?",
+            "Is BBA Connect compulsory?",
+            "Where are the subject notes?",
+            "How to cover my backlog?",
+            "When is the Mid-Term exam?"
         ];
 
 
