@@ -1,29 +1,33 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Page Title -->
-    <title>Circle | BBA Assistant</title>
+    <title>Circle AI | BBA Assistant</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="circle.png">
     <link rel="apple-touch-icon" href="circle.png">
 
     <!-- SEO Description -->
-    <meta name="description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
+    <meta name="description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Circle | BBA Assistant">
-    <meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
-    <meta property="og:image" content="circle.png">
+    <meta property="og:title" content="Circle AI | BBA Assistant">
+    <meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
 
     <!-- Twitter / X Sharing -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Circle | BBA Assistant">
-    <meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle. Learn faster, understand better.">
-    <meta name="twitter:image" content="circle.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Circle AI | BBA Assistant">
+    <meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -440,6 +444,49 @@
         .msg-ai strong { color: #ffffff; font-weight: 600; }
         .msg-ai a { cursor: pointer; pointer-events: auto; }
         
+        /* Response Time and Read Aloud Capsules */
+        .response-metadata-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .meta-capsule {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #909090;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-family: var(--font-conversational);
+            transition: all 0.3s ease;
+            cursor: default;
+            user-select: none;
+        }
+        .meta-capsule svg {
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
+            fill: currentColor;
+        }
+        .meta-btn {
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        .meta-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .meta-btn.playing {
+            background: rgba(0, 92, 255, 0.2);
+            color: #ffffff;
+            border-color: rgba(0, 92, 255, 0.5);
+        }
+
         /* Thinking Animation */
         .thinking-dot {
             width: 10px;
@@ -616,10 +663,9 @@
             margin-bottom: 16px;
             padding-bottom: 4px;
             scrollbar-width: none;
-            /* Using touch panning for mobile and our custom JS scrolling for desktop */
             transition: opacity 0.6s ease, transform 0.6s ease;
             cursor: grab;
-            scroll-behavior: auto; /* Ensure smooth native scrolling applies correctly or JS controls it */
+            scroll-behavior: auto;
         }
         #suggestion-pills:active { cursor: grabbing; }
         #suggestion-pills::-webkit-scrollbar { display: none; }
@@ -777,11 +823,24 @@
         }
         #footer-disclaimer a:hover { color: #ffffff; }
 
-        /* New Chat + Button */
-        #new-chat-btn {
+        /* Floating Buttons (Settings, Install, Share, New Chat) */
+        .floating-btn-group-left {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+        .floating-btn-group-right {
             position: fixed;
             top: 24px;
             right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+        .floating-btn {
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -796,23 +855,227 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 100;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.6s ease;
             pointer-events: auto;
+            outline: none;
+            padding: 0;
         }
-        #new-chat-btn:hover {
-            transform: scale(1.05);
+        .floating-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .floating-btn:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Settings Modal */
+        #settings-modal, #install-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        #settings-modal.show, #install-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .settings-content {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            background: #0a0a0a;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px;
+            transform: scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            color: #ffffff;
+            font-family: var(--font-conversational);
+        }
+        #settings-modal.show .settings-content, #install-modal.show .settings-content {
+            transform: scale(1);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-family: var(--font-ui);
+            font-size: 20px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 12px;
+        }
+
+        .settings-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            padding: 0;
+        }
+        .settings-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .settings-desc {
+            font-size: 13px;
+            color: #a0a0a0;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* iOS Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.15);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .toggle-slider {
+            background-color: #005cff;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .settings-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+            font-size: 12px;
+            color: #808080;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .settings-footer a {
+            color: inherit;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .settings-footer a:hover {
             color: #ffffff;
         }
-        #new-chat-btn:active {
-            transform: scale(0.95);
+
+        /* Install Modal Elements */
+        .install-img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .install-action-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-ui);
+            margin-top: 8px;
+        }
+        .install-action-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .install-fallback-msg {
+            font-size: 12px;
+            color: #ffaa00;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
         }
         
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: var(--font-conversational);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 99999;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         @media (max-width: 768px) {
-            #new-chat-btn { top: 20px; right: 20px; width: 40px; height: 40px; font-size: 22px; }
+            .floating-btn-group-left { top: 20px; left: 20px; gap: 8px; }
+            .floating-btn-group-right { top: 20px; right: 20px; gap: 8px; }
+            .floating-btn { width: 40px; height: 40px; font-size: 22px; }
+            .floating-btn svg { width: 18px; height: 18px; }
         }
 
         /* Accessibility: Reduced Motion */
@@ -821,9 +1084,10 @@
             .anim-enter, .anim-exit { transform: none !important; filter: none !important; }
             .glow-spinner { animation: none !important; background: rgba(255,255,255,0.1); }
             .thinking-dot { animation: none !important; opacity: 0.7; }
-            #new-chat-btn { transition: none !important; }
+            .floating-btn { transition: none !important; }
             .promo-ring-progress { animation: none !important; stroke-dashoffset: 113.1 !important; }
             .dl-box { transition: none !important; }
+            #settings-modal .settings-content, #install-modal .settings-content { transition: none !important; transform: none !important; }
         }
     </style>
 </head>
@@ -832,8 +1096,8 @@
     <div id="app">
         <!-- New User Onboarding Layer -->
         <div id="onboarding-layer" class="hidden">
-            <img id="intro-logo" src="circle.png" alt="Circle Logo" class="anim-element anim-enter hidden">
-            <h1 id="intro-brand" class="font-ui anim-element anim-enter hidden">Circle.</h1>
+            <img id="intro-logo" src="circle.png" alt="Circle AI Logo" class="anim-element anim-enter hidden">
+            <h1 id="intro-brand" class="font-ui anim-element anim-enter hidden">Circle AI.</h1>
             <div id="intro-name-step" class="anim-element anim-enter hidden">
                 <h2 class="font-ui">What's your name?</h2>
                 <div class="name-input-wrapper" id="name-wrapper">
@@ -857,14 +1121,81 @@
                 <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" class="promo-linkedin-btn font-ui">Follow on LinkedIn</a>
             </div>
         </div>
+        
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <span>Settings</span>
+                    <button id="settings-close" class="settings-close" aria-label="Close Settings">×</button>
+                </div>
+                
+                <div class="settings-row">
+                    <span>Improve Circle</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="improve-circle-toggle" aria-label="Improve Circle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-desc">
+                    Circle AI respects your privacy. Allow your prompts to be saved and used to improve Circle. Turn this off to opt out of prompt storage and training.
+                </div>
+                
+                <div class="settings-footer">
+                    If you have any queries, suggestions, or feedback,<br>please share them with us <a href="https://shorturl.at/NwAMA" target="_blank" rel="noopener noreferrer">here</a>.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Install Modal -->
+        <div id="install-modal" class="hidden">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <span>Install Circle</span>
+                    <button id="install-close" class="settings-close" aria-label="Close Install">×</button>
+                </div>
+                
+                <img src="circle-promo.png" alt="Circle AI Promo" class="install-img">
+                
+                <div class="settings-desc" style="margin-bottom: 16px;">
+                    Your BBA assistant, now on your device. Quick access, completely free, lightweight, and safe.
+                </div>
+                
+                <button id="pwa-install-btn" class="install-action-btn">Install (2KB)</button>
+                <div id="install-fallback-msg" class="install-fallback-msg">Installation is currently unavailable in this browser.</div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">Share text copied</div>
 
         <!-- Main Conversational Interface -->
         <div id="main-layer" class="main-layer-fade hidden">
             
-            <button id="new-chat-btn" class="hidden" aria-label="New Chat">+</button>
+            <div class="floating-btn-group-left">
+                <button id="settings-btn" class="floating-btn hidden" aria-label="Settings">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </button>
+                <button id="install-btn" class="floating-btn hidden" aria-label="Install Circle AI">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="floating-btn-group-right">
+                <button id="share-btn" class="floating-btn hidden" aria-label="Share Circle AI">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                    </svg>
+                </button>
+                <button id="new-chat-btn" class="floating-btn hidden" aria-label="New Chat">+</button>
+            </div>
             
             <div id="header-container">
-                <h1 class="brand-title font-ui">Circle.</h1>
+                <h1 class="brand-title font-ui">Circle AI.</h1>
                 <div id="greeting-rotator" class="font-ui anim-element anim-enter hidden"></div>
             </div>
 
@@ -888,13 +1219,82 @@
             </div>
             
             <div id="footer-disclaimer" class="font-ui">
-                Circle can make mistakes. Check important info <a href="https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO" target="_blank" rel="noopener noreferrer">here</a>.
+                Circle AI can make mistakes. Check important info <a href="https://chat.whatsapp.com/Lio5GWhFGTBHaUjPZAGdFO" target="_blank" rel="noopener noreferrer">here</a>.
             </div>
 
         </div>
     </div>
 
     <script>
+        /*******************************************************
+         * SERVICE WORKER REGISTRATION
+         *******************************************************/
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .catch(error => {
+                        console.error('Service worker registration failed:', error);
+                    });
+            });
+        }
+
+        /*******************************************************
+         * PWA INSTALLATION LOGIC
+         *******************************************************/
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Only show install button if not already in standalone mode
+            if (!isRunningAsInstalledPWA()) {
+                document.getElementById('install-btn').classList.remove('hidden');
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            document.getElementById('install-btn').classList.add('hidden');
+            closeInstallModal();
+        });
+
+        function isRunningAsInstalledPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function showInstallModal() {
+            const modal = document.getElementById('install-modal');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.add('show');
+            
+            document.getElementById('install-fallback-msg').style.display = 'none';
+        }
+
+        function closeInstallModal() {
+            const modal = document.getElementById('install-modal');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+                setTimeout(() => { modal.classList.add('hidden'); }, 400);
+            }
+        }
+
+        async function handleInstallClick() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+                closeInstallModal();
+                document.getElementById('install-btn').classList.add('hidden');
+            } else {
+                document.getElementById('install-fallback-msg').style.display = 'block';
+            }
+        }
+
         /*******************************************************
          * 0. ANTI-COPY & DEVTOOLS DETERRENTS (UX Only)
          *******************************************************/
@@ -950,7 +1350,7 @@
                     'circle kisne banaya', 'circle kisne create kiya', 'circle kisne banaya hai', 'circle ka developer kaun hai', 'circle developer kaun hai', 
                     'who created circle', 'who is the developer of circle', 'who built circle', 'circle made by', 'circle developed by'
                 ],
-                markdown: `### What is Circle?\n\n**Circle** is a free, 24×7 virtual BBA assistant built specifically for BBA students.\n\nCircle is a TOOL made by the **BBA Circle Community**.\n\nIts developer is <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">Satya Prakash Samal</a>.\n\nThink of Circle as a single place where a student can ask how the BBA Programme works, instead of searching through WhatsApp groups, LMS discussions, emails, and old messages.\n\nCircle can help with things such as:\n\n- What to study and what is included in the syllabus\n- Mid-semester and end-semester syllabus\n- Passing marks and examination criteria\n- Assignment and assessment information\n- Important academic deadlines\n- LMS-related information\n- Programme updates and announcements\n- Operational and common BBA queries\n- Study resources and other useful information\n\n**No sign-up. No subscription. Free forever. Available 24×7.**\n\nWebsite:\n[https://shorturl.at/APPeS](https://shorturl.at/APPeS)`
+                markdown: `### What is Circle?\n\n**Circle AI** is a free, 24×7 virtual BBA assistant built specifically for BBA students.\n\nCircle AI is a TOOL made by the **BBA Circle Community**.\n\nIts developer is <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">Satya Prakash Samal</a>.\n\nThink of Circle AI as a single place where a student can ask how the BBA Programme works, instead of searching through WhatsApp groups, LMS discussions, emails, and old messages.\n\nCircle AI can help with things such as:\n\n- What to study and what is included in the syllabus\n- Mid-semester and end-semester syllabus\n- Passing marks and examination criteria\n- Assignment and assessment information\n- Important academic deadlines\n- LMS-related information\n- Programme updates and announcements\n- Operational and common BBA queries\n- Study resources and other useful information\n\n**No sign-up. No subscription. Free forever. Available 24×7.**\n\nWebsite:\n[https://shorturl.at/APPeS](https://shorturl.at/APPeS)`
             },
             {
                 id: 'founder_circle',
@@ -1360,7 +1760,7 @@
                     'bba connect fees kya', 'bba connect fee kya', 'bba connect ka fee kya', 'bba connect ka fees kya', 'bba connect 500 kyun', 
                     'bba connect 500 kyu', 'bba connect 500 kisliye', 'Can parents attend BBA Connect', 'Are parents allowed at BBA Connect', 'BBA Connect mein parents allowed hain', 'BBA Connect mein parents aa sakte hain'
                 ],
-                markdown: `BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional.`,
+                markdown: `"BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional."`,
                 sources: []
             },
             {
@@ -1455,13 +1855,42 @@
                 id: 'mid_term_syllabus',
                 category: 'Mid-Term Syllabus',
                 suggestionPool: [
-                    "What's included in the Mid-Term syllabus?",
-                    "Are all Mid-Term videos uploaded?",
-                    "When is the Mid-Term exam?",
-                    "mid sem syllabus kya hai?"
+                    "What is the Mid-Term syllabus?",
+                    "Mid-Term syllabus kya hai?",
+                    "Mid sem mein kya padhna hai?",
+                    "Mid sem ke videos kaha hain?",
+                    "Where are the Mid-Term playlists?",
+                    "Business Communication Mid-Term videos",
+                    "Business Mathematics Mid-Term videos",
+                    "Computer Applications Mid-Term videos",
+                    "Marketing and Sales Mid-Term videos",
+                    "Entrepreneurship Basics Mid-Term videos",
+                    "Mid sem playlist kahan hai?",
+                    "Midterm ki preparation ke liye videos kaha hain?"
                 ],
-                keywords: ['mid term', 'midterm', 'mid sem', 'syllabus', 'portions', '13 september', 'mid-term', 'exam syllabus'],
-                markdown: `### Mid-Term Examination Syllabus\n\n{{Name}}, here's what you need to know about the Mid-Term Examination syllabus.\n\nCurrently, only the videos and material relevant to the Mid-Term syllabus are being uploaded.\n\nAll videos and material available on the LMS up to 31 August will be considered part of the Mid-Term syllabus and will be included in the 13 September Mid-Term Examination.\n\nCurrent status:\n\n- **Business Communication**: All videos covering the Mid-Term syllabus are live.\n- **Business Mathematics**: All videos covering the Mid-Term syllabus are live.\n- **Computer Applications for Business**: All videos covering the Mid-Term syllabus are live.\n- **Entrepreneurship Basics**: All videos covering the Mid-Term syllabus are live.\n- **Marketing and Sales Management**: Approximately 10 videos relevant to the Mid-Term syllabus are yet to be made live and are expected to be uploaded this week.\n\nWhat should you study?\n\nAs a safe rule, anything uploaded on the LMS by 31 August should be considered relevant for the Mid-Term Examination.\n\nNo additional videos or material beyond the Mid-Term syllabus are expected to be included at this stage.\n\nMid-Term Examination: 13 September\nSyllabus cutoff: 31 August`
+                keywords: [
+                    'mid term', 'mid-term', 'midterm', 'mid sem', 'mid-sem', 'mid sem syllabus', 'mid-sem syllabus', 
+                    'midterm syllabus', 'mid term syllabus', 'mid term portion', 'midterm portion', 'mid sem portion', 
+                    'mid-sem portion', 'mid sem portions', 'midterm portions', 'mid semester syllabus', 'mid semester portion', 
+                    'mid-semester syllabus', 'mid-semester portion', 'mid exam', 'mid sem exam', 'midterm exam', 'mid term exam', 
+                    'mid semester exam', 'mid-semester exam', 'mid sem examination', 'mid term examination', 'midterm examination', 
+                    'mid sem videos', 'midterm videos', 'mid sem lectures', 'midterm lectures', 'mid sem playlist', 'midterm playlist', 
+                    'mid sem youtube', 'mid term youtube', 'mid sem recordings', 'mid term recordings', 'what is mid sem syllabus', 
+                    'what is mid term syllabus', 'what is midterm syllabus', 'what comes in mid sem', 'what comes in midterm', 
+                    'what to study for mid sem', 'what to study for midterm', 'mid sem mein kya hai', 'mid sem me kya hai', 
+                    'mid sem me kya padhna hai', 'mid sem mein kya padhna hai', 'midterm mein kya hai', 'midterm me kya hai', 
+                    'midterm me kya padhna hai', 'mid sem ka syllabus', 'mid sem ka portion', 'mid sem ki tayari', 'midterm ki tayari', 
+                    'mid sem ke videos', 'mid sem ki videos', 'mid term ke videos', 'midterm ke videos', 'syllabus for mid sem', 
+                    'syllabus for mid term', 'videos for mid sem', 'videos for midterm', 'lectures for mid sem', 'mid sem playlist kaha hai', 
+                    'mid sem playlist kahan hai', 'midterm playlist kaha hai', 'midterm playlist kahan hai', 'business communication mid sem', 
+                    'business mathematics mid sem', 'computer applications mid sem', 'computer applications for business mid sem', 
+                    'marketing and sales management mid sem', 'entrepreneurship basics mid sem', 'midsem', 'midsem syllabus', 
+                    'midsem sylabus', 'midterm sylabus', 'mid term sylabus', 'mid sem sylabus', 'midsem syallbus', 'mid sem syallbus', 
+                    'mid term syallbus', 'midterm syallbus', 'mid sem sillabus', 'mid sem silabus', 'mid term silabus', 'mid sem porion', 
+                    'midterm poriton', 'midterm porton', 'mid sem vedios', 'mid term vedios', 'midsem vedio', 'midterm vidoes', 
+                    'mid sem lecture', 'midsem lecutres', 'mid sem plalist', 'midterm plalist', 'portions', '13 september', 'exam syllabus'
+                ],
+                markdown: `### Mid-Term Examination Syllabus\n\n{{Name}}, here’s the current **Mid-Term syllabus**, subject by subject.\n\nThe following playlists contain the available video lectures relevant to the Mid-Term preparation.\n\n### Business Communication\n\n**Videos uploaded:** 1–80\n\n[Watch the Business Communication playlist →](https://youtube.com/playlist?list=PLO6lKmVH-LHc&si=Fueo6s_1gvNdXSjU)\n\n### Business Mathematics\n\n**Videos uploaded:** 1–84\n\n[Watch the Business Mathematics playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SALcAYjbujfMUwAI4S9Cx9c&si=BFPR6-SGkhXkdx8D)\n\n### Computer Applications for Business\n\n**Videos uploaded:** 1–84\n\n[Watch the Computer Applications playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SCk7LmDwxbmiYXrwn4DaZZm&si=Fa3zKY4xWgzYWP-5)\n\n### Marketing and Sales Management\n\n**Videos uploaded:** 1–78\n\n[Watch the Marketing and Sales Management playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SCqngJcM7uWg81BnOXiuaNM&si=Ub0UqIAqkdYzliPQ)\n\n### Entrepreneurship Basics\n\n**Videos uploaded:** 1–77\n\n[Watch the Entrepreneurship Basics playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SB2v1pdapHJcxcGq-Mj4r4-&si=6HkLwbhlIB9YeiU1)\n\n---\n\nFor **handbooks, practice assignments, PPTs, and other LMS resources**, simply ask Circle AI.`
             },
             {
                 id: 'material_pages_to_study',
@@ -1709,11 +2138,41 @@
             }
         }
 
+        // Cookie utilities for UI state
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax";
+        }
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const isRegistered = localStorage.getItem('circle_user_registered');
             userName = localStorage.getItem('circle_username') || "";
             
             localStorage.removeItem('circle_promo_shown');
+            
+            // Set initial toggle state from cookie
+            const savedSetting = getCookie('circleImproveEnabled');
+            const toggleEl = document.getElementById('improve-circle-toggle');
+            if (savedSetting === 'false') {
+                toggleEl.checked = false;
+            } else {
+                toggleEl.checked = true;
+            }
 
             if (isRegistered && userName) {
                 startMainInterface();
@@ -1722,6 +2181,41 @@
             }
             setupEventListeners();
         });
+
+        function showInstallModal() {
+            const modal = document.getElementById('install-modal');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.add('show');
+            
+            // Reset fallback message if it was shown previously
+            document.getElementById('install-fallback-msg').style.display = 'none';
+        }
+
+        function closeInstallModal() {
+            const modal = document.getElementById('install-modal');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+                setTimeout(() => { modal.classList.add('hidden'); }, 400);
+            }
+        }
+
+        async function handleInstallClick() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+                closeInstallModal();
+            } else {
+                // Show fallback message
+                document.getElementById('install-fallback-msg').style.display = 'block';
+            }
+        }
 
         /*******************************************************
          * 4. CINEMATIC ONBOARDING SEQUENCE
@@ -1785,7 +2279,7 @@
             await sleep(1200);
             nameStep.classList.add('hidden');
 
-            welcome.textContent = formatText("Welcome to Circle, {{Name}}.", userName);
+            welcome.textContent = formatText("Welcome to Circle AI, {{Name}}.", userName);
             welcome.classList.remove('hidden');
             await sleep(50);
             welcome.classList.remove('anim-enter');
@@ -1892,6 +2386,10 @@
             
             greetingLoopActive = true;
             rotateGreetingsLoop(rot, currentIdx);
+            
+            document.getElementById('settings-btn').classList.remove('hidden');
+            document.getElementById('install-btn').classList.remove('hidden');
+            document.getElementById('share-btn').classList.remove('hidden');
         }
 
         async function rotateGreetingsLoop(rot, currentIdx) {
@@ -1956,6 +2454,92 @@
             }, 500);
         }
 
+        /*******************************************************
+         * 6.5 SETTINGS LOGIC
+         *******************************************************/
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+                setTimeout(() => { modal.classList.add('hidden'); }, 400);
+            } else {
+                modal.classList.remove('hidden');
+                void modal.offsetWidth;
+                modal.classList.add('show');
+            }
+        }
+        
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+                setTimeout(() => { modal.classList.add('hidden'); }, 400);
+            }
+        }
+
+        /*******************************************************
+         * 6.6 SHARE LOGIC
+         *******************************************************/
+        async function handleShare() {
+            const shareTitle = "Circle AI | BBA Assistant";
+            const shareText = "Circle AI is a free, 24×7 virtual BBA assistant built for BBA students.\n\nIt helps students quickly find information about the BBA Programme, including syllabus, examinations, assessments, academic updates, LMS information, study resources, and common programme queries.\n\nAsk Circle AI instead of searching through old WhatsApp messages, LMS discussions, emails, and scattered information.\n\nCircle AI | BBA Assistant";
+            const shareUrl = "https://shorturl.at/APPeS";
+            
+            let sharedSuccessfully = false;
+
+            if (navigator.canShare) {
+                try {
+                    const response = await fetch('circle-promo.png');
+                    const blob = await response.blob();
+                    const file = new File([blob], 'circle-promo.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: shareTitle,
+                            text: shareText,
+                            url: shareUrl
+                        });
+                        sharedSuccessfully = true;
+                    }
+                } catch (error) {
+                    console.log("Image share failed, falling back to text.", error);
+                }
+            }
+            
+            if (!sharedSuccessfully && navigator.share) {
+                try {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                    sharedSuccessfully = true;
+                } catch (error) {
+                    console.log("Text share failed or user cancelled.", error);
+                }
+            }
+            
+            if (!sharedSuccessfully) {
+                // Graceful fallback to clipboard
+                const fallbackText = `${shareText}\n${shareUrl}`;
+                try {
+                    await navigator.clipboard.writeText(fallbackText);
+                    showToast("Share text copied");
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            }
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
         /*******************************************************
          * 7. EVENT LISTENERS & HORIZONTAL SCROLLING
@@ -1970,6 +2554,16 @@
             const chatSubmit = document.getElementById('chat-submit');
             const newChatBtn = document.getElementById('new-chat-btn');
             const promoCloseBtn = document.getElementById('promo-close');
+            
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsCloseBtn = document.getElementById('settings-close');
+            const improveToggle = document.getElementById('improve-circle-toggle');
+            
+            const installBtn = document.getElementById('install-btn');
+            const installCloseBtn = document.getElementById('install-close');
+            const pwaInstallBtn = document.getElementById('pwa-install-btn');
+            
+            const shareBtn = document.getElementById('share-btn');
 
             chatInput.addEventListener('focus', stopGreetingRotation);
             chatInput.addEventListener('input', stopGreetingRotation);
@@ -1981,6 +2575,27 @@
 
             newChatBtn.addEventListener('click', startNewChat);
             promoCloseBtn.addEventListener('click', closePromoModal);
+            
+            settingsBtn.addEventListener('click', toggleSettings);
+            settingsCloseBtn.addEventListener('click', closeSettings);
+            
+            installBtn.addEventListener('click', showInstallModal);
+            installCloseBtn.addEventListener('click', closeInstallModal);
+            pwaInstallBtn.addEventListener('click', handleInstallClick);
+            
+            shareBtn.addEventListener('click', handleShare);
+            
+            improveToggle.addEventListener('change', (e) => {
+                setCookie('circleImproveEnabled', e.target.checked, 365);
+            });
+            
+            // Allow escape key to close settings
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSettings();
+                    closeInstallModal();
+                }
+            });
 
             const pillsContainer = document.getElementById('suggestion-pills');
             
@@ -2076,6 +2691,11 @@
             document.body.classList.remove('chat-active');
             document.getElementById('new-chat-btn').classList.add('hidden');
             
+            // Stop any ongoing speech when starting a new chat
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            
             const chatInput = document.getElementById('chat-input');
             chatInput.value = '';
             
@@ -2112,6 +2732,11 @@
             const chatInput = document.getElementById('chat-input');
             const query = chatInput.value.trim();
             if (!query) return;
+            
+            // Stop any ongoing speech when a new query is submitted
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
 
             chatInput.value = "";
             stopGreetingRotation();
@@ -2145,14 +2770,21 @@
 
             appendUserMessage(query);
             scrollToBottom();
+            
+            const processStartTime = performance.now();
 
             const dotId = 'dot-' + Date.now();
             appendThinkingDot(dotId);
             scrollToBottom();
 
-            await sleep(2500);
+            // Reduced waiting time to 1.5 seconds
+            await sleep(1500);
 
             document.getElementById(dotId).remove();
+            
+            const processEndTime = performance.now();
+            const elapsedSeconds = ((processEndTime - processStartTime) / 1000).toFixed(2);
+            
             const responseData = matchIntent(query);
 
             const aiContainer = document.createElement('div');
@@ -2197,6 +2829,12 @@
 
             if (responseData.sources && responseData.sources.length > 0) {
                 appendSources(aiContainer, responseData.sources);
+                scrollToBottom();
+            }
+            
+            // Only add metadata to normal answers (not Dream Labs triggers to avoid messy UI during terminal flow)
+            if (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe') {
+                appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown);
                 scrollToBottom();
             }
 
@@ -2245,6 +2883,70 @@
             sourceDiv.style.opacity = '1';
         }
         
+        function appendResponseMetadata(container, timeSeconds, rawMarkdown) {
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'response-metadata-container';
+            
+            const timeCapsule = document.createElement('div');
+            timeCapsule.className = 'meta-capsule';
+            timeCapsule.innerHTML = `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>${timeSeconds}s`;
+            
+            const speakCapsule = document.createElement('div');
+            speakCapsule.className = 'meta-capsule meta-btn';
+            
+            const speakIcon = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
+            const stopIcon = `<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>`;
+            
+            speakCapsule.innerHTML = `${speakIcon}Read aloud`;
+            
+            // Clean markdown for speech
+            let cleanTextForSpeech = rawMarkdown
+                .replace(/<[^>]*>/g, '') // remove any explicit html
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // replace markdown links with just the link text
+                .replace(/[#*_~`]/g, ''); // remove markdown symbols
+            
+            let isPlaying = false;
+            
+            speakCapsule.addEventListener('click', () => {
+                if (!('speechSynthesis' in window)) return;
+                
+                if (isPlaying) {
+                    window.speechSynthesis.cancel();
+                    isPlaying = false;
+                    speakCapsule.classList.remove('playing');
+                    speakCapsule.innerHTML = `${speakIcon}Read aloud`;
+                } else {
+                    window.speechSynthesis.cancel(); // Cancel any existing speech
+                    
+                    const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
+                    
+                    utterance.onend = () => {
+                        isPlaying = false;
+                        speakCapsule.classList.remove('playing');
+                        speakCapsule.innerHTML = `${speakIcon}Read aloud`;
+                    };
+                    
+                    utterance.onerror = () => {
+                        isPlaying = false;
+                        speakCapsule.classList.remove('playing');
+                        speakCapsule.innerHTML = `${speakIcon}Read aloud`;
+                    }
+                    
+                    window.speechSynthesis.speak(utterance);
+                    isPlaying = true;
+                    speakCapsule.classList.add('playing');
+                    speakCapsule.innerHTML = `${stopIcon}Stop`;
+                }
+            });
+            
+            metaDiv.appendChild(timeCapsule);
+            metaDiv.appendChild(speakCapsule);
+            container.appendChild(metaDiv);
+            
+            void metaDiv.offsetWidth;
+            metaDiv.style.opacity = '1';
+        }
+        
         async function startDreamLabsFlow(container) {
             const dotId = 'dl-dot-' + Date.now();
             const dot = document.createElement('div');
@@ -2272,7 +2974,7 @@
             
             const header = document.createElement('div');
             header.className = 'dl-header';
-            header.innerHTML = 'DREAM LABS';
+            header.innerHTML = 'DREAM LABS <div class="dl-header-sub">• breathing tool</div>';
             terminal.appendChild(header);
             
             const terminalAreaWrapper = document.createElement('div');
@@ -2323,6 +3025,7 @@
                 <div class="dl-box-container">
                     <div class="dl-box expand"></div>
                 </div>
+                <div style="margin-top: 24px; font-size: 11px; opacity: 0.5; letter-spacing: 1px; text-transform: none; font-family: var(--font-conversational);">inhale • hold • exhale</div>
             `;
             terminal.appendChild(breathingArea);
             
