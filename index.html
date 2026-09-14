@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -284,6 +283,18 @@
             transition: opacity 0.3s ease;
         }
         #name-submit:hover { opacity: 1; }
+        
+        .name-privacy-footnote {
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            margin-top: 12px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            pointer-events: none;
+        }
 
         /* Main Interface Layout */
         #main-layer {
@@ -1104,6 +1115,9 @@
                     <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="off">
                     <button id="name-submit" class="font-ui" aria-label="Submit Name">→</button>
                 </div>
+                <div class="name-privacy-footnote font-conversational">
+                    Use your real name for a more personalised experience. Your name is not shared with any third party. It is used only for answer personalisation, and your data remains private.
+                </div>
             </div>
             <h1 id="intro-welcome" class="font-ui anim-element anim-enter hidden"></h1>
         </div>
@@ -1410,7 +1424,7 @@
                 keywords_severe: [
                     'self harm', 'self-harm', 'hurt myself', 'hurting myself', 'harm myself', 'cut myself', 'cutting myself', 
                     'want to hurt myself', 'khud ko hurt', 'khud ko nuksan', 'khud ko harm', 'khud ko hurt karna', 'khud ko nuksan pahuchana', 
-                    'suicide', 'suicidal', 'suicide thoughts', 'suicidal thoughts', 'want to die', 'i want to die', 'wanna die', 
+                    'suicide', 'suicide thoughts', 'suicidal thoughts', 'want to die', 'i want to die', 'wanna die', 
                     'kill myself', 'want to kill myself', 'end my life', 'ending my life', 'end it all', 'marna hai', 'mar jana hai', 
                     'marna chahta hu', 'marna chahti hu', 'khud ko maarna', 'khud ko marna', 'zindagi khatam', 'life khatam karni hai', 
                     'suicde', 'suicid', 'suicide thought', 'suicidal thought', 'selfharm', 'cant live', 'cant go on', 'dont want to live', 
@@ -1461,32 +1475,6 @@
                 markdown_general: `{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below.`
             },
             {
-                id: 'msq_marking',
-                category: 'MSQ Marking Scheme',
-                suggestionPool: [
-                    "What is the MSQ marking scheme?",
-                    "MSQ mein wrong option select kiya toh kya hoga?",
-                    "How are MSQs marked?",
-                    "MSQ mein partial marks kaise milte hain?",
-                    "multiple selection question ka marks kaise milega?"
-                ],
-                keywords: [
-                    'msq', 'mqs', 'msqs', 'multiple select questions', 'multiple selection questions', 'msq marking scheme', 'msq marks', 
-                    'msq marking', 'msq exam marking', 'multiple select marking', 'multiple selection marking', 'multiple correct options', 
-                    'msq partial marks', 'msq full marks', 'msq zero marks', 'msq negative marking', 'msq wrong option', 'msq incorrect option', 
-                    'msq correct option', 'msq ka marking', 'msq ka marks', 'msq mein kitne marks', 'msq me kitne marks', 'msq kaise check hoga', 
-                    'msq kaise mark hoga', 'msq marking kaise hogi', 'msq mein partial marks', 'msq me partial marks', 'msq me wrong option', 
-                    'msq me galat option', 'multiple selection ka marking', 'multiple selection mein marks', 'multiple selection me marks', 
-                    'multiple option question', 'multiple options question', 'multiple correct question', 'select multiple options', 
-                    'ek se zyada option', 'one or more correct options', 'multiple selction', 'multiple selecton', 'multiple selection qustion', 
-                    'multiple selct question', 'multiple selection ques', 'multiple select ques', 'multiple choice selection', 
-                    'multiple correct selection', 'multiple answer question', 'multiple answers question', 'msq mein ek correct aur ek wrong option select kiya toh',
-                    'MSQ me sirf correct option select kiya toh', 'all correct options select karne par'
-                ],
-                markdown: `### MSQ Marking Scheme\n\n{{Name}}, for Multiple Select Questions (MSQs), the marking scheme is as follows:\n\n<table>\n  <tr>\n    <th>Selection</th>\n    <th>Marks</th>\n  </tr>\n  <tr>\n    <td>One correct option + one wrong option selected</td>\n    <td>No marks</td>\n  </tr>\n  <tr>\n    <td>Only one correct option selected, with no incorrect option</td>\n    <td>Partial marks</td>\n  </tr>\n  <tr>\n    <td>All correct options selected, with no incorrect option</td>\n    <td>Full marks</td>\n  </tr>\n  <tr>\n    <td>Even one incorrect option selected</td>\n    <td>Zero marks</td>\n  </tr>\n</table>\n\n**Important clarification:**\n- Selecting an incorrect option results in ZERO marks for that MSQ.\n- Selecting only a correct option, without selecting any incorrect option, receives PARTIAL marks.\n- Selecting ALL correct options, without selecting any incorrect option, receives FULL marks.\n- If even one incorrect option is selected, the question receives ZERO marks.`,
-                sources: []
-            },
-            {
                 id: 'question_pattern',
                 category: 'Question Pattern',
                 suggestionPool: [
@@ -1503,9 +1491,10 @@
                     'multiple choice questions', 'objective questions', 'objective type', 'exam questions', 'exam question type', 'mid sem questions', 
                     'mid sem question pattern', 'midterm questions', 'midterm question pattern', 'paper pattern kya hai', 'paper ka pattern kya hai', 
                     'exam ka pattern kya h', 'exam kaise hoga', 'questions ka pattern', 'question ka pattern', 'kitne type ke questions', 'mcq honge kya', 
+                    'msq', 'mqs', 'msqs', 'multiple select questions', 'multiple selection questions',
                     'msq honge kya', 'mcq aur msq', 'mcq msq', 'multiple choice aur multiple selection', 'multiple choice and multiple selection'
                 ],
-                markdown: `### Question Pattern\n\n{{Name}}, the examination will consist of:\n\n- **Multiple Choice Questions (MCQs)**\n- **Multiple Select Questions (MSQs)**\n\nMCQs generally require the student to select the correct option from the choices provided.\n\nMSQs may require the student to select more than one correct option, and the MSQ marking scheme applies separately.\n\nThe overall difficulty may range from **Moderate → Hard**.`
+                markdown: `### Question Pattern\n\n{{Name}}, the examination will consist of:\n\n- **Multiple Choice Questions (MCQs)**\n- **Multiple Select Questions (MSQs)**\n\nMCQs generally require the student to select the correct option from the choices provided.\n\nMSQs may require the student to select more than one correct option.\n\nThe overall difficulty may range from **Moderate → Hard**.`
             },
             {
                 id: 'passing_criteria',
