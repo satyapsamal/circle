@@ -1145,9 +1145,9 @@
                 </div>
                 
                 <div class="settings-row">
-                    <span>Improve Circle</span>
+                    <span>Improve Circle AI</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="improve-circle-toggle" aria-label="Improve Circle" checked>
+                        <input type="checkbox" id="improve-circle-toggle" aria-label="Improve Circle AI" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -1189,7 +1189,7 @@
             <div class="floating-btn-group-left">
                 <button id="settings-btn" class="floating-btn hidden" aria-label="Settings">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62-.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
                     </svg>
                 </button>
                 <button id="install-btn" class="floating-btn hidden" aria-label="Install Circle AI">
@@ -1259,13 +1259,15 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Only show install button if not already in standalone mode
-            if (!isRunningAsInstalledPWA()) {
+            const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
+            // Only show install button if not already in standalone mode and not previously installed
+            if (!isRunningAsInstalledPWA() && !pwaInstalled) {
                 document.getElementById('install-btn').classList.remove('hidden');
             }
         });
 
         window.addEventListener('appinstalled', () => {
+            localStorage.setItem('circle_pwa_installed', 'true');
             deferredPrompt = null;
             document.getElementById('install-btn').classList.add('hidden');
             closeInstallModal();
@@ -1298,13 +1300,15 @@
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
                     console.log('User accepted the install prompt');
+                    localStorage.setItem('circle_pwa_installed', 'true');
+                    document.getElementById('install-btn').classList.add('hidden');
                 } else {
                     console.log('User dismissed the install prompt');
                 }
                 deferredPrompt = null;
                 closeInstallModal();
-                document.getElementById('install-btn').classList.add('hidden');
             } else {
+                // Show fallback message
                 document.getElementById('install-fallback-msg').style.display = 'block';
             }
         }
@@ -1501,18 +1505,19 @@
                 category: 'Passing Criteria',
                 suggestionPool: [
                     "What is the passing criteria?",
-                    "Pass hone ke liye kitna percentage chahiye?",
-                    "How much do I need to pass?",
-                    "40% pass hai kya?",
-                    "agar exam bahut hard hua toh passing ka kya hoga?"
+                    "How do I progress to the next year?",
+                    "Is 500 out of 1000 enough?",
+                    "How is Annual NPE calculated?"
                 ],
                 keywords: [
-                    'passing marks', 'pass marks', 'passing criteria', 'pass criteria', 'minimum marks', 'minimum percentage', 'how much to pass', 
-                    'how many marks to pass', 'exam pass marks', 'mid sem pass marks', 'midterm pass marks', '40 percent', '40%', '40 marks', 
-                    'pass percentage', 'passing percentage', 'pass ka criteria', 'pass hone ke liye', 'kitne marks chahiye', 'kitna percentage chahiye', 
-                    'pass hone ke liye kitna', '40 percent pass', '40% pass', 'exam mein pass hone ke liye', 'exam me pass hone ke liye'
+                    'passing criteria', 'progress to the next year', 'progression', 'marks do i need', '500 marks', 
+                    '500 out of 1000', 'less than 500 marks', 'annual npe', 'course gpa', 'course npe', 'relative grading', 
+                    'nva', 'no valid attempt', 'absent', 'retakes', 'minimum mark required', 'course marks converted',
+                    'marks do i need for progression', '500 out of 1000 enough', 'progress with less than 500',
+                    'annual npe is 40', 'how is gpa calculated', 'how is npe calculated', 'what happens if i am absent',
+                    'are retakes allowed', 'minimum mark required in every course', 'converted to grades', 'fail', 'pass'
                 ],
-                markdown: `### Passing Criteria\n\n{{Name}}, the general passing criterion is **40%**.\n\nHowever, for a particularly difficult examination, if the overall performance is such that everyone scores below 40%, the bottom 2% of students may be considered unsuccessful under the stated criteria.`
+                markdown: `### BBA Relative Grading and Progression Policy\n\nThe BBA Program follows a relative grading system.\n\nRaw marks are converted into a percentile among all students who have valid attempts in that course.\n\nThe percentile determines the student's letter grade:\n\n- A\n- B\n- C\n- D\n\nCourse GPA and Course NPE are progressively calculated within the relevant grade band. Therefore, students receiving the same letter grade can still have slightly different Course GPA and Course NPE values.\n\nNPE means Normalized Performance/Examination score and is a normalized score from 0 to 100. It is NOT the student's raw percentage.\n\n### Progression to the next academic year\n\nA student progresses to the next academic year if EITHER of the following conditions is satisfied:\n\n1. The student obtains at least 500 marks out of 1000 across the ten courses.\n\nOR\n\n2. The student's Annual NPE is at least 40.\n\nThese are alternative routes.\n\nTherefore:\n\n- A student with 500 or more marks out of 1000 qualifies even if Annual NPE is below 40.\n- A student with fewer than 500 marks can still qualify if Annual NPE is at least 40.\n\nThere is NO separate minimum-mark requirement for each individual course under the 500/1000 progression route. The total marks across all ten courses are considered.\n\n### Annual GPA and Annual NPE\n\nAnnual GPA = average of the ten Course GPAs.\n\nAnnual NPE = average of the ten Course NPEs.\n\n### Valid attempts\n\nStudents with valid attempts receive:\n\n- percentile-based result\n- letter grade\n- positive Course GPA\n- positive Course NPE\n\n### NVA\n\nIf a student has no valid attempt, including absence, the course result is:\n\n- NVA\n- Course marks = 0\n- Course GPA = 0.00\n- Course NPE = 0\n\n### Retakes\n\nRetakes are NOT permitted.\n\n### Non-course requirements\n\nNon-course requirements may have statuses such as:\n\n- Completed\n- NVA\n\nNon-course requirements are NOT included in:\n\n- Annual GPA\n- Annual NPE\n- Aggregate Marks\n\nHowever, mandatory non-course requirements must still be completed.`
             },
             {
                 id: 'faculty_bc',
@@ -2090,6 +2095,50 @@
             suggGen = suggestionGenerator();
         }
 
+        let isAppendingSuggestions = false;
+        function loadMoreSuggestions(container) {
+            if (isAppendingSuggestions) return;
+            isAppendingSuggestions = true;
+            
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < 5; i++) {
+                const q = suggGen.next().value;
+                fragment.appendChild(createSuggestionPillElement(q));
+            }
+            
+            container.appendChild(fragment);
+            
+            setTimeout(() => { isAppendingSuggestions = false; }, 100);
+        }
+
+        function renderSuggestionPills() {
+            const container = document.getElementById('suggestion-pills');
+            container.innerHTML = '';
+            
+            // Add fixed pills
+            fixedSuggestions.forEach(item => {
+                container.appendChild(createSuggestionPillElement(item.text, true, item.url));
+            });
+
+            resetSuggestionGenerator();
+            
+            // Initial load of random pills
+            for (let i = 0; i < 15; i++) {
+                container.appendChild(createSuggestionPillElement(suggGen.next().value));
+            }
+            
+            container.classList.remove('hidden');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(6px)';
+            
+            void container.offsetWidth;
+            
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+            
+            container.scrollLeft = 0;
+        }
+
         /*******************************************************
          * 3. STATE, UTILS & INITIALIZATION
          *******************************************************/
@@ -2127,40 +2176,19 @@
             }
         }
 
-        // Cookie utilities for UI state
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                let date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax";
-        }
-        function getCookie(name) {
-            let nameEQ = name + "=";
-            let ca = document.cookie.split(';');
-            for(let i=0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0)==' ') c = c.substring(1,c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-            }
-            return null;
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
             const isRegistered = localStorage.getItem('circle_user_registered');
             userName = localStorage.getItem('circle_username') || "";
             
             localStorage.removeItem('circle_promo_shown');
             
-            // Set initial toggle state from cookie
-            const savedSetting = getCookie('circleImproveEnabled');
+            // Restore Improve Circle AI toggle from localStorage
+            const savedSetting = localStorage.getItem('circleImproveEnabled');
             const toggleEl = document.getElementById('improve-circle-toggle');
-            if (savedSetting === 'false') {
-                toggleEl.checked = false;
+            if (savedSetting === null) {
+                toggleEl.checked = true; // Default ON
             } else {
-                toggleEl.checked = true;
+                toggleEl.checked = savedSetting === 'true';
             }
 
             if (isRegistered && userName) {
@@ -2171,40 +2199,6 @@
             setupEventListeners();
         });
 
-        function showInstallModal() {
-            const modal = document.getElementById('install-modal');
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.add('show');
-            
-            // Reset fallback message if it was shown previously
-            document.getElementById('install-fallback-msg').style.display = 'none';
-        }
-
-        function closeInstallModal() {
-            const modal = document.getElementById('install-modal');
-            if (modal.classList.contains('show')) {
-                modal.classList.remove('show');
-                setTimeout(() => { modal.classList.add('hidden'); }, 400);
-            }
-        }
-
-        async function handleInstallClick() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                } else {
-                    console.log('User dismissed the install prompt');
-                }
-                deferredPrompt = null;
-                closeInstallModal();
-            } else {
-                // Show fallback message
-                document.getElementById('install-fallback-msg').style.display = 'block';
-            }
-        }
 
         /*******************************************************
          * 4. CINEMATIC ONBOARDING SEQUENCE
@@ -2302,59 +2296,6 @@
             return el;
         }
 
-        function loadMoreSuggestions(container, direction = 'append') {
-            const fragment = document.createDocumentFragment();
-            for (let i = 0; i < 5; i++) {
-                const q = suggGen.next().value;
-                fragment.appendChild(createSuggestionPillElement(q));
-            }
-            
-            if (direction === 'append') {
-                container.appendChild(fragment);
-            } else {
-                container.insertBefore(fragment, container.firstChild);
-            }
-            
-            // To ensure browser memory/DOM limits are respected implicitly
-            // We'll limit it loosely if it gets incredibly large to avoid memory leaks
-            // But we keep it high (e.g. 150) so typical infinite scroll feels completely seamless
-            const pills = container.querySelectorAll('.suggestion-pill');
-            if (pills.length > 150) {
-                if (direction === 'append') {
-                    // Culling from the start requires scrollLeft adjustment, handled carefully in event listener.
-                    for (let i = 0; i < 10; i++) pills[i].remove();
-                } else {
-                    for (let i = pills.length - 1; i >= pills.length - 10; i--) pills[i].remove();
-                }
-            }
-        }
-
-        function renderSuggestionPills() {
-            const container = document.getElementById('suggestion-pills');
-            container.innerHTML = '';
-            
-            // Add fixed pills
-            fixedSuggestions.forEach(item => {
-                container.appendChild(createSuggestionPillElement(item.text, true, item.url));
-            });
-
-            resetSuggestionGenerator();
-            
-            // Initial load of random pills
-            for (let i = 0; i < 15; i++) {
-                container.appendChild(createSuggestionPillElement(suggGen.next().value));
-            }
-            
-            container.classList.remove('hidden');
-            container.style.opacity = '0';
-            container.style.transform = 'translateY(6px)';
-            
-            void container.offsetWidth;
-            
-            container.style.opacity = '1';
-            container.style.transform = 'translateY(0)';
-        }
-
         async function startMainInterface() {
             const mainLayer = document.getElementById('main-layer');
             mainLayer.classList.remove('hidden');
@@ -2377,7 +2318,12 @@
             rotateGreetingsLoop(rot, currentIdx);
             
             document.getElementById('settings-btn').classList.remove('hidden');
-            document.getElementById('install-btn').classList.remove('hidden');
+            
+            const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
+            if (!pwaInstalled && !isRunningAsInstalledPWA() && deferredPrompt) {
+                document.getElementById('install-btn').classList.remove('hidden');
+            }
+            
             document.getElementById('share-btn').classList.remove('hidden');
         }
 
@@ -2531,7 +2477,7 @@
         }
 
         /*******************************************************
-         * 7. EVENT LISTENERS & HORIZONTAL SCROLLING
+         * 7. EVENT LISTENERS & SCROLLING MANAGEMENT
          *******************************************************/
         function setupEventListeners() {
             document.getElementById('name-submit').addEventListener('click', submitName);
@@ -2575,7 +2521,7 @@
             shareBtn.addEventListener('click', handleShare);
             
             improveToggle.addEventListener('change', (e) => {
-                setCookie('circleImproveEnabled', e.target.checked, 365);
+                localStorage.setItem('circleImproveEnabled', e.target.checked ? 'true' : 'false');
             });
             
             // Allow escape key to close settings
@@ -2619,29 +2565,11 @@
                 }
             }, { passive: false });
 
-            // Infinite scroll trigger dynamically tied to scroll event
-            let isProgrammaticScroll = false;
-
+            // Infinite scroll trigger for right side ONLY
             pillsContainer.addEventListener('scroll', () => {
-                if (isProgrammaticScroll) return;
-
-                // Load more on the right
-                if (pillsContainer.scrollWidth - pillsContainer.clientWidth - pillsContainer.scrollLeft < 300) {
-                    loadMoreSuggestions(pillsContainer, 'append');
-                }
-
-                // Load more on the left
-                if (pillsContainer.scrollLeft < 50) {
-                    isProgrammaticScroll = true;
-                    const oldScrollWidth = pillsContainer.scrollWidth;
-                    
-                    loadMoreSuggestions(pillsContainer, 'prepend');
-                    
-                    const newScrollWidth = pillsContainer.scrollWidth;
-                    // Adjust scroll to maintain position seamlessly without visual jump
-                    pillsContainer.scrollLeft += (newScrollWidth - oldScrollWidth);
-                    
-                    setTimeout(() => { isProgrammaticScroll = false; }, 20);
+                const nearRight = pillsContainer.scrollLeft + pillsContainer.clientWidth >= pillsContainer.scrollWidth - 300;
+                if (nearRight) {
+                    loadMoreSuggestions(pillsContainer);
                 }
             });
         }
@@ -2656,11 +2584,23 @@
             }
         }
 
+        function isUserNearBottom() {
+            const chatContainer = document.getElementById('chat-container');
+            // 150px threshold allows the user to still be considered "at the bottom" 
+            // even if new lines push content down slightly before the scroll catches up
+            return (chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 150;
+        }
+
         function scrollToBottom() {
             const chatContainer = document.getElementById('chat-container');
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
+        function smartScrollToBottom() {
+            if (isUserNearBottom()) {
+                scrollToBottom();
+            }
+        }
 
         /*******************************************************
          * 8. START NEW CHAT (The '+' Button logic)
@@ -2758,6 +2698,7 @@
             isProcessing = true;
 
             appendUserMessage(query);
+            // User intentionally submitted, so hard scroll down is appropriate here
             scrollToBottom();
             
             const processStartTime = performance.now();
@@ -2766,8 +2707,8 @@
             appendThinkingDot(dotId);
             scrollToBottom();
 
-            // Reduced waiting time to 1.5 seconds
-            await sleep(1500);
+            // Minimal natural UI transition wait before generating response
+            await sleep(50);
 
             document.getElementById(dotId).remove();
             
@@ -2813,24 +2754,29 @@
                 
                 void dlBtnContainer.offsetWidth;
                 dlBtnContainer.style.opacity = '1';
-                scrollToBottom();
+                smartScrollToBottom();
             }
 
             if (responseData.sources && responseData.sources.length > 0) {
                 appendSources(aiContainer, responseData.sources);
-                scrollToBottom();
+                smartScrollToBottom();
             }
             
             // Only add metadata to normal answers (not Dream Labs triggers to avoid messy UI during terminal flow)
             if (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe') {
                 appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown);
-                scrollToBottom();
+                smartScrollToBottom();
             }
 
             isProcessing = false;
 
-            renderSuggestionPills();
-            scrollToBottom();
+            if (pills) {
+                pills.classList.remove('hidden');
+                void pills.offsetWidth;
+                pills.style.opacity = '1';
+                pills.style.transform = 'translateY(0)';
+            }
+            smartScrollToBottom();
         }
 
         /*******************************************************
@@ -2972,7 +2918,7 @@
             
             wrapper.appendChild(terminal);
             container.appendChild(wrapper);
-            scrollToBottom();
+            smartScrollToBottom();
             
             const sequence = [
                 { wait: 800, text: "initializing environment..." },
@@ -2994,7 +2940,7 @@
                 
                 void line.offsetWidth; 
                 line.classList.add('active');
-                scrollToBottom();
+                smartScrollToBottom();
                 
                 await sleep(step.wait - 300);
                 line.classList.remove('active');
@@ -3073,7 +3019,7 @@ setInterval(() => {
                     sourceContent.style.display = 'none';
                     chevron.textContent = '▼';
                 }
-                scrollToBottom();
+                smartScrollToBottom();
             };
             
             terminal.appendChild(sourceToggle);
@@ -3084,7 +3030,7 @@ setInterval(() => {
             breathingArea.style.transition = 'opacity 1s ease';
             void breathingArea.offsetWidth;
             breathingArea.style.opacity = '1';
-            scrollToBottom();
+            smartScrollToBottom();
             
             const phaseEl = breathingArea.querySelector('.dl-phase');
             const timerEl = breathingArea.querySelector('.dl-timer');
@@ -3114,8 +3060,13 @@ setInterval(() => {
                 timerEl.textContent = t;
             }, 1000);
 
-            renderSuggestionPills();
-            scrollToBottom();
+            if (pills) {
+                pills.classList.remove('hidden');
+                void pills.offsetWidth;
+                pills.style.opacity = '1';
+                pills.style.transform = 'translateY(0)';
+            }
+            smartScrollToBottom();
         }
 
         /*******************************************************
@@ -3280,9 +3231,13 @@ setInterval(() => {
         async function typewriteHTML(container, htmlString) {
             let currentHTML = "";
             let i = 0;
-            const typingSpeed = 25; 
+            const MAX_RENDER_TIME = 1400; // Leaves a 100ms safety margin to hit the 1.5s total target
+            const startTime = performance.now();
 
             while (i < htmlString.length) {
+                // Determine scrolling condition BEFORE injecting the next chunk to prevent jumps overriding user intent
+                const nearBottom = isUserNearBottom();
+
                 if (htmlString[i] === '<') {
                     let tag = "";
                     while (htmlString[i] !== '>' && i < htmlString.length) {
@@ -3294,13 +3249,41 @@ setInterval(() => {
                 } else {
                     currentHTML += htmlString[i];
                     container.innerHTML = currentHTML;
-                    scrollToBottom();
-                    await sleep(typingSpeed + (Math.random() * 10));
+                    
+                    if (nearBottom) scrollToBottom();
+                    
+                    const elapsed = performance.now() - startTime;
+                    if (elapsed >= MAX_RENDER_TIME) {
+                        break; // Exhausted budget, flush instantly
+                    }
+
+                    // Variable typing speed for more natural feel
+                    let charDelay = 2 + Math.random() * 10; 
+                    if (['.', '!', '?'].includes(htmlString[i])) {
+                        charDelay += 40;
+                    } else if (htmlString[i] === ',') {
+                        charDelay += 20;
+                    } else if (htmlString[i] === ' ') {
+                        charDelay += 5;
+                    }
+                    
+                    // Clamp delay so we don't overshoot the total budget
+                    const remaining = MAX_RENDER_TIME - elapsed;
+                    if (charDelay > remaining) {
+                        charDelay = remaining;
+                    }
+                    
+                    if (charDelay > 0) {
+                        await sleep(charDelay);
+                    }
                 }
                 i++;
             }
+            
+            // Final render injection
+            const finalNearBottom = isUserNearBottom();
             container.innerHTML = htmlString;
-            scrollToBottom();
+            if (finalNearBottom) scrollToBottom();
         }
 
     </script>
