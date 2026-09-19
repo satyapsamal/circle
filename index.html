@@ -83,6 +83,37 @@
         .font-ui { font-family: var(--font-ui); }
         .font-conversational { font-family: var(--font-conversational); }
         
+        /* Mobile tap highlight and focus ring removal for interactive elements */
+        button,
+        a,
+        .suggestion-pill,
+        .source-btn,
+        .model-option,
+        .meta-btn,
+        .dl-source-toggle,
+        [role="button"] {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        button:focus,
+        a:focus,
+        .suggestion-pill:focus,
+        .source-btn:focus,
+        .model-option:focus,
+        .meta-btn:focus,
+        .dl-source-toggle:focus,
+        [role="button"]:focus,
+        button:focus-visible,
+        a:focus-visible,
+        .suggestion-pill:focus-visible,
+        .source-btn:focus-visible,
+        .model-option:focus-visible,
+        .meta-btn:focus-visible,
+        .dl-source-toggle:focus-visible,
+        [role="button"]:focus-visible {
+            outline: none !important;
+        }
+
         /* Smooth Text Animation System */
         .anim-element {
             transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), 
@@ -171,9 +202,11 @@
             justify-content: center;
             cursor: pointer;
             z-index: 20;
-            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
             pointer-events: auto;
             padding: 0;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         #promo-close.promo-disabled {
             pointer-events: none;
@@ -182,7 +215,6 @@
         }
         #promo-close:not(.promo-disabled):hover {
             background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.05);
             border-color: rgba(255, 255, 255, 0.3);
         }
         .promo-ring {
@@ -367,7 +399,6 @@
             display: flex;
             flex-direction: column;
             gap: 32px;
-            scroll-behavior: smooth;
         }
 
         #chat-container::-webkit-scrollbar { display: none; }
@@ -867,9 +898,10 @@
             justify-content: center;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.6s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.6s ease;
             pointer-events: auto;
             outline: none;
+            -webkit-tap-highlight-color: transparent;
             padding: 0;
         }
         .floating-btn svg { 
@@ -879,10 +911,124 @@
             display: block; 
             flex-shrink: 0; 
             overflow: visible; 
+            transition: opacity 0.3s ease, filter 0.3s ease;
         }
         .floating-btn:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .floating-btn:active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Model Selection Pill */
+        #model-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: auto;
+            padding: 0 16px;
+            border-radius: 22px;
+            font-family: var(--font-conversational);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Recommended Tag */
+        .recommended-tag {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            letter-spacing: 0.3px;
+        }
+
+        /* Model Dropdown Menu */
+        #model-menu {
+            position: absolute;
+            top: 56px;
+            left: 0;
+            background: #0a0a0a;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 300px;
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 101;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #model-menu.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .model-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            text-align: left;
+            border: none;
+            background: transparent;
+            color: #ffffff;
+            font-family: var(--font-conversational);
+            width: 100%;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .model-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .model-option-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+        .model-option-title {
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .model-option-desc {
+            font-size: 12px;
+            color: #888888;
+        }
+        .model-check {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #005cff;
+            opacity: 0;
+        }
+        .model-option.selected .model-check {
+            opacity: 1;
+        }
+        .model-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+            margin: 4px 0;
         }
 
         /* Settings Modal */
@@ -914,13 +1060,8 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1);
             padding: 24px;
-            transform: scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             color: #ffffff;
             font-family: var(--font-conversational);
-        }
-        #settings-modal.show .settings-content, #install-modal.show .settings-content {
-            transform: scale(1);
         }
 
         .settings-header {
@@ -947,8 +1088,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
             outline: none;
+            -webkit-tap-highlight-color: transparent;
             padding: 0;
         }
         .settings-close:hover {
@@ -1048,13 +1190,15 @@
             font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
             font-family: var(--font-ui);
             margin-top: 8px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .install-action-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
         }
         .install-fallback-msg {
             font-size: 12px;
@@ -1094,6 +1238,13 @@
             .floating-btn-group-right { top: 20px; right: 20px; gap: 8px; }
             .floating-btn { width: 40px; height: 40px; font-size: 22px; }
             .floating-btn svg { width: 18px; height: 18px; }
+            #model-btn { font-size: 13px; padding: 0 12px; }
+            #model-menu { top: 52px; width: 300px; max-width: calc(100vw - 40px); }
+            
+            #model-btn.mobile-model-hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
         }
 
         /* Accessibility: Reduced Motion */
@@ -1102,10 +1253,8 @@
             .anim-enter, .anim-exit { transform: none !important; filter: none !important; }
             .glow-spinner { animation: none !important; background: rgba(255,255,255,0.1); }
             .thinking-dot { animation: none !important; opacity: 0.7; }
-            .floating-btn { transition: none !important; }
             .promo-ring-progress { animation: none !important; stroke-dashoffset: 113.1 !important; }
             .dl-box { transition: none !important; }
-            #settings-modal .settings-content, #install-modal .settings-content { transition: none !important; transform: none !important; }
         }
     </style>
 </head>
@@ -1162,6 +1311,17 @@
                     Circle AI respects your privacy. Allow your prompts to be saved and used to improve Circle. Turn this off to opt out of prompt storage and training.
                 </div>
                 
+                <div class="settings-row" style="margin-top: 24px;">
+                    <span>Show Circle AI Banner</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="promo-banner-toggle" aria-label="Show Circle AI Banner" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-desc" style="margin-bottom: 28px;">
+                    Show the Circle AI promotional banner once when you send your first prompt in a new session.
+                </div>
+                
                 <div class="settings-footer">
                     If you have any queries, suggestions, or feedback,<br>please share them with us <a href="https://shorturl.at/NwAMA" target="_blank" rel="noopener noreferrer">here</a>.
                 </div>
@@ -1179,7 +1339,7 @@
                 <img src="circle-promo.png" alt="Circle AI Promo" class="install-img">
                 
                 <div class="settings-desc" style="margin-bottom: 16px;">
-                    Your BBA assistant, now on your device. Quick access, completely free, lightweight, and safe.
+                    Your BBA assistant, now on your device.<br>Quick access, completely free, lightweight, and safe.
                 </div>
                 
                 <button id="pwa-install-btn" class="install-action-btn">Install (2KB)</button>
@@ -1204,6 +1364,35 @@
                         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                     </svg>
                 </button>
+                <div style="position: relative;">
+                    <button id="model-btn" class="floating-btn hidden" aria-label="Select AI model">
+                        <span id="model-btn-label">Circle Core</span>
+                        <span id="model-btn-chevron">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 9.5L12 14.5L17 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                    </button>
+                    <div id="model-menu">
+                        <button class="model-option" data-model="core">
+                            <div class="model-option-content">
+                                <span class="model-option-title">Circle Core</span>
+                                <span class="model-option-desc">Balanced responses</span>
+                            </div>
+                            <div class="model-check">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </div>
+                        </button>
+                        <div class="model-divider"></div>
+                        <button class="model-option" data-model="swift">
+                            <div class="model-option-content">
+                                <span class="model-option-title">Circle Swift <span class="recommended-tag font-conversational">Recommended</span></span>
+                                <span class="model-option-desc">Faster responses</span>
+                            </div>
+                            <div class="model-check">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </div>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="floating-btn-group-right">
@@ -1354,6 +1543,55 @@
          * 1. GOOGLE SHEETS CONFIGURATION
          *******************************************************/
         const GOOGLE_SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbz-lZT2sgrNk7xHSEEOHAtD97feo9H9EZcufbJ99WZ8Ywris93zawFE2g3hRhceU4x97w/exec";
+
+        /*******************************************************
+         * ROBUST PREFERENCE STORAGE
+         *******************************************************/
+        function setPreference(name, value) {
+            // Write to cookie
+            let date = new Date();
+            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+            document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/; SameSite=Lax";
+            
+            // Write to localStorage as backup
+            try {
+                localStorage.setItem("circle_pref_" + name, value);
+            } catch (e) {
+                console.warn("localStorage fallback failed.");
+            }
+            
+            // Verify write was successful
+            if (getPreference(name) !== value) {
+                console.warn("Preference persistence failed for", name);
+            }
+        }
+
+        function getPreference(name, defaultValue) {
+            // Read from cookie primary
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            
+            // Read from localStorage fallback
+            try {
+                const lsValue = localStorage.getItem("circle_pref_" + name);
+                if (lsValue !== null) {
+                    // Restore cookie if it was missing but LS had it
+                    let date = new Date();
+                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+                    document.cookie = name + "=" + lsValue + "; expires=" + date.toUTCString() + "; path=/; SameSite=Lax";
+                    return lsValue;
+                }
+            } catch (e) {
+                console.warn("localStorage fallback read failed.");
+            }
+            
+            return defaultValue !== undefined ? defaultValue : null;
+        }
 
         /*******************************************************
          * 2. KNOWLEDGE BASE & INTENTS (Hardcoded Local Data)
@@ -1799,7 +2037,7 @@
                     'water bottle allowed', 'bottle allowed', 'pen', 'pencil', 'pen and pencil', 
                     'pen pencil', 'can I bring pen', 'can I bring pencil', 'can I take pen', 
                     'can I take pencil', 'pen allowed', 'pencil allowed', 'pen and pencil allowed',
-                    'exam centre mein kya le ja sakte hai', 'exam center mein kya le ja sakte hai', 
+                    'exam centre mein kya le ja sakte hai', 'exam centre mein kya le ja sakte hai', 
                     'exam mein kya le ja sakte hai', 'mid sem mein kya le jana hai', 
                     'mid sem exam mein kya le ja sakte hai', 'exam hall mein kya le ja sakte hai', 
                     'exam centre pe kya le jana hai', 'exam center pe kya le jana hai', 
@@ -2154,7 +2392,15 @@
         let isChatMode = false;
         let isProcessing = false;
         let promoTimer = null;
-        let promoShownThisChat = false; 
+        
+        // Track promo shown in session storage instead of window scope
+        // This ensures the logic holds across manual refreshes but resets per new tab/session.
+        function setPromoShownInSession() {
+            sessionStorage.setItem('circlePromoShownSession', 'true');
+        }
+        function hasPromoBeenShownInSession() {
+            return sessionStorage.getItem('circlePromoShownSession') === 'true';
+        }
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -2187,16 +2433,28 @@
             const isRegistered = localStorage.getItem('circle_user_registered');
             userName = localStorage.getItem('circle_username') || "";
             
-            localStorage.removeItem('circle_promo_shown');
+            localStorage.removeItem('circle_promo_shown'); // Legacy cleanup
             
-            // Restore Improve Circle AI toggle from localStorage
-            const savedSetting = localStorage.getItem('circleImproveEnabled');
-            const toggleEl = document.getElementById('improve-circle-toggle');
-            if (savedSetting === null) {
-                toggleEl.checked = true; // Default ON
+            // Improve Circle Preference
+            const savedImproveSetting = getPreference('circleImproveEnabled', 'true');
+            const improveToggleEl = document.getElementById('improve-circle-toggle');
+            improveToggleEl.checked = savedImproveSetting === 'true';
+            
+            // Show Banner Preference
+            const savedPromoSetting = getPreference('circleShowPromoBanner', 'true');
+            const promoToggleEl = document.getElementById('promo-banner-toggle');
+            promoToggleEl.checked = savedPromoSetting === 'true';
+
+            // Model Selection Preference
+            let currentModel = getPreference('circleSelectedModel', 'core');
+            if (currentModel !== 'swift' && currentModel !== 'core') {
+                currentModel = 'core'; // invalid value fallback
+                setPreference('circleSelectedModel', 'core');
             } else {
-                toggleEl.checked = savedSetting === 'true';
+                // Ensure default is explicitly saved if missing
+                setPreference('circleSelectedModel', currentModel);
             }
+            selectModelUI(currentModel);
 
             if (isRegistered && userName) {
                 startMainInterface();
@@ -2206,6 +2464,19 @@
             setupEventListeners();
         });
 
+        // Helper to update the visual model state
+        function selectModelUI(modelVal) {
+            const btnLabel = document.getElementById('model-btn-label');
+            if (btnLabel) {
+                btnLabel.textContent = modelVal === 'swift' ? 'Circle Swift' : 'Circle Core';
+            }
+            const opts = document.querySelectorAll('.model-option');
+            opts.forEach(opt => opt.classList.remove('selected'));
+            const targetOpt = document.querySelector(`.model-option[data-model="${modelVal}"]`);
+            if (targetOpt) {
+                targetOpt.classList.add('selected');
+            }
+        }
 
         /*******************************************************
          * 4. CINEMATIC ONBOARDING SEQUENCE
@@ -2325,6 +2596,7 @@
             rotateGreetingsLoop(rot, currentIdx);
             
             document.getElementById('settings-btn').classList.remove('hidden');
+            document.getElementById('model-btn').classList.remove('hidden');
             
             const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
             if (!pwaInstalled && !isRunningAsInstalledPWA() && deferredPrompt) {
@@ -2500,12 +2772,17 @@
             const settingsBtn = document.getElementById('settings-btn');
             const settingsCloseBtn = document.getElementById('settings-close');
             const improveToggle = document.getElementById('improve-circle-toggle');
+            const promoBannerToggle = document.getElementById('promo-banner-toggle');
             
             const installBtn = document.getElementById('install-btn');
             const installCloseBtn = document.getElementById('install-close');
             const pwaInstallBtn = document.getElementById('pwa-install-btn');
             
             const shareBtn = document.getElementById('share-btn');
+            
+            const modelBtn = document.getElementById('model-btn');
+            const modelMenu = document.getElementById('model-menu');
+            const modelOptions = document.querySelectorAll('.model-option');
 
             chatInput.addEventListener('focus', stopGreetingRotation);
             chatInput.addEventListener('input', stopGreetingRotation);
@@ -2528,14 +2805,58 @@
             shareBtn.addEventListener('click', handleShare);
             
             improveToggle.addEventListener('change', (e) => {
-                localStorage.setItem('circleImproveEnabled', e.target.checked ? 'true' : 'false');
+                setPreference('circleImproveEnabled', e.target.checked ? 'true' : 'false');
             });
             
-            // Allow escape key to close settings
+            promoBannerToggle.addEventListener('change', (e) => {
+                setPreference('circleShowPromoBanner', e.target.checked ? 'true' : 'false');
+                if (!e.target.checked) {
+                    if (promoTimer) clearTimeout(promoTimer);
+                    closePromoModal(); // Hide safely if it's currently showing
+                }
+            });
+            
+            // Model menu interactions
+            const modelBtnChevron = document.getElementById('model-btn-chevron');
+            const chevronDown = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 9.5L12 14.5L17 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            const chevronUp = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 14.5L12 9.5L17 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+            modelBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isShowing = modelMenu.classList.contains('show');
+                if (isShowing) {
+                    modelMenu.classList.remove('show');
+                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
+                } else {
+                    modelMenu.classList.add('show');
+                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronUp;
+                }
+            });
+            
+            modelOptions.forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    const selected = e.currentTarget.getAttribute('data-model');
+                    setPreference('circleSelectedModel', selected);
+                    selectModelUI(selected);
+                    modelMenu.classList.remove('show');
+                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
+                });
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (modelBtn && modelMenu && !modelBtn.contains(e.target) && !modelMenu.contains(e.target)) {
+                    modelMenu.classList.remove('show');
+                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
+                }
+            });
+            
+            // Allow escape key to close settings, install modal, model menu
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeSettings();
                     closeInstallModal();
+                    modelMenu.classList.remove('show');
+                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
                 }
             });
 
@@ -2572,11 +2893,29 @@
                 }
             }, { passive: false });
 
-            // Infinite scroll trigger for right side ONLY
+            // Infinite scroll trigger dynamically tied to scroll event
+            let isProgrammaticScroll = false;
+
             pillsContainer.addEventListener('scroll', () => {
-                const nearRight = pillsContainer.scrollLeft + pillsContainer.clientWidth >= pillsContainer.scrollWidth - 300;
-                if (nearRight) {
-                    loadMoreSuggestions(pillsContainer);
+                if (isProgrammaticScroll) return;
+
+                // Load more on the right
+                if (pillsContainer.scrollWidth - pillsContainer.clientWidth - pillsContainer.scrollLeft < 300) {
+                    loadMoreSuggestions(pillsContainer, 'append');
+                }
+
+                // Load more on the left
+                if (pillsContainer.scrollLeft < 50) {
+                    isProgrammaticScroll = true;
+                    const oldScrollWidth = pillsContainer.scrollWidth;
+                    
+                    loadMoreSuggestions(pillsContainer, 'prepend');
+                    
+                    const newScrollWidth = pillsContainer.scrollWidth;
+                    // Adjust scroll to maintain position seamlessly without visual jump
+                    pillsContainer.scrollLeft += (newScrollWidth - oldScrollWidth);
+                    
+                    setTimeout(() => { isProgrammaticScroll = false; }, 20);
                 }
             });
         }
@@ -2600,13 +2939,22 @@
 
         function scrollToBottom() {
             const chatContainer = document.getElementById('chat-container');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
         }
 
+        let scrollFramePending = false;
         function smartScrollToBottom() {
-            if (isUserNearBottom()) {
-                scrollToBottom();
-            }
+            if (scrollFramePending) return;
+            scrollFramePending = true;
+            requestAnimationFrame(() => {
+                scrollFramePending = false;
+                if (isUserNearBottom()) {
+                    scrollToBottom();
+                }
+            });
         }
 
         /*******************************************************
@@ -2622,10 +2970,10 @@
             chatContainer.innerHTML = '';
             
             isChatMode = false;
-            promoShownThisChat = false; 
             
             document.body.classList.remove('chat-active');
             document.getElementById('new-chat-btn').classList.add('hidden');
+            document.getElementById('model-btn').classList.remove('mobile-model-hidden');
             
             // Stop any ongoing speech when starting a new chat
             if ('speechSynthesis' in window) {
@@ -2677,9 +3025,23 @@
             chatInput.value = "";
             stopGreetingRotation();
             
-            if (!promoShownThisChat) {
-                promoShownThisChat = true;
-                setTimeout(showPromoModal, 1500); 
+            // Check promo banner setting
+            let allowPromoBanner = getPreference('circleShowPromoBanner', 'true');
+            
+            // Show promotional poster ONCE per session on first prompt IF setting is ON
+            if (allowPromoBanner === 'true' && !hasPromoBeenShownInSession()) {
+                if (promoTimer) clearTimeout(promoTimer);
+                promoTimer = setTimeout(() => {
+                    // Double check preference in case it was toggled during the timeout
+                    if (getPreference('circleShowPromoBanner', 'true') !== 'true') {
+                        return;
+                    }
+                    if (sessionStorage.getItem('circlePromoShownSession') === 'true') {
+                        return;
+                    }
+                    sessionStorage.setItem('circlePromoShownSession', 'true');
+                    showPromoModal();
+                }, 1500); 
             }
 
             const pills = document.getElementById('suggestion-pills');
@@ -2699,6 +3061,8 @@
                 
                 isChatMode = true;
             }
+            
+            document.getElementById('model-btn').classList.add('mobile-model-hidden');
 
             logToGoogleSheets({ type: "query", name: userName, prompt: query });
             
@@ -2714,8 +3078,18 @@
             appendThinkingDot(dotId);
             scrollToBottom();
 
-            // Minimal natural UI transition wait before generating response
-            await sleep(50);
+            // Check selected model
+            let currentModel = getPreference('circleSelectedModel', 'core');
+            if (currentModel !== 'swift') {
+                currentModel = 'core';
+            }
+
+            // Adjust delay based on model
+            if (currentModel === 'swift') {
+                await sleep(500);
+            } else {
+                await sleep(3000);
+            }
 
             document.getElementById(dotId).remove();
             
@@ -3257,7 +3631,7 @@ setInterval(() => {
                     currentHTML += htmlString[i];
                     container.innerHTML = currentHTML;
                     
-                    if (nearBottom) scrollToBottom();
+                    if (nearBottom) smartScrollToBottom();
                     
                     const elapsed = performance.now() - startTime;
                     if (elapsed >= MAX_RENDER_TIME) {
@@ -3290,7 +3664,7 @@ setInterval(() => {
             // Final render injection
             const finalNearBottom = isUserNearBottom();
             container.innerHTML = htmlString;
-            if (finalNearBottom) scrollToBottom();
+            if (finalNearBottom) smartScrollToBottom();
         }
 
     </script>
