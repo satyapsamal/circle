@@ -2404,6 +2404,7 @@
         let isChatMode = false;
         let isProcessing = false;
         let promoTimer = null;
+        let promoBannerConsent = true; // Added live consent tracking
         
         // Track promo shown in session storage instead of window scope
         // This ensures the logic holds across manual refreshes but resets per new tab/session.
@@ -2454,8 +2455,9 @@
             
             // Show Banner Preference
             const savedPromoSetting = getPreference('circleShowPromoBanner', 'true');
+            promoBannerConsent = (savedPromoSetting === 'true'); // Live sync
             const promoToggleEl = document.getElementById('promo-banner-toggle');
-            promoToggleEl.checked = savedPromoSetting === 'true';
+            promoToggleEl.checked = promoBannerConsent;
 
             // Model Selection Preference
             let currentModel = getPreference('circleSelectedModel', 'core');
@@ -2821,8 +2823,9 @@
             });
             
             promoBannerToggle.addEventListener('change', (e) => {
-                setPreference('circleShowPromoBanner', e.target.checked ? 'true' : 'false');
-                if (!e.target.checked) {
+                promoBannerConsent = e.target.checked;
+                setPreference('circleShowPromoBanner', promoBannerConsent ? 'true' : 'false');
+                if (!promoBannerConsent) {
                     if (promoTimer) clearTimeout(promoTimer);
                     closePromoModal(); // Hide safely if it's currently showing
                 }
@@ -3038,14 +3041,16 @@
             stopGreetingRotation();
             
             // Check promo banner setting
-            let allowPromoBanner = getPreference('circleShowPromoBanner', 'true');
+            const consent = promoBannerConsent === true && getPreference('circleShowPromoBanner', 'true') === 'true';
+            const alreadyShown = sessionStorage.getItem('circlePromoShownSession') === 'true';
             
             // Show promotional poster ONCE per session on first prompt IF setting is ON
-            if (allowPromoBanner === 'true' && !hasPromoBeenShownInSession()) {
+            if (consent && !alreadyShown) {
                 if (promoTimer) clearTimeout(promoTimer);
                 promoTimer = setTimeout(() => {
                     // Double check preference in case it was toggled during the timeout
-                    if (getPreference('circleShowPromoBanner', 'true') !== 'true') {
+                    const finalConsent = promoBannerConsent === true && getPreference('circleShowPromoBanner', 'true') === 'true';
+                    if (!finalConsent) {
                         return;
                     }
                     if (sessionStorage.getItem('circlePromoShownSession') === 'true') {
