@@ -3217,9 +3217,8 @@
             
             const modelCapsule = document.createElement('div');
             modelCapsule.className = 'meta-capsule';
-            const brainIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58H10"/><path d="M12 4.5a2.5 2.5 0 0 1 4.96-.46 2.5 2.5 0 0 1 1.98 3 2.5 2.5 0 0 1 1.32 4.24 3 3 0 0 1-.34 5.58H14"/><path d="M12 4.5V20"/><path d="M12 9.5H9.5"/><path d="M12 14.5H10"/></svg>`;
             const modelLabel = (modelUsed === 'swift') ? 'Circle Swift' : 'Circle Core';
-            modelCapsule.innerHTML = `${brainIcon}${modelLabel}`;
+            modelCapsule.textContent = modelLabel;
             
             const timeCapsule = document.createElement('div');
             timeCapsule.className = 'meta-capsule';
