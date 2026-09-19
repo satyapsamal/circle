@@ -91,7 +91,9 @@
         .model-option,
         .meta-btn,
         .dl-source-toggle,
-        [role="button"] {
+        [role="button"],
+        .toggle-slider,
+        .toggle-switch input {
             -webkit-tap-highlight-color: transparent !important;
         }
 
@@ -103,6 +105,7 @@
         .meta-btn:focus,
         .dl-source-toggle:focus,
         [role="button"]:focus,
+        .toggle-switch input:focus + .toggle-slider,
         button:focus-visible,
         a:focus-visible,
         .suggestion-pill:focus-visible,
@@ -110,8 +113,10 @@
         .model-option:focus-visible,
         .meta-btn:focus-visible,
         .dl-source-toggle:focus-visible,
-        [role="button"]:focus-visible {
+        [role="button"]:focus-visible,
+        .toggle-switch input:focus-visible + .toggle-slider {
             outline: none !important;
+            box-shadow: none !important;
         }
 
         /* Smooth Text Animation System */
@@ -493,6 +498,7 @@
             margin-top: 12px;
             opacity: 0;
             transition: opacity 0.5s ease;
+            flex-wrap: wrap;
         }
         .meta-capsule {
             display: inline-flex;
@@ -1239,7 +1245,13 @@
             .floating-btn { width: 40px; height: 40px; font-size: 22px; }
             .floating-btn svg { width: 18px; height: 18px; }
             #model-btn { font-size: 13px; padding: 0 12px; }
-            #model-menu { top: 52px; width: 300px; max-width: calc(100vw - 40px); }
+            #model-menu { 
+                top: 52px; 
+                width: max-content; 
+                min-width: 260px;
+                max-width: calc(100vw - 40px); 
+                left: 0; 
+            }
             
             #model-btn.mobile-model-hidden {
                 opacity: 0;
@@ -3088,7 +3100,7 @@
             if (currentModel === 'swift') {
                 await sleep(500);
             } else {
-                await sleep(3000);
+                await sleep(6000);
             }
 
             document.getElementById(dotId).remove();
@@ -3145,7 +3157,7 @@
             
             // Only add metadata to normal answers (not Dream Labs triggers to avoid messy UI during terminal flow)
             if (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe') {
-                appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown);
+                appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown, currentModel);
                 smartScrollToBottom();
             }
 
@@ -3199,9 +3211,15 @@
             sourceDiv.style.opacity = '1';
         }
         
-        function appendResponseMetadata(container, timeSeconds, rawMarkdown) {
+        function appendResponseMetadata(container, timeSeconds, rawMarkdown, modelUsed) {
             const metaDiv = document.createElement('div');
             metaDiv.className = 'response-metadata-container';
+            
+            const modelCapsule = document.createElement('div');
+            modelCapsule.className = 'meta-capsule';
+            const brainIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58H10"/><path d="M12 4.5a2.5 2.5 0 0 1 4.96-.46 2.5 2.5 0 0 1 1.98 3 2.5 2.5 0 0 1 1.32 4.24 3 3 0 0 1-.34 5.58H14"/><path d="M12 4.5V20"/><path d="M12 9.5H9.5"/><path d="M12 14.5H10"/></svg>`;
+            const modelLabel = (modelUsed === 'swift') ? 'Circle Swift' : 'Circle Core';
+            modelCapsule.innerHTML = `${brainIcon}${modelLabel}`;
             
             const timeCapsule = document.createElement('div');
             timeCapsule.className = 'meta-capsule';
@@ -3255,6 +3273,7 @@
                 }
             });
             
+            metaDiv.appendChild(modelCapsule);
             metaDiv.appendChild(timeCapsule);
             metaDiv.appendChild(speakCapsule);
             container.appendChild(metaDiv);
