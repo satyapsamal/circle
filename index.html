@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="origin">
     <!-- Page Title -->
-    <title>Circle AI | BBA Assistant</title>
+    <title>Circle</title>
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -18,13 +19,13 @@
 
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Circle AI | BBA Assistant">
+    <meta property="og:title" content="Circle">
     <meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
     <meta property="og:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
 
     <!-- Twitter / X Sharing -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Circle AI | BBA Assistant">
+    <meta name="twitter:title" content="Circle">
     <meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
     
@@ -68,7 +69,17 @@
             user-select: auto;
         }
 
-        body, html {
+        img, svg, video, canvas, button, a, [role=button], [role=tab] {
+            -webkit-user-drag: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+
+        .learn-thumbnails {
+            touch-action: pan-y;
+        }
+
+        html {
             width: 100%;
             height: 100%;
             background-color: var(--bg-color);
@@ -76,7 +87,26 @@
             font-family: var(--font-ui);
             overflow: hidden;
             -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+            overscroll-behavior: none;
         }
+
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            overflow: hidden;
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+            overscroll-behavior: none;
+            touch-action: pan-y;
+        }
+
+        /* Browser-controlled zoom cannot be universally disabled by a webpage.
+         * These rules make the app viewport/layout stable and block the common
+         * in-page keyboard/wheel zoom gestures where the browser permits it. */
 
         /* Utility Classes */
         .hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; }
@@ -1239,6 +1269,43 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        @media (max-width: 1100px) and (min-width: 769px) {
+            #learn-layer {
+                padding: calc(var(--shell-header-height) + 18px) 20px 24px;
+            }
+
+            .learn-shell {
+                width: min(var(--learn-max-width), calc(100vw - 40px));
+            }
+
+            .learn-workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                gap: 12px;
+            }
+
+            .learn-video-stage {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16 / 9;
+            }
+
+            .learn-playlist {
+                width: 100%;
+                height: 330px;
+                aspect-ratio: auto;
+            }
+
+            .learn-thumbnails {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                align-content: start;
+                gap: 9px;
+            }
+
+            .learn-thumb { margin: 0; }
+        }
+
         @media (max-width: 768px) {
             .floating-btn-group-left { top: 20px; left: 20px; gap: 8px; }
             .floating-btn-group-right { top: 20px; right: 20px; gap: 8px; }
@@ -1252,10 +1319,10 @@
                 max-width: calc(100vw - 40px); 
                 left: 0; 
             }
-            
-            #model-btn.mobile-model-hidden {
-                opacity: 0;
-                pointer-events: none;
+
+            body.circle-ask-mode #main-layer > .floating-btn-group-left {
+                top: calc(var(--shell-header-height) + 12px);
+                left: 18px;
             }
         }
 
@@ -1268,6 +1335,893 @@
             .promo-ring-progress { animation: none !important; stroke-dashoffset: 113.1 !important; }
             .dl-box { transition: none !important; }
         }
+
+
+        /* =====================================================
+         * CIRCLE UNIFIED APP SHELL + LEARN UX
+         * ===================================================== */
+        :root {
+            --shell-header-height: 68px;
+            --learn-muted: #8b8b8b;
+            --learn-border: rgba(255,255,255,0.10);
+            --learn-border-strong: rgba(255,255,255,0.22);
+            --learn-surface: #090909;
+        }
+
+        #app-shell-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--shell-header-height);
+            z-index: 30000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity .35s ease, transform .35s ease;
+        }
+
+        #app-shell-header.ready {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .shell-brand {
+            border: 0;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            min-width: 150px;
+            gap: 9px;
+            color: #fff;
+            font-family: var(--font-ui);
+            font-size: 18px;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .shell-brand img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            display: block;
+            opacity: .92;
+        }
+
+        .shell-brand-name {
+            white-space: nowrap;
+        }
+
+        .shell-mode-switch {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: inline-flex;
+            align-items: center;
+            padding: 4px;
+            gap: 2px;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(12,12,12,.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 999px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.28);
+        }
+
+        .shell-mode-btn {
+            border: 0;
+            background: transparent;
+            color: #8e8e8e;
+            font-family: var(--font-conversational);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background .2s ease, color .2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .shell-mode-btn.active {
+            background: rgba(255,255,255,.10);
+            color: #fff;
+        }
+
+        .shell-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            min-width: 150px;
+        }
+
+        #app-new-chat-btn,
+        #app-more-btn {
+            height: 40px;
+            border: 1px solid rgba(255,255,255,.11);
+            background: rgba(255,255,255,.035);
+            color: #ddd;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s ease, border-color .2s ease, color .2s ease;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        #app-new-chat-btn {
+            padding: 0 14px 0 11px;
+            gap: 7px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-3px);
+            transition: opacity .25s ease, transform .25s ease, background .2s ease, border-color .2s ease, color .2s ease;
+        }
+
+        #app-new-chat-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        #app-new-chat-btn .new-chat-plus {
+            font-size: 19px;
+            line-height: 1;
+            font-weight: 300;
+        }
+
+        #app-new-chat-btn .new-chat-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        #app-more-btn {
+            padding: 0 15px 0 12px;
+            gap: 7px;
+            font-size: 12px;
+            font-family: var(--font-conversational);
+            font-weight: 500;
+        }
+
+        #app-new-chat-btn:hover,
+        #app-more-btn:hover {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,255,255,.22);
+            color: #fff;
+        }
+
+        .more-dots {
+            font-size: 18px;
+            line-height: 1;
+            letter-spacing: 1px;
+            transform: translateY(-1px);
+        }
+
+        #more-menu {
+            position: fixed;
+            top: calc(var(--shell-header-height) - 3px);
+            right: 28px;
+            width: 270px;
+            background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 15px;
+            padding: 7px;
+            box-shadow: 0 18px 45px rgba(0,0,0,.55);
+            z-index: 31000;
+            opacity: 0;
+            transform: translateY(-6px) scale(.985);
+            pointer-events: none;
+            transition: opacity .18s ease, transform .18s ease;
+        }
+
+        #more-menu.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .more-menu-item {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: #ddd;
+            border-radius: 10px;
+            min-height: 41px;
+            padding: 9px 11px;
+            text-align: left;
+            cursor: pointer;
+            font: 500 12px var(--font-conversational);
+            transition: background .18s ease, color .18s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .more-menu-item:hover {
+            background: rgba(255,255,255,.06);
+            color: #fff;
+        }
+
+        .more-menu-icon {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 17px;
+            display: block;
+            color: #cfcfcf;
+            fill: currentColor;
+            stroke: currentColor;
+            overflow: visible;
+        }
+
+        .more-menu-label {
+            line-height: 1.2;
+        }
+
+        #more-menu {
+            width: 210px;
+            border-radius: 15px;
+        }
+
+        /* More now owns Settings, Share and Install. Keep only the AI model control
+         * from the legacy floating controls, and only while Ask mode is active. */
+        #main-layer > .floating-btn-group-left,
+        #main-layer > .floating-btn-group-right {
+            display: none !important;
+        }
+
+        body.circle-ask-mode #main-layer > .floating-btn-group-left {
+            display: flex !important;
+            top: calc(var(--shell-header-height) + 14px);
+            left: 28px;
+            z-index: 30001;
+        }
+
+        body.circle-ask-mode #main-layer > .floating-btn-group-left #settings-btn,
+        body.circle-ask-mode #main-layer > .floating-btn-group-left #install-btn {
+            display: none !important;
+        }
+
+        body.circle-ask-mode #main-layer > .floating-btn-group-left #model-btn {
+            display: inline-flex !important;
+        }
+
+        #main-layer > #header-container {
+            display: none !important;
+        }
+
+        #main-layer {
+            padding-top: var(--shell-header-height);
+        }
+
+        #main-layer.shell-hidden {
+            display: none !important;
+        }
+
+        #chat-container {
+            padding-top: 88px;
+        }
+
+        /* =====================================================
+         * LEARN
+         * ===================================================== */
+        #learn-layer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            padding: calc(var(--shell-header-height) + 29px) 24px 28px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #000;
+        }
+
+        #learn-layer.visible {
+            display: block;
+        }
+
+        .learn-shell {
+            width: min(var(--learn-max-width), calc(100vw - 48px));
+            min-height: 0;
+            margin: 0 auto;
+        }
+
+        .learn-workspace {
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) var(--learn-playlist-width);
+            grid-template-rows: auto;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .learn-video-stage {
+            width: 100%;
+            min-width: 0;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            background: #050505;
+            border: 1px solid var(--learn-border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 18px 45px rgba(0,0,0,.28);
+        }
+
+        #learn-player {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #learn-player iframe {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            border: 0;
+        }
+
+        .learn-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font: 12px var(--font-conversational);
+            background: #050505;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .learn-playlist {
+            width: 100%;
+            height: auto;
+            min-height: 0;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--learn-border);
+            border-radius: 16px;
+            background: #080808;
+            overflow: hidden;
+            box-shadow: 0 18px 45px rgba(0,0,0,.20);
+        }
+
+        .learn-thumbnails {
+            width: 100%;
+            height: 100%;
+            padding: 9px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.18) transparent;
+        }
+
+        .learn-thumbnails::-webkit-scrollbar { width: 4px; }
+        .learn-thumbnails::-webkit-scrollbar-track { background: transparent; }
+        .learn-thumbnails::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 999px; }
+
+        .learn-thumb {
+            position: relative;
+            display: block;
+            width: 100%;
+            margin: 0 0 8px;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            background: transparent;
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 16 / 9;
+            transition: border-color .18s ease, opacity .18s ease, transform .18s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .learn-thumb:last-child { margin-bottom: 0; }
+
+        .learn-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: #111;
+        }
+
+        .learn-thumb:hover {
+            border-color: rgba(255,255,255,.18);
+            transform: translateY(-1px);
+        }
+
+        .learn-thumb.active {
+            border-color: rgba(255,255,255,.72);
+        }
+
+        .learn-thumb.active::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.20);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .learn-thumb.completed img { opacity: .62; }
+
+        .learn-controls {
+            position: relative;
+            z-index: 300;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 15px 2px 0;
+        }
+
+        .learn-lesson-meta {
+            position: relative;
+            min-width: 0;
+        }
+
+        #learn-lecture-label {
+            color: #fff;
+            font: 500 14px var(--font-conversational);
+            letter-spacing: .01em;
+        }
+
+        .learn-course-select-wrap {
+            position: relative;
+            z-index: 50000;
+            margin-top: 6px;
+        }
+
+        #learn-course-btn {
+            position: relative;
+            z-index: 50001;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 0;
+            background: transparent;
+            color: #888;
+            padding: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            font: 400 12px var(--font-conversational);
+            text-align: left;
+            max-width: min(70vw, 480px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            -webkit-tap-highlight-color: transparent;
+            transition: color .18s ease;
+        }
+
+        #learn-course-btn:hover { color: #fff; }
+
+        #learn-course-chevron {
+            font-size: 10px;
+            color: #666;
+            flex: 0 0 auto;
+        }
+
+        #learn-course-menu {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 8px);
+            bottom: auto !important;
+            width: min(330px, calc(100vw - 28px));
+            max-height: min(320px, 45vh);
+            overflow-y: auto;
+            background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 14px;
+            padding: 7px;
+            box-shadow: 0 18px 45px rgba(0,0,0,.65);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(5px);
+            transition: opacity .18s ease, transform .18s ease;
+            z-index: 60000;
+        }
+
+        #learn-course-menu.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .learn-course-option {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: #ddd;
+            border-radius: 9px;
+            padding: 10px 11px;
+            text-align: left;
+            cursor: pointer;
+            font: 500 12px var(--font-conversational);
+            transition: background .18s ease, color .18s ease;
+        }
+
+        .learn-course-option:hover,
+        .learn-course-option.active {
+            background: rgba(255,255,255,.06);
+            color: #fff;
+        }
+
+        .learn-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        .learn-nav-btn {
+            border: 0;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            padding: 8px 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font: 500 11px var(--font-conversational);
+            transition: color .18s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .learn-nav-btn:hover:not(:disabled) { color: #fff; }
+        .learn-nav-btn:disabled { opacity: .18; cursor: default; }
+
+        .learn-nav-arrow { font-size: 16px; line-height: 1; }
+
+        /* First-time profile onboarding */
+        .profile-onboarding-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: min(330px, 92vw);
+        }
+
+        #onboarding-photo-picker {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,.22);
+            background: rgba(255,255,255,.04);
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #onboarding-photo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        #onboarding-photo-placeholder {
+            color: rgba(255,255,255,.48);
+            font: 400 11px var(--font-conversational);
+            text-align: center;
+            padding: 12px;
+            line-height: 1.4;
+        }
+
+        #onboarding-photo-picker.has-photo #onboarding-photo-preview { display: block; }
+        #onboarding-photo-picker.has-photo #onboarding-photo-placeholder { display: none; }
+
+        #onboarding-photo-input { display: none; }
+
+        .profile-photo-note {
+            margin-top: -10px;
+            margin-bottom: 18px;
+            color: rgba(255,255,255,.38);
+            font: 400 10px var(--font-conversational);
+        }
+
+        @media (max-width: 900px) {
+            :root { --shell-header-height: 62px; }
+
+            #app-shell-header { padding: 0 18px; }
+            .shell-brand { min-width: auto; }
+            .shell-brand-name { display: none; }
+            .shell-brand img { width: 30px; height: 30px; }
+            .shell-actions { min-width: auto; }
+
+            #app-new-chat-btn {
+                width: 40px;
+                padding: 0;
+                gap: 0;
+            }
+            #app-new-chat-btn .new-chat-label { display: none; }
+            #app-new-chat-btn .new-chat-plus { font-size: 22px; }
+
+            #app-more-btn {
+                width: 40px;
+                padding: 0;
+                gap: 0;
+            }
+            #app-more-btn .more-text { display: none; }
+            #app-more-btn .more-dots { font-size: 19px; }
+
+            #more-menu {
+                right: 18px;
+                top: calc(var(--shell-header-height) - 1px);
+                width: min(210px, calc(100vw - 36px));
+            }
+
+            .shell-mode-btn {
+                padding: 7px 14px;
+                font-size: 11px;
+            }
+
+            #learn-layer {
+                padding: calc(var(--shell-header-height) + 14px) 14px 20px;
+            }
+
+            .learn-shell {
+                width: 100%;
+            }
+
+            .learn-workspace {
+                width: 100%;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                gap: 12px;
+            }
+
+            .learn-video-stage {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16 / 9;
+            }
+
+            .learn-playlist {
+                width: 100%;
+                height: min(40vh, 320px);
+                aspect-ratio: auto;
+            }
+
+            .learn-thumbnails {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0,1fr));
+                align-content: start;
+                gap: 8px;
+            }
+
+            .learn-thumb {
+                margin: 0;
+            }
+
+            .learn-controls {
+                align-items: center;
+                gap: 12px;
+                padding-top: 12px;
+            }
+
+            #learn-course-btn { max-width: 48vw; }
+
+            .learn-nav { gap: 2px; }
+            .learn-nav-btn { padding: 8px 5px; }
+            .learn-nav-btn .nav-label { display: none; }
+            .learn-nav-arrow { font-size: 22px; }
+
+            #chat-container { padding-top: 76px; }
+        }
+
+        @media (max-width: 520px) {
+            .shell-mode-switch {
+                left: 50%;
+            }
+
+            .learn-playlist {
+                height: 250px;
+            }
+
+            .learn-thumbnails {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+
+
+        /* =====================================================
+         * LEARN LAYOUT FINAL OVERRIDES
+         * Keep desktop Learn horizontal: video on the left,
+         * compact playlist on the right. Only switch vertical
+         * on actual narrow/mobile viewports.
+         * ===================================================== */
+        :root {
+            --learn-max-width: 1360px;
+            --learn-playlist-width: 300px;
+        }
+
+        #learn-layer {
+            box-sizing: border-box;
+            padding: calc(var(--shell-header-height) + 28px) 24px 32px !important;
+        }
+
+        .learn-shell {
+            width: min(var(--learn-max-width), calc(100vw - 48px)) !important;
+            max-width: var(--learn-max-width) !important;
+            margin: 0 auto !important;
+        }
+
+        .learn-workspace {
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) var(--learn-playlist-width) !important;
+            grid-template-rows: auto !important;
+            gap: 16px !important;
+            align-items: stretch !important;
+        }
+
+        .learn-video-stage {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
+            min-height: 0 !important;
+            align-self: start !important;
+        }
+
+        #learn-player,
+        #learn-player iframe {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .learn-playlist {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            aspect-ratio: auto !important;
+            align-self: stretch !important;
+            overflow: hidden !important;
+        }
+
+        .learn-thumbnails {
+            width: 100% !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        .learn-thumb {
+            width: 100% !important;
+            aspect-ratio: 16 / 9 !important;
+            margin: 0 0 8px !important;
+            border-radius: 9px !important;
+        }
+
+        .learn-thumb img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        .learn-controls {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 14px 2px 0 !important;
+            position: relative !important;
+            z-index: 90000 !important;
+        }
+
+        .learn-lesson-meta {
+            position: relative !important;
+            z-index: 90001 !important;
+        }
+
+        .learn-course-select-wrap {
+            position: static !important;
+            z-index: 100000 !important;
+        }
+
+        #learn-course-btn {
+            position: relative !important;
+            z-index: 100001 !important;
+            min-height: 28px !important;
+            cursor: pointer !important;
+            touch-action: manipulation !important;
+        }
+
+        #learn-course-menu {
+            z-index: 1000000 !important;
+            width: min(320px, calc(100vw - 28px)) !important;
+            max-height: min(320px, 50vh) !important;
+            overflow-y: auto !important;
+        }
+
+        #learn-course-menu.open {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* Keep the horizontal desktop composition down to tablet width. */
+        @media (min-width: 769px) {
+            .learn-workspace {
+                grid-template-columns: minmax(0, 1fr) 300px !important;
+            }
+
+            .learn-playlist {
+                height: 100% !important;
+            }
+
+            .learn-controls {
+                align-items: flex-start !important;
+            }
+        }
+
+        @media (max-width: 1100px) and (min-width: 769px) {
+            #learn-layer {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            .learn-shell {
+                width: calc(100vw - 40px) !important;
+            }
+
+            .learn-workspace {
+                grid-template-columns: minmax(0, 1fr) 260px !important;
+                gap: 12px !important;
+            }
+
+            .learn-thumb {
+                border-radius: 8px !important;
+                margin-bottom: 7px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .learn-workspace {
+                grid-template-columns: 1fr !important;
+                grid-template-rows: auto auto !important;
+                gap: 12px !important;
+            }
+
+            .learn-video-stage {
+                aspect-ratio: 16 / 9 !important;
+            }
+
+            .learn-playlist {
+                width: 100% !important;
+                height: 300px !important;
+                aspect-ratio: auto !important;
+            }
+
+            .learn-thumbnails {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                align-content: start !important;
+                gap: 8px !important;
+            }
+
+            .learn-thumb {
+                margin: 0 !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1278,13 +2232,22 @@
             <img id="intro-logo" src="circle.png" alt="Circle AI Logo" class="anim-element anim-enter hidden">
             <h1 id="intro-brand" class="font-ui anim-element anim-enter hidden">Circle AI.</h1>
             <div id="intro-name-step" class="anim-element anim-enter hidden">
-                <h2 class="font-ui">What's your name?</h2>
-                <div class="name-input-wrapper" id="name-wrapper">
-                    <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="off">
-                    <button id="name-submit" class="font-ui" aria-label="Submit Name">→</button>
-                </div>
-                <div class="name-privacy-footnote font-conversational">
-                    Use your real name for a more personalised experience. Your name is not shared with any third party. It is used only for answer personalisation, and your data remains private.
+                <div class="profile-onboarding-block">
+                    <label id="onboarding-photo-picker" for="onboarding-photo-input" aria-label="Choose profile picture">
+                        <img id="onboarding-photo-preview" src="" alt="Profile picture preview">
+                        <span id="onboarding-photo-placeholder">Add your profile picture</span>
+                        <input id="onboarding-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
+                    </label>
+                    <div class="profile-photo-note font-conversational">Used only to personalise Circle.</div>
+                    <h2 class="font-ui">What's your name?</h2>
+                    <div class="name-input-wrapper" id="name-wrapper">
+                        <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="name">
+                        <button id="name-submit" class="font-ui" aria-label="Continue">→</button>
+                    </div>
+                    <div class="name-privacy-footnote font-conversational">
+                        Your name and profile picture are used for personalisation. With your permission, Circle sends them to its connected Google account for profile storage. They are not used for advertising.
+                    </div>
+                    <div id="profile-upload-error" class="font-conversational" style="display:none;color:#ff6666;font-size:11px;margin-top:10px;text-align:center;">Please add a profile picture to continue.</div>
                 </div>
             </div>
             <h1 id="intro-welcome" class="font-ui anim-element anim-enter hidden"></h1>
@@ -1361,6 +2324,95 @@
 
         <!-- Toast Notification -->
         <div id="toast" class="toast">Share text copied</div>
+
+        <!-- =====================================================
+             UNIFIED CIRCLE APP SHELL
+             Learn is the default mode on every page load.
+             Ask opens the existing Circle AI chat interface.
+             ===================================================== -->
+        <header id="app-shell-header" aria-label="Circle navigation">
+            <button class="shell-brand" id="circle-brand-home" type="button" aria-label="Circle home">
+                <img src="circle.png" alt="">
+                <span class="shell-brand-name">Circle.</span>
+            </button>
+
+            <div class="shell-mode-switch" role="tablist" aria-label="Circle mode">
+                <button id="shell-learn-btn" class="shell-mode-btn active" type="button" role="tab" aria-selected="true">Learn</button>
+                <button id="shell-ask-btn" class="shell-mode-btn" type="button" role="tab" aria-selected="false">Ask</button>
+            </div>
+
+            <div class="shell-actions">
+                <button id="app-new-chat-btn" type="button" aria-label="New Chat">
+                    <span class="new-chat-plus">+</span>
+                    <span class="new-chat-label">New Chat</span>
+                </button>
+                <button id="app-more-btn" type="button" aria-expanded="false" aria-controls="more-menu">
+                    <span class="more-dots">•••</span>
+                    <span class="more-text">More</span>
+                </button>
+            </div>
+        </header>
+
+        <div id="more-menu" aria-hidden="true">
+            <button id="more-settings" class="more-menu-item" type="button">
+                <svg class="more-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.097.078.16.208.18.327.05.297.086.6.108.908.02.296-.06.49-.18.587l-.84.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.098-.078-.16-.208-.18-.327-.023-.308-.059-.611-.108-.908-.02-.296.06-.49.18-.587l.84-.692a1.875 1.875 0 0 0 .432-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/>
+                </svg>
+                <span class="more-menu-label">Settings</span>
+            </button>
+            <button id="more-share" class="more-menu-item" type="button">
+                <svg class="more-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                </svg>
+                <span class="more-menu-label">Share Circle AI</span>
+            </button>
+            <button id="more-install" class="more-menu-item" type="button">
+                <svg class="more-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                <span class="more-menu-label">Install Circle AI</span>
+            </button>
+        </div>
+
+        <!-- =====================================================
+             LEARN MODE
+             ===================================================== -->
+        <section id="learn-layer" aria-label="Circle Learn">
+            <div class="learn-shell">
+                <div class="learn-workspace">
+                    <div class="learn-video-stage">
+                        <div id="learn-player"></div>
+                        <div id="learn-loading" class="learn-loading">Loading Learn…</div>
+                    </div>
+
+                    <aside class="learn-playlist" aria-label="Course playlist">
+                        <div id="learn-thumbnails" class="learn-thumbnails"></div>
+                    </aside>
+                </div>
+
+                <div class="learn-controls">
+                    <div class="learn-lesson-meta">
+                        <div id="learn-lecture-label">Lecture 01</div>
+                        <div class="learn-course-select-wrap">
+                            <button id="learn-course-btn" type="button" aria-expanded="false" aria-controls="learn-course-menu">
+                                <span id="learn-course-name">Business Communication</span>
+                                <span id="learn-course-chevron">⌄</span>
+                            </button>
+                            <div id="learn-course-menu"></div>
+                        </div>
+                    </div>
+
+                    <div class="learn-nav" aria-label="Lesson navigation">
+                        <button id="learn-prev-btn" class="learn-nav-btn" type="button">
+                            <span class="learn-nav-arrow">←</span><span class="nav-label">Previous</span>
+                        </button>
+                        <button id="learn-next-btn" class="learn-nav-btn" type="button">
+                            <span class="nav-label">Next</span><span class="learn-nav-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Main Conversational Interface -->
         <div id="main-layer" class="main-layer-fade hidden">
@@ -1522,34 +2574,91 @@
         }
 
         /*******************************************************
-         * 0. ANTI-COPY & DEVTOOLS DETERRENTS (UX Only)
+         * 0. CONTENT PROTECTION DETERRENTS (BEST EFFORT)
+         * A normal webpage cannot securely prevent a determined user
+         * from inspecting client-side HTML/JS in their own browser.
+         * These handlers only block common UI gestures/shortcuts.
          *******************************************************/
-        document.addEventListener('contextmenu', e => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
+        (() => {
+            const editableSelector = 'input, textarea, [contenteditable="true"]';
+            const isEditableTarget = (target) => target instanceof Element && !!target.closest(editableSelector);
 
-        document.addEventListener('dragstart', e => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
+            document.addEventListener('contextmenu', (e) => {
+                if (!isEditableTarget(e.target)) e.preventDefault();
+            }, { capture: true });
 
-        document.addEventListener('copy', e => {
-            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
+            document.addEventListener('selectstart', (e) => {
+                if (!isEditableTarget(e.target)) e.preventDefault();
+            }, { capture: true });
 
-        document.addEventListener('keydown', e => {
-            const isInput = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
-            if (e.key === 'F12') e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(e.key.toLowerCase())) e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') e.preventDefault();
-            if (!isInput && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') e.preventDefault();
-        });
+            document.addEventListener('dragstart', (e) => {
+                if (!isEditableTarget(e.target)) e.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('copy', (e) => {
+                if (!isEditableTarget(document.activeElement)) e.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('cut', (e) => {
+                if (!isEditableTarget(document.activeElement)) e.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('keydown', (e) => {
+                const key = String(e.key || '').toLowerCase();
+                const mod = e.ctrlKey || e.metaKey;
+                const isEditable = isEditableTarget(e.target) || isEditableTarget(document.activeElement);
+
+                // Developer tools / view-source / save-page / print shortcuts.
+                if (e.key === 'F12' || e.key === 'F11') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                if (mod && (
+                    key === 'u' ||
+                    key === 's' ||
+                    key === 'p' ||
+                    key === 'j' ||
+                    (e.shiftKey && ['i', 'j', 'c'].includes(key))
+                )) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
+                // Prevent normal-page copy unless a form field is active.
+                if (!isEditable && mod && key === 'c') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
+                // Block common browser zoom shortcuts. Browser UI menus remain
+                // outside webpage control.
+                if (mod && ['+', '=', '-', '_', '0'].includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, { capture: true });
+
+            // Block Ctrl/Cmd + wheel zoom where supported.
+            document.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) e.preventDefault();
+            }, { capture: true, passive: false });
+
+            // Block gesture-based page zoom on browsers that expose it as a gesture event.
+            ['gesturestart', 'gesturechange', 'gestureend'].forEach(type => {
+                document.addEventListener(type, (e) => e.preventDefault(), { capture: true, passive: false });
+            });
+
+            // Reduce long-press image extraction on touch browsers.
+            document.addEventListener('touchstart', (e) => {
+                const target = e.target;
+                if (target instanceof HTMLImageElement || target instanceof SVGElement) {
+                    target.style.webkitTouchCallout = 'none';
+                }
+            }, { capture: true, passive: true });
+        })();
 
         /*******************************************************
          * 1. GOOGLE SHEETS CONFIGURATION
@@ -2405,6 +3514,52 @@
         let isProcessing = false;
         let promoTimer = null;
         let promoBannerConsent = true; // Added live consent tracking
+
+        /* Unified shell + Learn state */
+        let profilePhotoDataUrl = localStorage.getItem('circle_profile_photo_data_url') || '';
+        let circleUserId = localStorage.getItem('circle_user_id') || '';
+        let learnPlayer = null;
+        let learnPlayerReady = false;
+        let learnPlayerApiLoading = false;
+        let learnActiveCourseId = localStorage.getItem('circle_learn_active_course') || 'businessCommunication';
+        let learnPlaylistIds = [];
+        let learnActiveIndex = 0;
+        let learnLastSkipKey = null;
+        let learnProgress = {};
+        try {
+            learnProgress = JSON.parse(localStorage.getItem('circle_learn_progress_v2') || '{}') || {};
+        } catch (_) {
+            learnProgress = {};
+        }
+
+        const LEARN_INTRO_SKIP_SECONDS = 10;
+        const LEARN_COURSES = {
+            businessCommunication: {
+                name: 'Business Communication',
+                type: 'playlist',
+                playlistId: 'PL59tH4pjx8SAWnw-k80wuzLi-l9HIqYzf'
+            },
+            businessMathematics: {
+                name: 'Business Mathematics',
+                type: 'playlist',
+                playlistId: 'PL59tH4pjx8SALcAYjbujfMUwAI4S9Cx9c'
+            },
+            computerApplications: {
+                name: 'Computer Application for Business',
+                type: 'playlist',
+                playlistId: 'PL59tH4pjx8SCk7LmDwxbmiYXrwn4DaZZm'
+            },
+            marketingSales: {
+                name: 'Marketing and Sales Management',
+                type: 'playlist',
+                playlistId: 'PL59tH4pjx8SCqngJcM7uWg81BnOXiuaNM'
+            },
+            entrepreneurship: {
+                name: 'Entrepreneurship Basics',
+                type: 'playlist',
+                playlistId: 'PL59tH4pjx8SB2v1pdapHJcxcGq-Mj4r4-'
+            }
+        };
         
         // Track promo shown in session storage instead of window scope
         // This ensures the logic holds across manual refreshes but resets per new tab/session.
@@ -2469,13 +3624,22 @@
                 setPreference('circleSelectedModel', currentModel);
             }
             selectModelUI(currentModel);
+            if (!circleUserId) {
+                circleUserId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : ('circle_' + Date.now() + '_' + Math.random().toString(36).slice(2));
+                localStorage.setItem('circle_user_id', circleUserId);
+            }
 
-            if (isRegistered && userName) {
-                startMainInterface();
+            if (!LEARN_COURSES[learnActiveCourseId]) {
+                learnActiveCourseId = 'businessCommunication';
+            }
+
+            setupEventListeners();
+
+            if (isRegistered && userName && profilePhotoDataUrl) {
+                startMainInterface().then(() => switchCircleMode('learn'));
             } else {
                 startOnboardingSequence();
             }
-            setupEventListeners();
         });
 
         // Helper to update the visual model state
@@ -2527,29 +3691,59 @@
             nameStep.classList.remove('hidden');
             await sleep(50);
             nameStep.classList.remove('anim-enter');
-            nameInput.focus();
+            document.getElementById('name-input').focus();
         }
 
         async function submitName() {
             const nameInput = document.getElementById('name-input');
             const wrapper = document.getElementById('name-wrapper');
+            const photoPicker = document.getElementById('onboarding-photo-picker');
+            const photoError = document.getElementById('profile-upload-error');
             const nameVal = nameInput.value.trim();
 
-            if (!nameVal) {
-                wrapper.style.borderColor = "#ff4444";
-                setTimeout(() => wrapper.style.borderColor = "rgba(255,255,255,0.3)", 1500);
-                return;
+            let valid = true;
+
+            if (!profilePhotoDataUrl) {
+                photoPicker.style.borderColor = '#ff4444';
+                photoError.style.display = 'block';
+                setTimeout(() => { photoPicker.style.borderColor = 'rgba(255,255,255,0.22)'; }, 1500);
+                valid = false;
+            } else {
+                photoError.style.display = 'none';
             }
+
+            if (!nameVal) {
+                wrapper.style.borderColor = '#ff4444';
+                setTimeout(() => wrapper.style.borderColor = 'rgba(255,255,255,0.3)', 1500);
+                valid = false;
+            }
+
+            if (!valid) return;
 
             localStorage.setItem('circle_user_registered', 'true');
             localStorage.setItem('circle_username', nameVal);
+            localStorage.setItem('circle_user_id', circleUserId);
+            localStorage.setItem('circle_profile_photo_data_url', profilePhotoDataUrl);
             userName = nameVal;
 
-            logToGoogleSheets({ type: "user", name: userName });
+            /*
+             * This is intentionally non-blocking: a slow/failed analytics or
+             * profile-upload request must never prevent the student entering Circle.
+             */
+            void logToGoogleSheets({
+                type: 'user_profile',
+                userId: circleUserId,
+                name: userName,
+                profilePhoto: {
+                    fileName: 'profile.jpg',
+                    mimeType: 'image/jpeg',
+                    dataUrl: profilePhotoDataUrl
+                }
+            });
 
             const nameStep = document.getElementById('intro-name-step');
             const welcome = document.getElementById('intro-welcome');
-            
+
             nameStep.classList.add('anim-exit');
             await sleep(1200);
             nameStep.classList.add('hidden');
@@ -2558,14 +3752,64 @@
             welcome.classList.remove('hidden');
             await sleep(50);
             welcome.classList.remove('anim-enter');
-            
-            await sleep(2500);
+
+            await sleep(1800);
 
             welcome.classList.add('anim-exit');
             await sleep(1200);
-            
+
             document.getElementById('onboarding-layer').classList.add('hidden');
-            startMainInterface();
+            await startMainInterface();
+            switchCircleMode('learn');
+        }
+
+        async function handleOnboardingPhotoUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+                showToast('Please choose JPG, PNG or WEBP.');
+                return;
+            }
+
+            try {
+                profilePhotoDataUrl = await compressProfileImage(file, 512, 0.78);
+                const preview = document.getElementById('onboarding-photo-preview');
+                const picker = document.getElementById('onboarding-photo-picker');
+                preview.src = profilePhotoDataUrl;
+                picker.classList.add('has-photo');
+                picker.style.borderColor = 'rgba(255,255,255,.22)';
+                document.getElementById('profile-upload-error').style.display = 'none';
+            } catch (error) {
+                console.error('Profile image processing failed:', error);
+                showToast('Could not process that picture. Try another image.');
+            }
+        }
+
+        function compressProfileImage(file, maxSize, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const scale = Math.min(1, maxSize / Math.max(img.naturalWidth, img.naturalHeight));
+                        const width = Math.max(1, Math.round(img.naturalWidth * scale));
+                        const height = Math.max(1, Math.round(img.naturalHeight * scale));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d', { alpha: false });
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = reader.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         /*******************************************************
@@ -2591,6 +3835,8 @@
         async function startMainInterface() {
             const mainLayer = document.getElementById('main-layer');
             mainLayer.classList.remove('hidden');
+            document.getElementById('app-shell-header').classList.add('ready');
+            ensureLearnPlayerAPI();
             
             await sleep(50);
             mainLayer.classList.add('main-layer-visible');
@@ -2610,7 +3856,6 @@
             rotateGreetingsLoop(rot, currentIdx);
             
             document.getElementById('settings-btn').classList.remove('hidden');
-            document.getElementById('model-btn').classList.remove('hidden');
             
             const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
             if (!pwaInstalled && !isRunningAsInstalledPWA() && deferredPrompt) {
@@ -2773,6 +4018,45 @@
          * 7. EVENT LISTENERS & SCROLLING MANAGEMENT
          *******************************************************/
         function setupEventListeners() {
+            /* Unified shell navigation */
+            document.getElementById('shell-learn-btn').addEventListener('click', () => switchCircleMode('learn'));
+            document.getElementById('shell-ask-btn').addEventListener('click', () => switchCircleMode('ask'));
+            document.getElementById('app-more-btn').addEventListener('click', (event) => {
+                event.stopPropagation();
+                toggleMoreMenu();
+            });
+            document.getElementById('more-settings').addEventListener('click', () => {
+                closeMoreMenu();
+                toggleSettings();
+            });
+            document.getElementById('more-share').addEventListener('click', () => {
+                closeMoreMenu();
+                handleShare();
+            });
+            document.getElementById('more-install').addEventListener('click', () => {
+                closeMoreMenu();
+                showInstallModal();
+            });
+            document.getElementById('app-new-chat-btn').addEventListener('click', startNewChat);
+
+            /* Learn navigation */
+            document.getElementById('learn-course-btn').addEventListener('click', (event) => {
+                event.stopPropagation();
+                toggleLearnCourseMenu();
+            });
+            document.getElementById('learn-prev-btn').addEventListener('click', () => openLearnLesson(learnActiveIndex - 1));
+            document.getElementById('learn-next-btn').addEventListener('click', () => openLearnLesson(learnActiveIndex + 1));
+            window.addEventListener('resize', () => {
+                const menu = document.getElementById('learn-course-menu');
+                if (menu && menu.classList.contains('open')) positionLearnCourseMenu();
+            });
+            window.addEventListener('scroll', () => {
+                const menu = document.getElementById('learn-course-menu');
+                if (menu && menu.classList.contains('open')) positionLearnCourseMenu();
+            }, true);
+
+            /* First-time profile upload */
+            document.getElementById('onboarding-photo-input').addEventListener('change', handleOnboardingPhotoUpload);
             document.getElementById('name-submit').addEventListener('click', submitName);
             document.getElementById('name-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') submitName();
@@ -2865,11 +4149,28 @@
                 }
             });
             
-            // Allow escape key to close settings, install modal, model menu
+            /* Close new shell menus when clicking outside. */
+            document.addEventListener('click', (e) => {
+                const moreMenu = document.getElementById('more-menu');
+                const moreButton = document.getElementById('app-more-btn');
+                const courseMenu = document.getElementById('learn-course-menu');
+                const courseButton = document.getElementById('learn-course-btn');
+
+                if (moreMenu && moreMenu.classList.contains('open') && !moreMenu.contains(e.target) && !moreButton.contains(e.target)) {
+                    closeMoreMenu();
+                }
+                if (courseMenu && courseMenu.classList.contains('open') && !courseMenu.contains(e.target) && !courseButton.contains(e.target)) {
+                    closeLearnCourseMenu();
+                }
+            });
+
+            /* Allow escape key to close settings, install modal, model and shell menus. */
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeSettings();
                     closeInstallModal();
+                    closeMoreMenu();
+                    closeLearnCourseMenu();
                     modelMenu.classList.remove('show');
                     if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
                 }
@@ -2988,7 +4289,7 @@
             
             document.body.classList.remove('chat-active');
             document.getElementById('new-chat-btn').classList.add('hidden');
-            document.getElementById('model-btn').classList.remove('mobile-model-hidden');
+            document.getElementById('app-new-chat-btn').classList.remove('visible');
             
             // Stop any ongoing speech when starting a new chat
             if ('speechSynthesis' in window) {
@@ -3077,11 +4378,10 @@
                 }, 600);
                 
                 isChatMode = true;
+                document.getElementById('app-new-chat-btn').classList.add('visible');
             }
             
-            document.getElementById('model-btn').classList.add('mobile-model-hidden');
-
-            logToGoogleSheets({ type: "query", name: userName, prompt: query });
+            logToGoogleSheets({ type: "query", userId: circleUserId, name: userName, prompt: query });
             
             isProcessing = true;
 
@@ -3473,6 +4773,610 @@ setInterval(() => {
             smartScrollToBottom();
         }
 
+
+        /* =====================================================
+         * UNIFIED SHELL NAVIGATION
+         * ===================================================== */
+        function setShellModeButton(mode) {
+            const learnBtn = document.getElementById('shell-learn-btn');
+            const askBtn = document.getElementById('shell-ask-btn');
+            const learnActive = mode === 'learn';
+            learnBtn.classList.toggle('active', learnActive);
+            askBtn.classList.toggle('active', !learnActive);
+            learnBtn.setAttribute('aria-selected', String(learnActive));
+            askBtn.setAttribute('aria-selected', String(!learnActive));
+        }
+
+        function switchCircleMode(mode) {
+            const askMode = mode !== 'learn';
+            document.body.classList.toggle('circle-ask-mode', askMode);
+
+            if (!askMode) {
+                persistLearnProgress();
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+                document.getElementById('learn-layer').classList.add('visible');
+                document.getElementById('main-layer').classList.add('shell-hidden');
+                setShellModeButton('learn');
+                closeMoreMenu();
+                document.getElementById('model-btn').classList.add('hidden');
+                closeLearnCourseMenu();
+                initializeLearnIfNeeded();
+            } else {
+                document.getElementById('learn-layer').classList.remove('visible');
+                document.getElementById('main-layer').classList.remove('shell-hidden');
+                setShellModeButton('ask');
+                closeMoreMenu();
+                document.getElementById('model-btn').classList.remove('hidden');
+                const rot = document.getElementById('greeting-rotator');
+                if (!isChatMode && rot) {
+                    rot.classList.remove('hidden');
+                    rot.textContent = formatText(greetingsList[0], userName);
+                }
+                if (isChatMode) {
+                    document.getElementById('app-new-chat-btn').classList.add('visible');
+                }
+            }
+        }
+
+        function openMoreMenu() {
+            const menu = document.getElementById('more-menu');
+            menu.classList.add('open');
+            menu.setAttribute('aria-hidden', 'false');
+            document.getElementById('app-more-btn').setAttribute('aria-expanded', 'true');
+        }
+
+        function closeMoreMenu() {
+            const menu = document.getElementById('more-menu');
+            if (!menu) return;
+            menu.classList.remove('open');
+            menu.setAttribute('aria-hidden', 'true');
+            document.getElementById('app-more-btn').setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleMoreMenu() {
+            const menu = document.getElementById('more-menu');
+            if (menu.classList.contains('open')) closeMoreMenu();
+            else openMoreMenu();
+        }
+
+        /* =====================================================
+         * LEARN ENGINE
+         * ===================================================== */
+        function ensureLearnPlayerAPI() {
+            if (window.YT && window.YT.Player) {
+                initializeLearnIfNeeded();
+                return;
+            }
+            if (learnPlayerApiLoading) return;
+            learnPlayerApiLoading = true;
+
+            const existing = document.querySelector('script[data-circle-youtube-api="true"]');
+            if (existing) return;
+
+            window.onYouTubeIframeAPIReady = function() {
+                learnPlayerApiLoading = false;
+                initializeLearnPlayer();
+            };
+
+            const script = document.createElement('script');
+            script.src = 'https://www.youtube.com/iframe_api';
+            script.async = true;
+            script.dataset.circleYoutubeApi = 'true';
+            document.head.appendChild(script);
+        }
+
+        function initializeLearnIfNeeded() {
+            if (learnPlayerReady) {
+                loadLearnCourse(learnActiveCourseId, false);
+            } else {
+                ensureLearnPlayerAPI();
+            }
+        }
+
+        function buildLearnPlaylistEmbedUrl(courseId, startSeconds = 10) {
+            const course = getLearnCourse(courseId);
+            const params = new URLSearchParams({
+                listType: 'playlist',
+                list: course.playlistId,
+                enablejsapi: '1',
+                origin: window.location.origin,
+                playsinline: '1',
+                rel: '0',
+                controls: '1',
+                iv_load_policy: '3',
+                start: String(Math.max(0, Math.floor(startSeconds)))
+            });
+            return 'https://www.youtube-nocookie.com/embed?' + params.toString();
+        }
+
+        function createLearnIframe(courseId, startSeconds = 10) {
+            const host = document.getElementById('learn-player');
+            if (!host) return null;
+
+            host.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.id = 'learn-youtube-iframe';
+            iframe.title = 'Circle Learn video player';
+            iframe.src = buildLearnPlaylistEmbedUrl(courseId, startSeconds);
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allowFullscreen = true;
+            iframe.referrerPolicy = 'origin';
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+            iframe.setAttribute('loading', 'eager');
+            iframe.style.display = 'block';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = '0';
+            host.appendChild(iframe);
+            return iframe;
+        }
+
+        function initializeLearnPlayer() {
+            if (learnPlayer || !(window.YT && window.YT.Player)) return;
+
+            const loading = document.getElementById('learn-loading');
+            loading.style.display = 'flex';
+
+            const initialCourse = getLearnCourse(learnActiveCourseId);
+            const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
+            const iframe = createLearnIframe(learnActiveCourseId, LEARN_INTRO_SKIP_SECONDS);
+            if (!iframe) return;
+
+            /*
+             * Important: create the iframe with referrerPolicy BEFORE YouTube
+             * receives the first request. Setting referrerpolicy in onReady is
+             * too late and can produce YouTube error 153.
+             */
+            learnPlayer = new YT.Player(iframe, {
+                events: {
+                    onReady: function(event) {
+                        learnPlayerReady = true;
+                        loading.style.display = 'none';
+                        try {
+                            const playerFrame = event.target.getIframe();
+                            if (playerFrame) {
+                                playerFrame.referrerPolicy = 'origin';
+                                playerFrame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+                            }
+                        } catch (_) {}
+
+                        /* The playlist is already loaded by the iframe URL.
+                         * Wait for YouTube to expose its playlist before rendering
+                         * the custom thumbnail rail. */
+                        refreshLearnPlaylist(0);
+                        renderLearnCourseMenu();
+                        updateLearnCourseUI();
+
+                        if (initialCourse.type === 'playlist' && savedIndex > 0) {
+                            setTimeout(() => {
+                                try { learnPlayer.playVideoAt(savedIndex); } catch (_) {}
+                            }, 500);
+                        }
+                        setTimeout(() => enforceLearnIntroSkip(), 450);
+                    },
+                    onStateChange: handleLearnPlayerStateChange,
+                    onAutoplayBlocked: function() {
+                        showToast('Press play to start the lesson.');
+                    },
+                    onError: function(event) {
+                        loading.style.display = 'none';
+                        const code = Number(event && event.data);
+                        console.warn('YouTube Learn player error:', code);
+                        if (code === 101 || code === 150) {
+                            showToast('This YouTube video does not allow embedded playback.');
+                        } else if (code === 100) {
+                            showToast('This YouTube video is unavailable or private.');
+                        } else if (code === 153) {
+                            showToast('YouTube blocked the embed request. The player is retrying with the required referrer.');
+                            /* Rebuild once with an explicit iframe so the HTTP
+                             * Referer is present on the initial player request. */
+                            setTimeout(() => retryLearnPlayerWithDirectIframe(), 250);
+                        } else {
+                            showToast('This lesson could not be loaded.');
+                        }
+                    }
+                }
+            });
+        }
+
+        function retryLearnPlayerWithDirectIframe() {
+            if (learnPlayerReady || !window.YT || !window.YT.Player) return;
+            const host = document.getElementById('learn-player');
+            if (!host) return;
+            try {
+                if (learnPlayer && typeof learnPlayer.destroy === 'function') learnPlayer.destroy();
+            } catch (_) {}
+            learnPlayer = null;
+            learnPlayerReady = false;
+            const iframe = createLearnIframe(learnActiveCourseId, LEARN_INTRO_SKIP_SECONDS);
+            if (!iframe) return;
+            learnPlayer = new YT.Player(iframe, {
+                events: {
+                    onReady: function(event) {
+                        learnPlayerReady = true;
+                        document.getElementById('learn-loading').style.display = 'none';
+                        refreshLearnPlaylist(0);
+                        renderLearnCourseMenu();
+                        updateLearnCourseUI();
+                        setTimeout(() => enforceLearnIntroSkip(), 450);
+                    },
+                    onStateChange: handleLearnPlayerStateChange,
+                    onError: function(event) {
+                        const code = Number(event && event.data);
+                        console.warn('YouTube Learn retry error:', code);
+                        if (code === 101 || code === 150) showToast('This YouTube video does not allow embedded playback.');
+                        else if (code === 100) showToast('This YouTube video is unavailable or private.');
+                        else showToast('YouTube could not load this lesson.');
+                    }
+                }
+            });
+        }
+
+        function getLearnCourse(courseId) {
+            return LEARN_COURSES[courseId] || LEARN_COURSES.businessCommunication;
+        }
+
+        function getLearnSavedIndex(courseId) {
+            const saved = learnProgress[courseId];
+            return saved && Number.isInteger(saved.index) ? saved.index : 0;
+        }
+
+        function safeLearnPlaylistIndex() {
+            try {
+                const index = learnPlayer.getPlaylistIndex();
+                return Number.isInteger(index) && index >= 0 ? index : learnActiveIndex;
+            } catch (_) {
+                return learnActiveIndex;
+            }
+        }
+
+        function safeLearnVideoId() {
+            try {
+                return learnPlayer.getVideoData().video_id || null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function safeLearnPlaylist() {
+            try {
+                const list = learnPlayer.getPlaylist();
+                return Array.isArray(list) ? list : [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function persistLearnProgress() {
+            if (!learnPlayer || !learnPlayerReady) {
+                try {
+                    localStorage.setItem('circle_learn_active_course', learnActiveCourseId);
+                    localStorage.setItem('circle_learn_progress_v2', JSON.stringify(learnProgress));
+                } catch (_) {}
+                return;
+            }
+
+            const index = safeLearnPlaylistIndex();
+            const videoId = safeLearnVideoId();
+            learnActiveIndex = index;
+
+            learnProgress[learnActiveCourseId] = {
+                index,
+                videoId,
+                updatedAt: Date.now()
+            };
+
+            try {
+                localStorage.setItem('circle_learn_active_course', learnActiveCourseId);
+                localStorage.setItem('circle_learn_progress_v2', JSON.stringify(learnProgress));
+            } catch (error) {
+                console.warn('Learn progress could not be saved:', error);
+            }
+        }
+
+        function loadLearnCourse(courseId, autoPlay) {
+            if (!learnPlayerReady) return;
+
+            const nextCourseId = LEARN_COURSES[courseId] ? courseId : 'businessCommunication';
+            const courseChanged = nextCourseId !== learnActiveCourseId;
+            if (!courseChanged) {
+                refreshLearnPlaylist(0);
+                renderLearnCourseMenu();
+                updateLearnCourseUI();
+                if (autoPlay) {
+                    setTimeout(() => { try { learnPlayer.playVideo(); } catch (_) {} }, 200);
+                }
+                return;
+            }
+
+            persistLearnProgress();
+            learnActiveCourseId = nextCourseId;
+            const course = getLearnCourse(learnActiveCourseId);
+            const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
+            learnActiveIndex = savedIndex;
+            learnLastSkipKey = null;
+            learnPlaylistIds = [];
+
+            try {
+                localStorage.setItem('circle_learn_active_course', learnActiveCourseId);
+            } catch (_) {}
+
+            renderLearnThumbnails();
+            renderLearnCourseMenu();
+            updateLearnCourseUI();
+
+            if (course.type === 'playlist') {
+                try {
+                    learnPlayer.loadPlaylist({
+                        list: course.playlistId,
+                        listType: 'playlist',
+                        index: savedIndex,
+                        startSeconds: LEARN_INTRO_SKIP_SECONDS
+                    });
+                } catch (error) {
+                    console.warn('Unable to load playlist:', error);
+                    showToast('Unable to load this course.');
+                }
+                refreshLearnPlaylist(0);
+            } else if (course.videoId) {
+                try {
+                    learnPlayer.loadVideoById({
+                        videoId: course.videoId,
+                        startSeconds: LEARN_INTRO_SKIP_SECONDS
+                    });
+                } catch (error) {
+                    console.warn('Unable to load lesson:', error);
+                }
+                learnPlaylistIds = [course.videoId];
+                learnActiveIndex = 0;
+                renderLearnThumbnails();
+                saveLearnIndexOnly();
+            }
+
+            if (autoPlay) {
+                setTimeout(() => { try { learnPlayer.playVideo(); } catch (_) {} }, 250);
+            }
+        }
+
+        function saveLearnIndexOnly() {
+            learnProgress[learnActiveCourseId] = {
+                index: learnActiveIndex,
+                videoId: learnPlaylistIds[learnActiveIndex] || null,
+                updatedAt: Date.now()
+            };
+            try {
+                localStorage.setItem('circle_learn_active_course', learnActiveCourseId);
+                localStorage.setItem('circle_learn_progress_v2', JSON.stringify(learnProgress));
+            } catch (_) {}
+        }
+
+        function refreshLearnPlaylist(attempt) {
+            if (!learnPlayer || !learnPlayerReady) return;
+
+            const ids = safeLearnPlaylist();
+            if (ids.length) {
+                learnPlaylistIds = ids;
+                learnActiveIndex = Math.max(0, Math.min(safeLearnPlaylistIndex(), ids.length - 1));
+                renderLearnThumbnails();
+                updateLearnCourseUI();
+                return;
+            }
+
+            if (attempt < 8) {
+                setTimeout(() => refreshLearnPlaylist(attempt + 1), 350);
+            }
+        }
+
+        function renderLearnThumbnails() {
+            const container = document.getElementById('learn-thumbnails');
+            if (!learnPlaylistIds.length) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const savedIndex = getLearnSavedIndex(learnActiveCourseId);
+            container.innerHTML = learnPlaylistIds.map((videoId, index) => {
+                const active = index === learnActiveIndex;
+                const completed = index < savedIndex;
+                return `
+                    <button class="learn-thumb ${active ? 'active' : ''} ${completed ? 'completed' : ''}"
+                            type="button"
+                            data-learn-index="${index}"
+                            aria-label="Lecture ${String(index + 1).padStart(2, '0')}">
+                        <img loading="lazy" src="https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg" alt="">
+                    </button>
+                `;
+            }).join('');
+
+            container.querySelectorAll('.learn-thumb').forEach(button => {
+                button.addEventListener('click', () => openLearnLesson(Number(button.dataset.learnIndex)));
+            });
+        }
+
+        function openLearnLesson(index) {
+            if (!learnPlayerReady) return;
+            const max = learnPlaylistIds.length ? learnPlaylistIds.length - 1 : 0;
+            learnActiveIndex = Math.max(0, Math.min(index, max));
+            learnLastSkipKey = null;
+
+            const course = getLearnCourse(learnActiveCourseId);
+            try {
+                if (course.type === 'playlist') {
+                    learnPlayer.playVideoAt(learnActiveIndex);
+                    setTimeout(() => enforceLearnIntroSkip(), 350);
+                } else {
+                    learnPlayer.loadVideoById({
+                        videoId: course.videoId,
+                        startSeconds: LEARN_INTRO_SKIP_SECONDS
+                    });
+                }
+            } catch (error) {
+                console.warn('Unable to open lesson:', error);
+            }
+
+            saveLearnIndexOnly();
+            updateLearnCourseUI();
+            renderLearnThumbnails();
+        }
+
+        function enforceLearnIntroSkip(attempt = 0) {
+            if (!learnPlayer || !learnPlayerReady || attempt > 6) return;
+            try {
+                const duration = learnPlayer.getDuration();
+                const now = learnPlayer.getCurrentTime();
+                if (duration > LEARN_INTRO_SKIP_SECONDS + 0.75 && now < LEARN_INTRO_SKIP_SECONDS - 0.25) {
+                    learnPlayer.seekTo(LEARN_INTRO_SKIP_SECONDS, true);
+                    return;
+                }
+                if (duration <= 0 || now < LEARN_INTRO_SKIP_SECONDS - 0.25) {
+                    setTimeout(() => enforceLearnIntroSkip(attempt + 1), 250);
+                }
+            } catch (_) {
+                setTimeout(() => enforceLearnIntroSkip(attempt + 1), 250);
+            }
+        }
+
+        function handleLearnPlayerStateChange(event) {
+            if (!learnPlayerReady) return;
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                learnActiveIndex = safeLearnPlaylistIndex();
+                updateLearnCourseUI();
+                renderLearnThumbnails();
+
+                const videoId = safeLearnVideoId();
+                const key = learnActiveCourseId + '::' + videoId;
+                if (videoId && learnLastSkipKey !== key) {
+                    learnLastSkipKey = key;
+                    try {
+                        const currentTime = learnPlayer.getCurrentTime();
+                        if (currentTime < LEARN_INTRO_SKIP_SECONDS - 0.25) {
+                            learnPlayer.seekTo(LEARN_INTRO_SKIP_SECONDS, true);
+                        }
+                    } catch (_) {}
+                    setTimeout(() => enforceLearnIntroSkip(), 150);
+                }
+
+                saveLearnIndexOnly();
+            }
+
+            if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+                learnActiveIndex = safeLearnPlaylistIndex();
+                saveLearnIndexOnly();
+            }
+
+            if (event.data === YT.PlayerState.ENDED) {
+                learnActiveIndex = safeLearnPlaylistIndex();
+                learnProgress[learnActiveCourseId] = {
+                    index: learnActiveIndex,
+                    videoId: safeLearnVideoId(),
+                    updatedAt: Date.now()
+                };
+                try {
+                    localStorage.setItem('circle_learn_progress_v2', JSON.stringify(learnProgress));
+                } catch (_) {}
+
+                if (learnActiveIndex < learnPlaylistIds.length - 1) {
+                    const nextIndex = learnActiveIndex + 1;
+                    learnActiveIndex = nextIndex;
+                    saveLearnIndexOnly();
+                    setTimeout(() => {
+                        try { learnPlayer.nextVideo(); } catch (_) { openLearnLesson(nextIndex); }
+                    }, 150);
+                }
+            }
+        }
+
+        function updateLearnCourseUI() {
+            const course = getLearnCourse(learnActiveCourseId);
+            document.getElementById('learn-course-name').textContent = course.name;
+            document.getElementById('learn-lecture-label').textContent = 'Lecture ' + String(learnActiveIndex + 1).padStart(2, '0');
+
+            document.getElementById('learn-prev-btn').disabled = learnActiveIndex <= 0;
+            const maxIndex = Math.max(0, learnPlaylistIds.length - 1);
+            document.getElementById('learn-next-btn').disabled = learnPlaylistIds.length > 0 && learnActiveIndex >= maxIndex;
+        }
+
+        function renderLearnCourseMenu() {
+            const menu = document.getElementById('learn-course-menu');
+            menu.innerHTML = Object.entries(LEARN_COURSES).map(([id, course]) => `
+                <button type="button" class="learn-course-option ${id === learnActiveCourseId ? 'active' : ''}" data-course-id="${id}">
+                    ${escapeHtml(course.name)}
+                </button>
+            `).join('');
+
+            menu.querySelectorAll('.learn-course-option').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const targetCourseId = button.dataset.courseId;
+                    closeLearnCourseMenu();
+                    /* Do not update learnActiveCourseId here. loadLearnCourse()
+                     * must compare the requested course against the current one
+                     * so it can actually switch playlists. */
+                    loadLearnCourse(targetCourseId, false);
+                });
+            });
+        }
+
+        function positionLearnCourseMenu() {
+            const menu = document.getElementById('learn-course-menu');
+            const button = document.getElementById('learn-course-btn');
+            if (!menu || !button || !menu.classList.contains('open')) return;
+
+            const rect = button.getBoundingClientRect();
+            const menuWidth = Math.min(320, Math.max(220, window.innerWidth - 28));
+            const gap = 8;
+            const viewportPadding = 14;
+
+            menu.style.position = 'fixed';
+            menu.style.width = menuWidth + 'px';
+            menu.style.maxHeight = Math.min(320, Math.max(180, window.innerHeight * 0.5)) + 'px';
+
+            let left = rect.left;
+            if (left + menuWidth > window.innerWidth - viewportPadding) {
+                left = window.innerWidth - menuWidth - viewportPadding;
+            }
+            left = Math.max(viewportPadding, left);
+
+            let top = rect.bottom + gap;
+            const menuHeight = menu.getBoundingClientRect().height;
+            if (top + menuHeight > window.innerHeight - viewportPadding) {
+                const above = rect.top - gap - menuHeight;
+                top = above >= viewportPadding ? above : Math.max(viewportPadding, window.innerHeight - menuHeight - viewportPadding);
+            }
+
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+            menu.style.bottom = 'auto';
+        }
+
+        function openLearnCourseMenu() {
+            renderLearnCourseMenu();
+            const menu = document.getElementById('learn-course-menu');
+            const button = document.getElementById('learn-course-btn');
+            if (!menu || !button) return;
+
+            menu.classList.add('open');
+            button.setAttribute('aria-expanded', 'true');
+            requestAnimationFrame(positionLearnCourseMenu);
+        }
+
+        function closeLearnCourseMenu() {
+            const menu = document.getElementById('learn-course-menu');
+            if (!menu) return;
+            menu.classList.remove('open');
+            document.getElementById('learn-course-btn').setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleLearnCourseMenu() {
+            const menu = document.getElementById('learn-course-menu');
+            if (menu.classList.contains('open')) closeLearnCourseMenu();
+            else openLearnCourseMenu();
+        }
+
         /*******************************************************
          * 11. INTENT MATCHING ENGINE (No Backend/API)
          *******************************************************/
@@ -3690,6 +5594,59 @@ setInterval(() => {
             if (finalNearBottom) smartScrollToBottom();
         }
 
+        /* =====================================================
+         * CLIENT-SIDE PROTECTION DETERRENTS
+         * These reduce casual copying/inspection. Browser-level
+         * developer tools and source access cannot be technically
+         * disabled by a web page.
+         * ===================================================== */
+        (function installClientProtectionDeterrents() {
+            document.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('dragstart', function(event) {
+                event.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('selectstart', function(event) {
+                const target = event.target;
+                if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+                event.preventDefault();
+            }, { capture: true });
+
+            document.addEventListener('keydown', function(event) {
+                const key = String(event.key || '').toLowerCase();
+                const modifier = event.ctrlKey || event.metaKey;
+
+                /* Common save / source / inspect shortcuts. */
+                if (modifier && ['s', 'u', 'p'].includes(key)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                if (key === 'f12' || (modifier && event.shiftKey && ['i', 'j', 'c'].includes(key))) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }, { capture: true });
+
+            /* Prevent common Ctrl/Cmd + mouse-wheel browser zoom gestures. */
+            window.addEventListener('wheel', function(event) {
+                if (event.ctrlKey || event.metaKey) event.preventDefault();
+            }, { passive: false, capture: true });
+
+            /* Prevent Ctrl/Cmd +/-/= zoom shortcuts where the browser exposes the event. */
+            window.addEventListener('keydown', function(event) {
+                const key = String(event.key || '');
+                if ((event.ctrlKey || event.metaKey) && ['+', '-', '=', '0'].includes(key)) {
+                    event.preventDefault();
+                }
+            }, { capture: true });
+        })();
+
+        window.addEventListener('pagehide', persistLearnProgress);
+        window.addEventListener('beforeunload', persistLearnProgress);
     </script>
 </body>
 </html>
