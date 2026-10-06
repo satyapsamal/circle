@@ -3,3693 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Page Title -->
-    <title>Circle AI | BBA Assistant</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Circle — The New Era begins 06 October 2026 at 11:11 PM IST.">
+    <title>Circle — New Era</title>
 
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="manifest.json">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="circle.png">
     <link rel="apple-touch-icon" href="circle.png">
 
-    <!-- SEO Description -->
-    <meta name="description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
-
-    <!-- Open Graph / Social Sharing -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Circle AI | BBA Assistant">
-    <meta property="og:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
-
-    <!-- Twitter / X Sharing -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Circle AI | BBA Assistant">
-    <meta name="twitter:description" content="Your student-led BBA assistant for quick answers, exam updates, study resources, and academic guidance. Ask Circle AI. Learn faster, understand better.">
-    <meta name="twitter:image" content="https://raw.githubusercontent.com/satyapsamal/circle/main/circle-promo.png">
-    
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --font-ui: 'Parmigiano Headline', 'Playfair Display', serif;
-            --font-conversational: 'Montserrat', sans-serif;
-            
-            --bg-color: #000000;
-            --text-primary: #ffffff;
-            --text-secondary: #808080;
-            --user-bubble: #005cff;
-            --ai-text: #f0f0f0;
+            --bg: #000;
+            --fg: #fff;
+            --muted: #8a8a8a;
+            --line: rgba(255,255,255,.10);
+            --surface: rgba(255,255,255,.035);
+            --font-display: 'Playfair Display', serif;
+            --font-ui: 'Montserrat', sans-serif;
         }
 
-        /* 
-         * Base Resets & Typography
-         * Prevent text selection globally as requested, except in inputs.
-         */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
-        /* Allow selection in input fields specifically */
-        input, textarea {
-            -webkit-user-select: auto;
-            -ms-user-select: auto;
-            user-select: auto;
-        }
-
-        body, html {
+        html, body {
             width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-ui);
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--fg);
             overflow: hidden;
-            -webkit-user-drag: none;
         }
 
-        /* Utility Classes */
-        .hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; }
-        .font-ui { font-family: var(--font-ui); }
-        .font-conversational { font-family: var(--font-conversational); }
-        
-        /* Mobile tap highlight and focus ring removal for interactive elements */
-        button,
-        a,
-        .suggestion-pill,
-        .source-btn,
-        .model-option,
-        .meta-btn,
-        .dl-source-toggle,
-        [role="button"],
-        .toggle-slider,
-        .toggle-switch input {
-            -webkit-tap-highlight-color: transparent !important;
+        body {
+            min-height: 100dvh;
+            font-family: var(--font-ui);
+            -webkit-font-smoothing: antialiased;
+            display: grid;
+            place-items: center;
+            position: relative;
+            isolation: isolate;
         }
 
-        button:focus,
-        a:focus,
-        .suggestion-pill:focus,
-        .source-btn:focus,
-        .model-option:focus,
-        .meta-btn:focus,
-        .dl-source-toggle:focus,
-        [role="button"]:focus,
-        .toggle-switch input:focus + .toggle-slider,
-        button:focus-visible,
-        a:focus-visible,
-        .suggestion-pill:focus-visible,
-        .source-btn:focus-visible,
-        .model-option:focus-visible,
-        .meta-btn:focus-visible,
-        .dl-source-toggle:focus-visible,
-        [role="button"]:focus-visible,
-        .toggle-switch input:focus-visible + .toggle-slider {
-            outline: none !important;
-            box-shadow: none !important;
+        body::before {
+            content: "";
+            position: fixed;
+            width: 52vw;
+            height: 52vw;
+            min-width: 360px;
+            min-height: 360px;
+            max-width: 760px;
+            max-height: 760px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255,255,255,.065) 0%,
+                rgba(255,255,255,.028) 34%,
+                rgba(255,255,255,0) 72%
+            );
+            filter: blur(20px);
+            z-index: -2;
+            pointer-events: none;
+            animation: breathe 6s ease-in-out infinite;
         }
 
-        /* Smooth Text Animation System */
-        .anim-element {
-            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), 
-                        transform 1.2s cubic-bezier(0.25, 1, 0.5, 1),
-                        filter 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-            will-change: opacity, transform, filter;
-            opacity: 1;
-            transform: translateY(0);
-            filter: blur(0px);
-        }
-        .anim-enter {
-            opacity: 0 !important;
-            transform: translateY(6px) !important;
-            filter: blur(2px) !important;
-        }
-        .anim-exit {
-            opacity: 0 !important;
-            transform: translateY(-6px) !important;
-            filter: blur(2px) !important;
-        }
-
-        /* Main Layer Simple Fade */
-        .main-layer-fade {
-            opacity: 0;
-            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .main-layer-visible {
-            opacity: 1 !important;
-        }
-
-        /* Promotional Modal Styles */
-        #promo-modal {
+        body::after {
+            content: "";
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 99999;
+            background:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(circle at center, black, transparent 72%);
+            -webkit-mask-image: radial-gradient(circle at center, black, transparent 72%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .page {
+            width: min(92vw, 980px);
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
+            padding: 32px 20px;
         }
-        #promo-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .promo-content {
-            position: relative;
-            width: 90vw;
-            max-width: 400px;
-            aspect-ratio: 4/5;
-            max-height: 85vh;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            background: #080808;
-        }
-        .promo-image {
+
+        .hero {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: pageIn 1.1s cubic-bezier(.2,.8,.2,1) both;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 42px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .brand img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            opacity: .92;
+        }
+
+        .brand-name {
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 500;
+            letter-spacing: .2px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #7e7e7e;
+            margin-bottom: 17px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(46px, 7.5vw, 88px);
+            line-height: .98;
+            font-weight: 400;
+            letter-spacing: -2.5px;
+            max-width: 900px;
+            margin-bottom: 19px;
+        }
+
+        .sub {
+            font-size: clamp(13px, 1.5vw, 16px);
+            line-height: 1.7;
+            color: #8d8d8d;
+            max-width: 570px;
+            margin-bottom: 48px;
+        }
+
+        .countdown {
+            width: min(100%, 760px);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--line);
+            border-radius: 26px;
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow:
+                0 24px 70px rgba(0,0,0,.48),
+                inset 0 1px 0 rgba(255,255,255,.035);
+            overflow: hidden;
+        }
+
+        .unit {
+            padding: 29px 12px 27px;
+            position: relative;
+        }
+
+        .unit + .unit::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 26%;
+            height: 48%;
+            width: 1px;
+            background: var(--line);
+        }
+
+        .number {
+            display: block;
+            font-family: var(--font-display);
+            font-size: clamp(34px, 5vw, 56px);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .label {
+            display: block;
+            margin-top: 9px;
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #707070;
+            font-weight: 500;
+        }
+
+        .release {
+            margin-top: 25px;
+            font-size: 10px;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: #6f6f6f;
+        }
+
+        .release strong {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .status {
+            margin-top: 42px;
+            color: #4f4f4f;
+            font-size: 10px;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            margin-right: 8px;
+            vertical-align: 1px;
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        .launch-message {
+            display: none;
+            font-family: var(--font-display);
+            font-size: clamp(32px, 5.5vw, 68px);
+            font-weight: 400;
+            letter-spacing: -1.5px;
+            margin-top: 8px;
+        }
+
+        .countdown.finished {
+            display: none;
+        }
+
+        .hero.released .launch-message {
             display: block;
         }
-        
-        /* Modal X Button with 3s Countdown */
-        #promo-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: 300;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: background 0.3s ease, border-color 0.3s ease;
-            pointer-events: auto;
-            padding: 0;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #promo-close.promo-disabled {
-            pointer-events: none;
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-        #promo-close:not(.promo-disabled):hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .promo-ring {
-            position: absolute;
-            top: -1px; left: -1px;
-            width: 40px; height: 40px;
-            /* scaleX(-1) mirrors it so clockwise animation acts anti-clockwise */
-            transform: scaleX(-1) rotate(-90deg);
-            pointer-events: none;
-        }
-        .promo-ring-progress {
-            /* Circumference of r=18 is ~113.1 */
-            stroke-dasharray: 113.1;
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 0.1s linear;
-        }
-        @keyframes ring-erase {
-            to { stroke-dashoffset: 113.1; }
-        }
 
-        /* Modal LinkedIn CTA */
-        .promo-linkedin-btn {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            padding: 12px 28px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-size: 15px;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-            z-index: 20;
-            pointer-events: auto;
-        }
-        .promo-linkedin-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: translateX(-50%) scale(1.02);
-        }
-
-        /* Onboarding Sequence Styles */
-        #onboarding-layer {
-            position: fixed;
-            inset: 0;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        #intro-logo { width: 120px; height: auto; pointer-events: none; }
-        #intro-brand { font-size: 32px; font-weight: 500; letter-spacing: 0.5px; }
-        #intro-name-step, #intro-welcome { text-align: center; }
-
-        #intro-name-step h2 {
-            font-size: 28px;
-            font-weight: 400;
-            margin-bottom: 30px;
-            color: var(--text-primary);
-        }
-
-        .name-input-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
-            padding-bottom: 8px;
-            transition: border-color 0.3s ease;
-        }
-
-        #name-input {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 22px;
-            text-align: center;
-            outline: none;
-            width: 250px;
-        }
-        #name-input::placeholder { color: rgba(255,255,255,0.2); font-family: var(--font-ui); }
-
-        #name-submit {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 24px;
-            cursor: pointer;
-            margin-left: 10px;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
-        #name-submit:hover { opacity: 1; }
-        
-        .name-privacy-footnote {
-            font-size: 11.5px;
-            line-height: 1.45;
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-            margin-top: 12px;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-            pointer-events: none;
-        }
-
-        /* Main Interface Layout */
-        #main-layer {
-            display: flex;
-            flex-direction: column;
-            height: 100dvh;
-            width: 100%;
-            position: relative;
-        }
-
-        /* Centered Header & Greeting Rotator */
-        #header-container {
-            position: absolute;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 100%;
-            transition: top 0.9s cubic-bezier(0.25, 1, 0.5, 1), transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-title {
-            font-size: 32px;
-            font-weight: 500;
-            transition: font-size 0.9s ease, opacity 0.9s ease;
-            margin: 0;
-            cursor: default;
-        }
-
-        #greeting-rotator {
-            font-size: 18px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            width: 100%;
-            max-width: 90vw;
-            padding-left: 20px;
-            padding-right: 20px;
-            margin: 0 auto;
-            text-align: center;
-            line-height: 1.4;
-            word-wrap: break-word;
-            pointer-events: none;
-        }
-
-        .chat-active #header-container {
-            top: 24px;
-            transform: translate(-50%, 0);
-        }
-
-        .chat-active .brand-title {
-            font-size: 20px;
-            opacity: 0.6;
-        }
-
-        /* Chat History Area */
-        #chat-container {
-            flex-grow: 1;
-            width: 100%;
-            max-width: 760px;
-            margin: 0 auto;
-            overflow-y: auto;
-            padding: 80px 24px 20px 24px;
-            opacity: 0;
-            visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        #chat-container::-webkit-scrollbar { display: none; }
-        #chat-container { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .chat-active #chat-container {
-            opacity: 1;
-            visibility: visible;
-            transition: opacity 0.8s ease 0.4s;
-        }
-
-        /* Conversational Messages */
-        .msg-user {
-            align-self: flex-end;
-            background-color: var(--user-bubble);
-            color: #ffffff;
-            padding: 14px 20px;
-            border-radius: 24px 24px 4px 24px;
-            max-width: 85%;
-            font-size: 16px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            cursor: default;
-        }
-
-        .msg-ai {
-            align-self: flex-start;
-            color: var(--ai-text);
-            max-width: 95%;
-            font-size: 16px;
-            line-height: 1.7;
-            cursor: default;
-            width: 100%;
-        }
-
-        /* Markdown Heading Styles */
-        .msg-ai h1, .msg-ai h2, .msg-ai h3 {
-            font-family: var(--font-conversational);
-            font-weight: 600;
-            color: #ffffff;
-            margin-top: 24px;
-            margin-bottom: 12px;
-        }
-        .msg-ai h1 { font-size: 22px; }
-        .msg-ai h2 { font-size: 20px; }
-        .msg-ai h3 { font-size: 18px; }
-        
-        .msg-ai blockquote {
-            border-left: 4px solid rgba(255,255,255,0.3);
-            padding-left: 12px;
-            margin: 16px 0;
-            color: #d0d0d0;
-            font-style: italic;
-        }
-
-        /* Table Styles for Markdown */
-        .msg-ai table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 16px;
-            font-size: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .msg-ai th, .msg-ai td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .msg-ai th {
-            background: rgba(255, 255, 255, 0.05);
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .msg-ai tr:last-child td {
-            border-bottom: none;
-        }
-
-        .msg-ai p { margin-bottom: 16px; }
-        .msg-ai p:last-child { margin-bottom: 0; }
-        .msg-ai ul { margin-left: 20px; margin-bottom: 16px; list-style-type: disc; }
-        .msg-ai li { margin-bottom: 8px; }
-        .msg-ai strong { color: #ffffff; font-weight: 600; }
-        .msg-ai a { cursor: pointer; pointer-events: auto; }
-        
-        /* Response Time and Read Aloud Capsules */
-        .response-metadata-container {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            flex-wrap: wrap;
-        }
-        .meta-capsule {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #909090;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-family: var(--font-conversational);
-            transition: all 0.3s ease;
-            cursor: default;
-            user-select: none;
-        }
-        .meta-capsule svg {
-            width: 12px;
-            height: 12px;
-            margin-right: 6px;
-            fill: currentColor;
-        }
-        .meta-btn {
-            cursor: pointer;
-            pointer-events: auto;
-        }
-        .meta-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .meta-btn.playing {
-            background: rgba(0, 92, 255, 0.2);
-            color: #ffffff;
-            border-color: rgba(0, 92, 255, 0.5);
-        }
-
-        /* Thinking Animation */
-        .thinking-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            animation: breathe 2s infinite ease-in-out;
-            margin: 10px 0;
-            align-self: flex-start;
-        }
-        @keyframes breathe {
-            0%, 100% { transform: scale(0.6); opacity: 0.4; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* Dream Labs Terminal Widget */
-        .dl-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top: 24px;
-        }
-        .dl-container {
-            background-color: #080808;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 24px;
-            width: 100%;
-            max-width: 320px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.5s ease;
-        }
-        .dl-header {
-            text-align: center;
-            color: #ffffff;
-            font-family: var(--font-ui);
-            font-weight: 600;
-            letter-spacing: 1px;
-            font-size: 15px;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-        .dl-header-sub {
-            font-family: var(--font-conversational);
-            font-size: 11px;
-            opacity: 0.5;
-            font-weight: 400;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
-            text-transform: none;
-        }
-        .dl-terminal-area-wrapper {
-            position: relative;
-            width: 100%;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.4s ease;
-        }
-        .dl-line {
-            font-family: monospace;
-            color: #a0a0a0;
-            font-size: 13px;
-            text-align: center;
-            transition: opacity 0.3s ease, text-shadow 0.3s ease;
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            left: 0;
-            pointer-events: none;
-        }
-        .dl-line.active {
-            opacity: 1;
-            color: #ffffff;
-            text-shadow: 0 0 8px rgba(255,255,255,0.4);
-        }
-        .dl-breathing-area {
-            text-align: center;
-            width: 100%;
+        .hero.released .release,
+        .hero.released .status {
             display: none;
         }
-        .dl-phase {
-            font-size: 15px;
-            color: #ffffff;
-            letter-spacing: 2px;
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-        .dl-timer {
-            font-size: 24px;
-            color: #ffffff;
-            margin-bottom: 16px;
-            font-weight: 400;
-        }
-        .dl-box-container {
-            height: 80px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: visible;
-        }
-        .dl-box {
-            width: 36px;
-            height: 36px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            transition: transform 4s linear;
-        }
-        .dl-box.expand {
-            transform: scale(1.7);
-        }
-        .dl-box.contract {
-            transform: scale(1);
-        }
-        
-        /* Dream Labs Source Expander */
-        .dl-source-toggle {
-            text-align: center;
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            cursor: pointer;
-            opacity: 0.5;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-            transition: opacity 0.3s ease;
-            pointer-events: auto;
-            width: 100%;
-        }
-        .dl-source-toggle:hover {
-            opacity: 1;
-        }
-        .dl-source-content {
-            display: none;
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 11px;
-            color: #888;
-            overflow-x: auto;
-            white-space: pre;
-            border: 1px solid rgba(255,255,255,0.05);
-            scrollbar-width: thin;
-            width: 100%;
-            text-align: left;
-        }
-        .dl-source-content::-webkit-scrollbar { height: 4px; }
-        .dl-source-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 
-        /* Input Area & Suggestion Pills */
-        #input-container {
-            width: 100%;
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 10px 24px 10px 24px;
-            position: relative;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #suggestion-pills {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            white-space: nowrap;
-            margin-bottom: 16px;
-            padding-bottom: 4px;
-            scrollbar-width: none;
-            transition: opacity 0.6s ease, transform 0.6s ease;
-            cursor: grab;
-            scroll-behavior: auto;
-        }
-        #suggestion-pills:active { cursor: grabbing; }
-        #suggestion-pills::-webkit-scrollbar { display: none; }
-        
-        /* Liquid Glass Suggestion Pills */
-        .suggestion-pill {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            color: #d0d0d0;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-            pointer-events: auto;
-            user-select: none;
-        }
-        .suggestion-pill:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
-        }
-
-        /* Input Glow Layering */
-        .input-wrapper-relative {
-            position: relative;
-            width: 100%;
-        }
-
-        .glow-clip {
-            position: absolute;
-            inset: -2px -2px -2px -2px; 
-            border-radius: 32px;
-            overflow: hidden;
-            z-index: -1;
-            mask-image: radial-gradient(white, black);
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-        }
-
-        .glow-spinner {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                from 0deg, transparent 30%, #ff0000, #ffaa00, #00ff00, #00ffff, #0000ff, #ff00ff, transparent 70%
-            );
-            animation: spin 4s linear infinite;
-            filter: blur(6px);
-            opacity: 0.85;
-            transition: opacity 1s ease, filter 1s ease;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .chat-active .glow-spinner {
-            opacity: 0.15;
-            animation: spin 12s linear infinite;
-            filter: blur(10px);
-        }
-        .glow-spinner-reset {
-            opacity: 0.85 !important;
-            filter: blur(6px) !important;
-            animation: spin 4s linear infinite !important;
-        }
-
-        .input-box {
-            background-color: #080808;
-            border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            padding: 8px 20px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.8);
-            position: relative;
-        }
-
-        #chat-input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: #ffffff;
-            font-size: 16px;
-            outline: none;
-            padding: 14px 0;
-            -webkit-user-select: auto;
-            -ms-user-select: auto;
-            user-select: auto;
-        }
-        #chat-input::placeholder { font-family: var(--font-ui); color: var(--text-secondary); font-size: 17px; }
-
-        #chat-submit {
-            background: transparent;
-            border: none;
-            color: #ffffff;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 0 5px 0 15px;
-            opacity: 0.4;
-            transition: opacity 0.3s ease;
-        }
-        #chat-submit:hover { opacity: 1; }
-
-        /* Source Buttons */
-        .sources-container {
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .source-btn {
-            display: inline-flex;
-            align-items: center;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #c0c0c0;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            align-self: flex-start;
-            pointer-events: auto;
-            cursor: pointer;
-        }
-        .source-btn:hover { background: rgba(255,255,255,0.08); color: #ffffff; border-color: rgba(255,255,255,0.4); }
-
-        /* Footer Disclaimer */
-        #footer-disclaimer {
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-secondary);
-            padding: 4px 24px 20px 24px;
-            opacity: 0.6;
-            z-index: 20;
-            pointer-events: none;
-        }
-        #footer-disclaimer a {
-            color: inherit;
-            font-weight: bold;
-            text-decoration: underline;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            pointer-events: auto;
-        }
-        #footer-disclaimer a:hover { color: #ffffff; }
-
-        /* Floating Buttons (Settings, Install, Share, New Chat) */
-        .floating-btn-group-left {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            display: flex;
-            gap: 12px;
-            z-index: 100;
-        }
-        .floating-btn-group-right {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            display: flex;
-            gap: 12px;
-            z-index: 100;
-        }
-        .floating-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-            font-size: 24px;
-            font-weight: 300;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.6s ease;
-            pointer-events: auto;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            padding: 0;
-        }
-        .floating-btn svg { 
-            width: 20px; 
-            height: 20px; 
-            fill: currentColor; 
-            display: block; 
-            flex-shrink: 0; 
-            overflow: visible; 
-            transition: opacity 0.3s ease, filter 0.3s ease;
-        }
-        .floating-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-        }
-        .floating-btn:active {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Model Selection Pill */
-        #model-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            width: auto;
-            padding: 0 16px;
-            border-radius: 22px;
-            font-family: var(--font-conversational);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Recommended Tag */
-        .recommended-tag {
-            font-size: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e0e0e0;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: 8px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            vertical-align: middle;
-            letter-spacing: 0.3px;
-        }
-
-        /* Model Dropdown Menu */
-        #model-menu {
-            position: absolute;
-            top: 56px;
-            left: 0;
-            background: #0a0a0a;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 300px;
-            padding: 8px 0;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            z-index: 101;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #model-menu.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .model-option {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            text-align: left;
-            border: none;
-            background: transparent;
-            color: #ffffff;
-            font-family: var(--font-conversational);
-            width: 100%;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .model-option:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .model-option-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex-grow: 1;
-        }
-        .model-option-title {
-            font-size: 15px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-        }
-        .model-option-desc {
-            font-size: 12px;
-            color: #888888;
-        }
-        .model-check {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #005cff;
-            opacity: 0;
-        }
-        .model-option.selected .model-check {
-            opacity: 1;
-        }
-        .model-divider {
-            height: 1px;
-            background: rgba(255,255,255,0.05);
-            margin: 4px 0;
-        }
-
-        /* Settings Modal */
-        #settings-modal, #install-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-        #settings-modal.show, #install-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .settings-content {
-            position: relative;
-            width: 90vw;
-            max-width: 400px;
-            background: #0a0a0a;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 24px;
-            color: #ffffff;
-            font-family: var(--font-conversational);
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            font-family: var(--font-ui);
-            font-size: 20px;
-            font-weight: 500;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 12px;
-        }
-
-        .settings-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s ease, border-color 0.3s ease;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            padding: 0;
-        }
-        .settings-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .settings-desc {
-            font-size: 13px;
-            color: #a0a0a0;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-
-        /* iOS Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 28px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(255,255,255,0.15);
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        input:checked + .toggle-slider {
-            background-color: #005cff;
-        }
-        input:checked + .toggle-slider:before {
-            transform: translateX(20px);
-        }
-
-        .settings-footer {
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 16px;
-            font-size: 12px;
-            color: #808080;
-            line-height: 1.5;
-            text-align: left;
-        }
-        .settings-footer a {
-            color: inherit;
-            font-weight: bold;
-            text-decoration: underline;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-        .settings-footer a:hover {
-            color: #ffffff;
-        }
-
-        /* Install Modal Elements */
-        .install-img {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            object-fit: cover;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .install-action-btn {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            padding: 14px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s ease, border-color 0.3s ease;
-            font-family: var(--font-ui);
-            margin-top: 8px;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .install-action-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .install-fallback-msg {
-            font-size: 12px;
-            color: #ffaa00;
-            text-align: center;
-            margin-top: 12px;
-            display: none;
-        }
-        
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-family: var(--font-conversational);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            z-index: 99999;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            .floating-btn-group-left { top: 20px; left: 20px; gap: 8px; }
-            .floating-btn-group-right { top: 20px; right: 20px; gap: 8px; }
-            .floating-btn { width: 40px; height: 40px; font-size: 22px; }
-            .floating-btn svg { width: 18px; height: 18px; }
-            #model-btn { font-size: 13px; padding: 0 12px; }
-            #model-menu { 
-                top: 52px; 
-                width: max-content; 
-                min-width: 260px;
-                max-width: calc(100vw - 40px); 
-                left: 0; 
-            }
-            
-            #model-btn.mobile-model-hidden {
+        @keyframes pageIn {
+            from {
                 opacity: 0;
-                pointer-events: none;
+                transform: translateY(18px);
+                filter: blur(7px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0);
             }
         }
 
-        /* Accessibility: Reduced Motion */
+        @keyframes breathe {
+            0%, 100% { transform: scale(.92); opacity: .55; }
+            50% { transform: scale(1.04); opacity: .95; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: .25; transform: scale(.85); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 620px) {
+            .page {
+                padding: 24px 16px;
+            }
+
+            .brand {
+                margin-bottom: 33px;
+            }
+
+            h1 {
+                letter-spacing: -1.7px;
+            }
+
+            .sub {
+                margin-bottom: 36px;
+                max-width: 330px;
+            }
+
+            .countdown {
+                border-radius: 20px;
+            }
+
+            .unit {
+                padding: 23px 6px 21px;
+            }
+
+            .label {
+                font-size: 8px;
+                letter-spacing: 1.8px;
+            }
+
+            .release {
+                line-height: 1.7;
+                max-width: 300px;
+            }
+
+            .status {
+                margin-top: 31px;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .anim-element { transition: opacity 0.5s ease !important; transform: none !important; filter: none !important; }
-            .anim-enter, .anim-exit { transform: none !important; filter: none !important; }
-            .glow-spinner { animation: none !important; background: rgba(255,255,255,0.1); }
-            .thinking-dot { animation: none !important; opacity: 0.7; }
-            .promo-ring-progress { animation: none !important; stroke-dashoffset: 113.1 !important; }
-            .dl-box { transition: none !important; }
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
         }
     </style>
 </head>
+
 <body>
+    <main class="page">
+        <section class="hero" id="hero">
+            <a class="brand" href="#" aria-label="Circle">
+                <img src="circle.png" alt="" onerror="this.style.display='none'">
+                <span class="brand-name">Circle</span>
+            </a>
 
-    <div id="app">
-        <!-- New User Onboarding Layer -->
-        <div id="onboarding-layer" class="hidden">
-            <img id="intro-logo" src="circle.png" alt="Circle AI Logo" class="anim-element anim-enter hidden">
-            <h1 id="intro-brand" class="font-ui anim-element anim-enter hidden">Circle AI.</h1>
-            <div id="intro-name-step" class="anim-element anim-enter hidden">
-                <h2 class="font-ui">What's your name?</h2>
-                <div class="name-input-wrapper" id="name-wrapper">
-                    <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="off">
-                    <button id="name-submit" class="font-ui" aria-label="Submit Name">→</button>
-                </div>
-                <div class="name-privacy-footnote font-conversational">
-                    Use your real name for a more personalised experience. Your name is not shared with any third party. It is used only for answer personalisation, and your data remains private.
-                </div>
-            </div>
-            <h1 id="intro-welcome" class="font-ui anim-element anim-enter hidden"></h1>
-        </div>
+            <div class="eyebrow">A new chapter begins</div>
 
-        <!-- Promotional Modal -->
-        <div id="promo-modal" class="hidden font-ui">
-            <div class="promo-content">
-                <button id="promo-close" class="promo-disabled" aria-disabled="true">
-                    <svg class="promo-ring" viewBox="0 0 40 40">
-                        <circle class="promo-ring-progress" cx="20" cy="20" r="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
-                    </svg>
-                    <span class="promo-x">×</span>
-                </button>
-                <img src="circle-promo.png" alt="Promotional Content" class="promo-image">
-                <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" class="promo-linkedin-btn font-ui">Follow on LinkedIn</a>
-            </div>
-        </div>
-        
-        <!-- Settings Modal -->
-        <div id="settings-modal" class="hidden">
-            <div class="settings-content">
-                <div class="settings-header">
-                    <span>Settings</span>
-                    <button id="settings-close" class="settings-close" aria-label="Close Settings">×</button>
-                </div>
-                
-                <div class="settings-row">
-                    <span>Improve Circle AI</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="improve-circle-toggle" aria-label="Improve Circle AI" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-desc">
-                    Circle AI respects your privacy. Allow your prompts to be saved and used to improve Circle. Turn this off to opt out of prompt storage and training.
-                </div>
-                
-                <div class="settings-row" style="margin-top: 24px;">
-                    <span>Show Circle AI Banner</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="promo-banner-toggle" aria-label="Show Circle AI Banner" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-desc" style="margin-bottom: 28px;">
-                    Show the Circle AI promotional banner once when you send your first prompt in a new session.
-                </div>
-                
-                <div class="settings-footer">
-                    If you have any queries, suggestions, or feedback,<br>please share them with us <a href="https://shorturl.at/NwAMA" target="_blank" rel="noopener noreferrer">here</a>.
-                </div>
-            </div>
-        </div>
-        
-        <!-- Install Modal -->
-        <div id="install-modal" class="hidden">
-            <div class="settings-content">
-                <div class="settings-header">
-                    <span>Install Circle</span>
-                    <button id="install-close" class="settings-close" aria-label="Close Install">×</button>
-                </div>
-                
-                <img src="circle-promo.png" alt="Circle AI Promo" class="install-img">
-                
-                <div class="settings-desc" style="margin-bottom: 16px;">
-                    Your BBA assistant, now on your device.<br>Quick access, completely free, lightweight, and safe.
-                </div>
-                
-                <button id="pwa-install-btn" class="install-action-btn">Install (2KB)</button>
-                <div id="install-fallback-msg" class="install-fallback-msg">Installation is currently unavailable in this browser.</div>
-            </div>
-        </div>
+            <h1>The New Era of Circle.</h1>
 
-        <!-- Toast Notification -->
-        <div id="toast" class="toast">Share text copied</div>
+            <p class="sub">
+                Everything is about to change.
+                The next version of Circle goes live at
+                <strong>11:11 PM IST</strong>.
+            </p>
 
-        <!-- Main Conversational Interface -->
-        <div id="main-layer" class="main-layer-fade hidden">
-            
-            <div class="floating-btn-group-left">
-                <button id="settings-btn" class="floating-btn hidden" aria-label="Settings">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.097.078.16.208.18.327.05.297.086.6.108.908.02.296-.06.49-.18.587l-.84.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.098-.078-.16-.208-.18-.327-.023-.308-.059-.611-.108-.908-.02-.296.06-.49.18-.587l.84-.692a1.875 1.875 0 0 0 .432-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/>
-                    </svg>
-                </button>
-                <button id="install-btn" class="floating-btn hidden" aria-label="Install Circle AI">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                    </svg>
-                </button>
-                <div style="position: relative;">
-                    <button id="model-btn" class="floating-btn hidden" aria-label="Select AI model">
-                        <span id="model-btn-label">Circle Core</span>
-                        <span id="model-btn-chevron">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 9.5L12 14.5L17 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                    </button>
-                    <div id="model-menu">
-                        <button class="model-option" data-model="core">
-                            <div class="model-option-content">
-                                <span class="model-option-title">Circle Core</span>
-                                <span class="model-option-desc">Balanced responses</span>
-                            </div>
-                            <div class="model-check">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                            </div>
-                        </button>
-                        <div class="model-divider"></div>
-                        <button class="model-option" data-model="swift">
-                            <div class="model-option-content">
-                                <span class="model-option-title">Circle Swift <span class="recommended-tag font-conversational">Recommended</span></span>
-                                <span class="model-option-desc">Faster responses</span>
-                            </div>
-                            <div class="model-check">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                            </div>
-                        </button>
-                    </div>
+            <div class="countdown" id="countdown" aria-label="Countdown to the release">
+                <div class="unit">
+                    <span class="number" id="days">00</span>
+                    <span class="label">Days</span>
+                </div>
+                <div class="unit">
+                    <span class="number" id="hours">00</span>
+                    <span class="label">Hours</span>
+                </div>
+                <div class="unit">
+                    <span class="number" id="minutes">00</span>
+                    <span class="label">Minutes</span>
+                </div>
+                <div class="unit">
+                    <span class="number" id="seconds">00</span>
+                    <span class="label">Seconds</span>
                 </div>
             </div>
 
-            <div class="floating-btn-group-right">
-                <button id="share-btn" class="floating-btn hidden" aria-label="Share Circle AI">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
-                    </svg>
-                </button>
-                <button id="new-chat-btn" class="floating-btn hidden" aria-label="New Chat">+</button>
-            </div>
-            
-            <div id="header-container">
-                <h1 class="brand-title font-ui">Circle AI.</h1>
-                <div id="greeting-rotator" class="font-ui anim-element anim-enter hidden"></div>
+            <div class="launch-message" id="launchMessage">
+                The New Era has begun.
             </div>
 
-            <div id="chat-container">
-                <!-- Chat messages injected here -->
+            <div class="release">
+                Release · <strong>06 October 2026 · 11:11 PM IST</strong>
             </div>
 
-            <div id="input-container">
-                <div id="suggestion-pills">
-                    <!-- Pills injected via JS -->
-                </div>
-                <div class="input-wrapper-relative">
-                    <div class="glow-clip">
-                        <div class="glow-spinner" id="glow-spinner-elem"></div>
-                    </div>
-                    <div class="input-box">
-                        <input type="text" id="chat-input" class="font-conversational" placeholder="Ask anything..." autocomplete="off">
-                        <button id="chat-submit" class="font-ui" aria-label="Send Message">→</button>
-                    </div>
-                </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                Preparing Circle
             </div>
-            
-            <div id="footer-disclaimer" class="font-ui">
-                Circle AI can make mistakes. Check important info <a href="https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My" target="_blank" rel="noopener noreferrer">here</a>.
-            </div>
-
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script>
-        /*******************************************************
-         * SERVICE WORKER REGISTRATION
-         *******************************************************/
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .catch(error => {
-                        console.error('Service worker registration failed:', error);
-                    });
-            });
-        }
-
-        /*******************************************************
-         * PWA INSTALLATION LOGIC
-         *******************************************************/
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
-            // Only show install button if not already in standalone mode and not previously installed
-            if (!isRunningAsInstalledPWA() && !pwaInstalled) {
-                document.getElementById('install-btn').classList.remove('hidden');
-            }
-        });
-
-        window.addEventListener('appinstalled', () => {
-            localStorage.setItem('circle_pwa_installed', 'true');
-            deferredPrompt = null;
-            document.getElementById('install-btn').classList.add('hidden');
-            closeInstallModal();
-        });
-
-        function isRunningAsInstalledPWA() {
-            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        }
-
-        function showInstallModal() {
-            const modal = document.getElementById('install-modal');
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.add('show');
-            
-            document.getElementById('install-fallback-msg').style.display = 'none';
-        }
-
-        function closeInstallModal() {
-            const modal = document.getElementById('install-modal');
-            if (modal.classList.contains('show')) {
-                modal.classList.remove('show');
-                setTimeout(() => { modal.classList.add('hidden'); }, 400);
-            }
-        }
-
-        async function handleInstallClick() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                    localStorage.setItem('circle_pwa_installed', 'true');
-                    document.getElementById('install-btn').classList.add('hidden');
-                } else {
-                    console.log('User dismissed the install prompt');
-                }
-                deferredPrompt = null;
-                closeInstallModal();
-            } else {
-                // Show fallback message
-                document.getElementById('install-fallback-msg').style.display = 'block';
-            }
-        }
-
-        /*******************************************************
-         * 0. ANTI-COPY & DEVTOOLS DETERRENTS (UX Only)
-         *******************************************************/
-        document.addEventListener('contextmenu', e => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('dragstart', e => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('copy', e => {
-            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('keydown', e => {
-            const isInput = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
-            if (e.key === 'F12') e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(e.key.toLowerCase())) e.preventDefault();
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') e.preventDefault();
-            if (!isInput && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') e.preventDefault();
-        });
-
-        /*******************************************************
-         * 1. GOOGLE SHEETS CONFIGURATION
-         *******************************************************/
-        const GOOGLE_SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbz-lZT2sgrNk7xHSEEOHAtD97feo9H9EZcufbJ99WZ8Ywris93zawFE2g3hRhceU4x97w/exec";
-
-        /*******************************************************
-         * ROBUST PREFERENCE STORAGE
-         *******************************************************/
-        function setPreference(name, value) {
-            // Write to cookie
-            let date = new Date();
-            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-            document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/; SameSite=Lax";
-            
-            // Write to localStorage as backup
-            try {
-                localStorage.setItem("circle_pref_" + name, value);
-            } catch (e) {
-                console.warn("localStorage fallback failed.");
-            }
-            
-            // Verify write was successful
-            if (getPreference(name) !== value) {
-                console.warn("Preference persistence failed for", name);
-            }
-        }
-
-        function getPreference(name, defaultValue) {
-            // Read from cookie primary
-            let nameEQ = name + "=";
-            let ca = document.cookie.split(';');
-            for(let i=0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0)==' ') c = c.substring(1,c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-            }
-            
-            // Read from localStorage fallback
-            try {
-                const lsValue = localStorage.getItem("circle_pref_" + name);
-                if (lsValue !== null) {
-                    // Restore cookie if it was missing but LS had it
-                    let date = new Date();
-                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = name + "=" + lsValue + "; expires=" + date.toUTCString() + "; path=/; SameSite=Lax";
-                    return lsValue;
-                }
-            } catch (e) {
-                console.warn("localStorage fallback read failed.");
-            }
-            
-            return defaultValue !== undefined ? defaultValue : null;
-        }
-
-        /*******************************************************
-         * 2. KNOWLEDGE BASE & INTENTS (Hardcoded Local Data)
-         *******************************************************/
-        const knowledgeBase = [
-            {
-                id: 'what_is_circle',
-                category: 'Circle Tool',
-                suggestionPool: [
-                    "What is Circle?",
-                    "Who developed Circle?",
-                    "what does circle do?",
-                    "circle kisne banaya hai?"
-                ],
-                keywords: [
-                    'what is circle', 'what is Circle', 'circle kya hai', 'circle kya h', 'circle kya karta hai', 'what does circle do', 
-                    'what is the circle', 'tell me about circle', 'about circle', 'circle assistant', 'circle bba assistant', 'bba assistant', 
-                    'virtual bba assistant', 'who made circle', 'who developed circle', 'circle developer', 'circle founder', 'circle creator', 
-                    'circle kisne banaya', 'circle kisne create kiya', 'circle kisne banaya hai', 'circle ka developer kaun hai', 'circle developer kaun hai', 
-                    'who created circle', 'who is the developer of circle', 'who built circle', 'circle made by', 'circle developed by'
-                ],
-                markdown: `### What is Circle?\n\n**Circle AI** is a free, 24×7 virtual BBA assistant built specifically for BBA students.\n\nCircle AI is a TOOL made by the **BBA Circle Community**.\n\nIts developer is <a href="https://www.linkedin.com/in/satyaprakashsamal/" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">Satya Prakash Samal</a>.\n\nThink of Circle AI as a single place where a student can ask how the BBA Programme works, instead of searching through WhatsApp groups, LMS discussions, emails, and old messages.\n\nCircle AI can help with things such as:\n\n- What to study and what is included in the syllabus\n- Mid-semester and end-semester syllabus\n- Passing marks and examination criteria\n- Assignment and assessment information\n- Important academic deadlines\n- LMS-related information\n- Programme updates and announcements\n- Operational and common BBA queries\n- Study resources and other useful information\n\n**No sign-up. No subscription. Free forever. Available 24×7.**\n\nWebsite:\n[https://shorturl.at/APPeS](https://shorturl.at/APPeS)`
-            },
-            {
-                id: 'founder_circle',
-                category: 'Founder Circle',
-                suggestionPool: [
-                    "What is Founder Circle?",
-                    "How do I apply for Founder Circle?",
-                    "Founder Circle acceptance rate?",
-                    "startup internship Founder Circle"
-                ],
-                keywords: [
-                    'What is Founder Circle', 'what is founder circle', 'Founder Circle kya hai', 'founder circle kya h', 'founder circle community', 
-                    'founder community', 'startup community', 'entrepreneur community', 'entrepreneurship community', 'founders community', 
-                    'builders community', 'aspiring entrepreneurs', 'where can founders connect', 'where can I find startup community', 'startup network', 
-                    'founder network', 'founder circle website', 'founder circle apply', 'how to join founder circle', 'founder circle kaise join kare', 
-                    'founder circle membership', 'founder circle acceptance rate', 'founder circle internship', 'founder circle masterclass', 
-                    'founder circle meetup', 'founder circle opportunities', 'founder circle founders', 'Founder Circle kaise join karu', 
-                    'How do I apply for Founder Circle', 'Founder Circle mein kya milta hai', 'Founder Circle startup community hai kya', 
-                    'Entrepreneurs ke liye koi community hai', 'Where can I connect with student founders'
-                ],
-                markdown: `### Founder Circle\n\n{{Name}}, Founder Circle is a community for:\n\n- Founders\n- Builders\n- Aspiring entrepreneurs\n\nIt is designed to help members:\n\n- Connect\n- Collaborate\n- Validate ideas\n- Learn\n- Build\n- Grow together\n\nFounder Circle is also part of the wider **BBA Circle parent community, "The Circle"**.\n\nTo maintain a focused and high-quality community, prospective members need to complete a short application before joining.\n\nFounder Circle website:\n[https://shorturl.at/fYUCO](https://shorturl.at/fYUCO)\n\nAverage acceptance rate:\n**10%**\n\nMembers can get access to:\n\n- Virtual masterclasses by batchmates building startups\n- Startup internship opportunities\n- In-person meetups across India\n- A network of ambitious students to collaborate, validate ideas, and build together\n\n*Founder Circle is an unofficial, student-led community created to help entrepreneurs and aspiring founders connect. Its discussions, opinions, and activities are independent and are not affiliated with any institution or organization.*`
-            },
-            {
-                id: 'parent_campus_visit',
-                category: 'Campus Visit',
-                suggestionPool: [
-                    "Can my parents visit campus?",
-                    "How much notice is needed for a campus visit?",
-                    "parents ke saath campus visit kar sakte hain?",
-                    "Parent permission for campus visit"
-                ],
-                keywords: [
-                    'Campus visit', 'Parent visit', 'Parents visiting campus', 'Can parents visit campus', 'Parent permission', 'Campus entry with parents', 
-                    'Visit campus with parents', 'Parents campus visit', 'Parents allowed on campus', 'Can my parents come', 'Can parents enter', 
-                    'Campus visit permission', 'Management permission', 'Permission to visit campus', '48 hours permission', '48 hour permission', 
-                    'parent visit rules', 'campus visit rules', 'visit IIM Udaipur', 'campus visit with parent', 'parents ke saath campus visit', 
-                    'parents ke sath campus jaana', 'parents campus aa sakte hain', 'parents ko campus mein allow hai', 'parents campus ja sakte hain', 
-                    'campus visit ka permission', 'management se permission', '48 hours pehle permission', '2 din pehle permission', 
-                    'parents ko kaise la sakte hain', 'mom', 'dad', 'mother', 'father', 'parents', 'family', 'maa', 'papa', 'mummy', 
-                    'parents ke saath', 'parents ke sath', 'Can I visit campus with my parents'
-                ],
-                markdown: `### Campus Visit & Parents\n\n{{Name}}, for regular working days, students who want to visit the campus with their parents need to obtain permission from management at least **48 hours in advance**.\n\nFor **BBA Connect**, parents will **not be allowed to visit the campus** as part of the event.`
-            },
-            {
-                id: 'student_wellbeing',
-                category: 'Dream Labs',
-                suggestionPool: [
-                    "I feel anxious",
-                    "How to handle exam stress?",
-                    "I feel overwhelmed",
-                    "Need a break from studying",
-                    "I feel stressed out",
-                    "I am panicking",
-                    "Feeling very sad",
-                    "Need some motivation"
-                ],
-                keywords_severe: [
-                    'self harm', 'self-harm', 'hurt myself', 'hurting myself', 'harm myself', 'cut myself', 'cutting myself', 
-                    'want to hurt myself', 'khud ko hurt', 'khud ko nuksan', 'khud ko harm', 'khud ko hurt karna', 'khud ko nuksan pahuchana', 
-                    'suicide', 'suicide thoughts', 'suicidal thoughts', 'want to die', 'i want to die', 'wanna die', 
-                    'kill myself', 'want to kill myself', 'end my life', 'ending my life', 'end it all', 'marna hai', 'mar jana hai', 
-                    'marna chahta hu', 'marna chahti hu', 'khud ko maarna', 'khud ko marna', 'zindagi khatam', 'life khatam karni hai', 
-                    'suicde', 'suicid', 'suicide thought', 'suicidal thought', 'selfharm', 'cant live', 'cant go on', 'dont want to live', 
-                    'dont wanna live', 'dont want live', 'wish i was dead', 'i wish i was dead', 'wish i were dead', 'i wish i could die', 
-                    'wish i could die', 'i want to be dead', 'i wanna be dead', 'want to be dead', 'better off dead', 'everyone would be better without me', 
-                    'nobody would miss me', 'no one would miss me', 'they would not miss me', 'i don\'t want to be here', 'i dont want to be here', 
-                    'i don\'t want to exist', 'i dont want to exist', 'i don\'t want to live anymore', 'i dont want to live anymore', 
-                    'i don\'t wanna live anymore', 'i dont wanna live anymore', 'i can\'t go on', 'i cant go on', 'i can\'t do this anymore', 
-                    'i cant do this anymore', 'i want everything to end', 'i want it all to end', 'i just want it to end', 'life isn\'t worth it', 
-                    'life is not worth it', 'life not worth living', 'no point living', 'no point in living', 'tired of living', 'tired of life', 
-                    'done with life', 'done with everything', 'want to disappear', 'i want to disappear', 'wish i could disappear', 
-                    'wish i wasn\'t here', 'wish i werent here', 'mar jana chahta hu', 'mar jana chahti hu', 'kaash main mar jata', 
-                    'kaash main mar jaati', 'kaash mai mar jata', 'kaash mai mar jaati', 'kaash main zinda nahi hota', 'kaash main zinda nahi hoti', 
-                    'jeena nahi hai', 'jeena nahi chahta', 'jeena nahi chahti', 'ab jeena nahi hai', 'zindagi nahi jeeni', 'zindagi khatam karni hai', 
-                    'sab khatam karna hai', 'sab kuch khatam karna hai', 'marne ka mann hai', 'marne ka man hai', 'marne ka mann kar raha hai', 
-                    'marne ka man kar raha hai', 'khud ko khatam karna', 'khud ko nuksaan', 'kash main mar jata', 'kash mai mar jata', 'i am done with life'
-                ],
-                keywords_general: [
-                    'depression', 'depressed', 'depress', 'feeling depressed', 'i am depressed', 'im depressed', 'very depressed', 
-                    'really depressed', 'sad', 'very sad', 'feeling sad', 'really sad', 'lonely', 'feeling lonely', 'alone', 'i feel alone', 
-                    'i feel lonely', 'empty', 'emotionally empty', 'hopeless', 'hopelessness', 'no hope', 'nothing matters', 'nothing feels right', 
-                    'feeling lost', 'lost in life', 'depression mein', 'depression me', 'depression ho raha hai', 'depression ho rha hai', 
-                    'depressed hu', 'depressed hoon', 'main depressed hu', 'mai depressed hu', 'mann udaas hai', 'man udaas hai', 'bahut udaas', 
-                    'bohot udaas', 'akela', 'akeli', 'akela feel ho raha hai', 'akela feel kar raha hu', 'akela feel kar rahi hu', 'mann nahi lag raha', 
-                    'bahut pareshaan', 'bohot pareshaan', 'life difficult lag rahi hai', 'sab kuch difficult lag raha hai', 'anxiety', 'anxious', 
-                    'feeling anxious', 'feel anxious', 'i feel anxious', 'i am anxious', 'im anxious', 'i\'m anxious', 'very anxious', 'really anxious', 
-                    'so anxious', 'too anxious', 'extremely anxious', 'my anxiety', 'i have anxiety', 'my anxiety is bad', 'anxiety attack', 
-                    'anxiety attacks', 'panic', 'panicking', 'panic attack', 'panic attacks', 'feeling panicked', 'i feel panicked', 'nervous', 
-                    'very nervous', 'feeling nervous', 'nervousness', 'restless', 'uneasy', 'worried', 'worrying', 'constant worry', 'overthinking', 
-                    'overthink', 'overthinking too much', 'cant stop thinking', 'can\'t stop thinking', 'anxiety ho rahi hai', 'anxiety ho raha hai', 
-                    'anxiety ho rha hai', 'anxious hu', 'anxious hoon', 'main anxious hu', 'mai anxious hu', 'bahut anxious', 'bohot anxious', 
-                    'bahut anxiety', 'bohot anxiety', 'mujhe anxiety ho rahi hai', 'mujhe anxiety ho raha hai', 'mujhe anxiety ho rha hai', 
-                    'panic ho raha hai', 'panic ho rhi hai', 'panic ho rha hai', 'bahut tension', 'bohot tension', 'bahut stress', 'bohot stress', 
-                    'exam ki tension', 'exam ko lekar tension', 'exam ke wajah se tension', 'exam ki wajah se anxiety', 'exam ko lekar anxiety', 
-                    'exam ka pressure', 'exam ke pressure mein', 'mann bahut pareshaan hai', 'dimag bahut chal raha hai', 'bahut overthink kar raha hu', 
-                    'bahut overthink kar rahi hu', 'stress', 'stressed', 'very stressed', 'too much stress', 'extreme stress', 'exam stress', 
-                    'academic stress', 'student stress', 'study stress', 'pressure', 'too much pressure', 'feeling pressured', 'overwhelmed', 
-                    'overwhelming', 'burnout', 'burnt out', 'mentally exhausted', 'emotionally exhausted', 'anxeity', 'anxity', 'depresion', 
-                    'depresed', 'cant cope', 'i cant handle this', 'handle nahi ho raha', 'handle nhi ho raha', 'sab kuch difficult lag raha hai', 
-                    'bahut pressure hai', 'bohot pressure hai', 'life difficult hai', 'life is difficult', 'give up', 'giving up', 'i want to give up', 
-                    'mann nahi kar raha', 'jeene ka mann nahi', 'life nahi chahiye', 'emotionally drained', 'mentally drained', 'feeling broken', 
-                    'feeling helpless', 'helpless', 'not coping', 'struggling mentally', 'mental struggle', 'bad mental health', 'not feeling okay', 
-                    'i\'m not okay', 'im not okay', 'feel terrible', 'feeling terrible', 'feeling horrible', 'feeling low', 'feeling down', 
-                    'mann pareshaan hai', 'man pareshaan hai', 'akeli feel ho rahi hai', 'akeli feel kar rahi hu', 'mental pressure', 'mental stress', 
-                    'dimag kharab ho raha hai', 'scared', 'afraid', 'mentally tired', 'mujhe depression feel ho raha hai'
-                ],
-                markdown_severe: `{{Name}}, I'm really sorry you're going through this. I'm glad you said something.\n\nPlease don't stay alone with this right now. Move toward a trusted person nearby and tell them clearly that you're not feeling safe. If you have access to anything you could use to hurt yourself, move away from it and ask someone you trust to stay with you.\n\nIf you are in immediate danger, call **112** in India or go to the nearest emergency department.\n\nYou can also contact **Tele-MANAS at 14416** for mental-health support.\n\nYou do not have to figure everything out right now. Focus only on getting through this moment with another person beside you.\n\nAs an optional peer community, you can also join <a href="https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline; font-weight: bold;">BBA Circle</a>.`,
-                markdown_general: `{{Name}}, take a moment. You don't have to figure everything out at once.\n\nIf you can, step away from the pressure for a few minutes, take a few slow breaths, and talk to someone you trust.\n\nIf you'd like, you can also try a short breathing exercise with Dream Labs below.`
-            },
-            {
-                id: 'question_pattern',
-                category: 'Question Pattern',
-                suggestionPool: [
-                    "What is the exam question pattern?",
-                    "paper ka pattern kya hai?",
-                    "mid sem mein MCQ honge?",
-                    "MCQ aur MSQ dono honge kya?",
-                    "exam difficulty kaisi hogi?"
-                ],
-                keywords: [
-                    'question pattern', 'exam pattern', 'paper pattern', 'exam format', 'question format', 'mid sem pattern', 'midterm pattern', 
-                    'mid term pattern', 'exam mein kya aayega', 'exam me kya aayega', 'paper mein kya hoga', 'paper me kya hoga', 'questions kaise honge', 
-                    'questions kis type ke honge', 'question kis type ka hoga', 'paper kis type ka hoga', 'mcq', 'mcqs', 'multiple choice', 
-                    'multiple choice questions', 'objective questions', 'objective type', 'exam questions', 'exam question type', 'mid sem questions', 
-                    'mid sem question pattern', 'midterm questions', 'midterm question pattern', 'paper pattern kya hai', 'paper ka pattern kya hai', 
-                    'exam ka pattern kya h', 'exam kaise hoga', 'questions ka pattern', 'question ka pattern', 'kitne type ke questions', 'mcq honge kya', 
-                    'msq', 'mqs', 'msqs', 'multiple select questions', 'multiple selection questions',
-                    'msq honge kya', 'mcq aur msq', 'mcq msq', 'multiple choice aur multiple selection', 'multiple choice and multiple selection'
-                ],
-                markdown: `### Question Pattern\n\n{{Name}}, the examination will consist of:\n\n- **Multiple Choice Questions (MCQs)**\n- **Multiple Select Questions (MSQs)**\n\nMCQs generally require the student to select the correct option from the choices provided.\n\nMSQs may require the student to select more than one correct option.\n\nThe overall difficulty may range from **Moderate → Hard**.`
-            },
-            {
-                id: 'passing_criteria',
-                category: 'Passing Criteria',
-                suggestionPool: [
-                    "What is the passing criteria?",
-                    "How do I progress to the next year?",
-                    "Is 500 out of 1000 enough?",
-                    "How is Annual NPE calculated?"
-                ],
-                keywords: [
-                    'passing criteria', 'progress to the next year', 'progression', 'marks do i need', '500 marks', 
-                    '500 out of 1000', 'less than 500 marks', 'annual npe', 'course gpa', 'course npe', 'relative grading', 
-                    'nva', 'no valid attempt', 'absent', 'retakes', 'minimum mark required', 'course marks converted',
-                    'marks do i need for progression', '500 out of 1000 enough', 'progress with less than 500',
-                    'annual npe is 40', 'how is gpa calculated', 'how is npe calculated', 'what happens if i am absent',
-                    'are retakes allowed', 'minimum mark required in every course', 'converted to grades', 'fail', 'pass'
-                ],
-                markdown: `### BBA Relative Grading and Progression Policy\n\nThe BBA Program follows a relative grading system.\n\nRaw marks are converted into a percentile among all students who have valid attempts in that course.\n\nThe percentile determines the student's letter grade:\n\n- A\n- B\n- C\n- D\n\nCourse GPA and Course NPE are progressively calculated within the relevant grade band. Therefore, students receiving the same letter grade can still have slightly different Course GPA and Course NPE values.\n\nNPE means Normalized Performance/Examination score and is a normalized score from 0 to 100. It is NOT the student's raw percentage.\n\n### Progression to the next academic year\n\nA student progresses to the next academic year if EITHER of the following conditions is satisfied:\n\n1. The student obtains at least 500 marks out of 1000 across the ten courses.\n\nOR\n\n2. The student's Annual NPE is at least 40.\n\nThese are alternative routes.\n\nTherefore:\n\n- A student with 500 or more marks out of 1000 qualifies even if Annual NPE is below 40.\n- A student with fewer than 500 marks can still qualify if Annual NPE is at least 40.\n\nThere is NO separate minimum-mark requirement for each individual course under the 500/1000 progression route. The total marks across all ten courses are considered.\n\n### Annual GPA and Annual NPE\n\nAnnual GPA = average of the ten Course GPAs.\n\nAnnual NPE = average of the ten Course NPEs.\n\n### Valid attempts\n\nStudents with valid attempts receive:\n\n- percentile-based result\n- letter grade\n- positive Course GPA\n- positive Course NPE\n\n### NVA\n\nIf a student has no valid attempt, including absence, the course result is:\n\n- NVA\n- Course marks = 0\n- Course GPA = 0.00\n- Course NPE = 0\n\n### Retakes\n\nRetakes are NOT permitted.\n\n### Non-course requirements\n\nNon-course requirements may have statuses such as:\n\n- Completed\n- NVA\n\nNon-course requirements are NOT included in:\n\n- Annual GPA\n- Annual NPE\n- Aggregate Marks\n\nHowever, mandatory non-course requirements must still be completed.`
-            },
-            {
-                id: 'faculty_bc',
-                category: 'Business Communication Faculty',
-                suggestionPool: [
-                    "Who is the Business Communication instructor?",
-                    "business communication faculty kaun hai?",
-                    "BC ke teacher kaun hain?",
-                    "Who teaches Business Communication?"
-                ],
-                keywords: [
-                    'business communication faculty', 'business communication instructor', 'business communication teacher', 'business communication professor',
-                    'bc faculty', 'bc instructor', 'bc teacher', 'bc professor', 'communicaton faculty', 'communcation instructor', 'business comunication teacher'
-                ],
-                markdown: `{{Name}}, for **Business Communication**:\n\n- **Faculty**: Prof. Kunal Kumar\n- **Instructor**: Prof. Bablu Ray`
-            },
-            {
-                id: 'faculty_bm',
-                category: 'Business Mathematics Faculty',
-                suggestionPool: [
-                    "Who is the Business Mathematics faculty?",
-                    "maths instructor kaun hai?",
-                    "Who teaches Business Mathematics?",
-                    "Business Maths teacher?"
-                ],
-                keywords: [
-                    'business mathematics faculty', 'business mathematics instructor', 'business mathematics teacher', 'business mathematics professor',
-                    'business maths faculty', 'business maths instructor', 'maths faculty', 'maths instructor', 'maths teacher', 'mathematcs faculty', 'mathematic instructor', 'business mathmatics teacher'
-                ],
-                markdown: `{{Name}}, for **Business Mathematics**:\n\n- **Faculty**: Prof. Sumit Kumar\n- **Instructor**: Prof. Silony Gupta`
-            },
-            {
-                id: 'faculty_cab',
-                category: 'Computer Applications Faculty',
-                suggestionPool: [
-                    "Who is the Computer Applications faculty?",
-                    "CAB faculty?",
-                    "computer application faculty?",
-                    "Who teaches CAB?"
-                ],
-                keywords: [
-                    'computer applications for business faculty', 'computer applications faculty', 'computer applications instructor', 'computer applications teacher',
-                    'cab faculty', 'cab instructor', 'cab teacher', 'computer application faculty', 'computer aplications instructor'
-                ],
-                markdown: `{{Name}}, for **Computer Applications for Business**:\n\n- **Faculty**: Prof. Gyanesh Raj\n- **Instructor**: Prof. Vinay Kumar Jha`
-            },
-            {
-                id: 'faculty_msm',
-                category: 'Marketing Faculty',
-                suggestionPool: [
-                    "Who is teaching Marketing and Sales Management?",
-                    "marketing faculty kaun hai?",
-                    "Who teaches Marketing and Sales?",
-                    "marketing instructor?"
-                ],
-                keywords: [
-                    'marketing and sales management faculty', 'marketing and sales faculty', 'marketing faculty', 'marketing instructor', 'marketing teacher',
-                    'sales management faculty', 'msm faculty', 'msm instructor', 'marketing managment faculty', 'marketing sales managment instructor', 'sales managment teacher'
-                ],
-                markdown: `{{Name}}, for **Marketing and Sales Management**:\n\n- **Faculty**: Prof. Ankur Kapoor\n- **Instructor**: Prof. Vaishali Garg`
-            },
-            {
-                id: 'faculty_eb',
-                category: 'Entrepreneurship Faculty',
-                suggestionPool: [
-                    "Who teaches Entrepreneurship Basics?",
-                    "Entrepreneurship ka instructor kaun hai?",
-                    "entrepreneurship faculty kaun hai?",
-                    "Who is the EB instructor?"
-                ],
-                keywords: [
-                    'entrepreneurship basics faculty', 'entrepreneurship faculty', 'entrepreneurship instructor', 'entrepreneurship teacher',
-                    'eb faculty', 'eb instructor', 'entreprenuership faculty', 'entrepreneurhsip instructor', 'entrepreneruship teacher'
-                ],
-                markdown: `{{Name}}, for **Entrepreneurship Basics**:\n\n- **Faculty**: Prof. Pradeep Hota\n- **Instructor**: Prof. Harsimar Kaur`
-            },
-            {
-                id: 'faculty_general',
-                category: 'Faculty General',
-                suggestionPool: [
-                    "Who are the faculty for our subjects?",
-                    "subject faculty list",
-                    "who teaches what?",
-                    "instructor details"
-                ],
-                keywords: [
-                    'who teaches', 'who is faculty', 'who is instructor', 'teacher', 'professor', 'sir', 'maam', 'mam', 'faculty kaun hai', 'faculty kon hai', 
-                    'teacher kaun hai', 'teacher kon hai', 'instructor kaun hai', 'instructor kon hai', 'kis professor ke under', 'kaun padha raha hai', 
-                    'who teaches this subject', 'subject faculty', 'subject instructor'
-                ],
-                markdown: `{{Name}}, here is the faculty and instructor information for your subjects:\n\n**Business Communication**\nFaculty: Prof. Kunal Kumar | Instructor: Prof. Bablu Ray\n\n**Business Mathematics**\nFaculty: Prof. Sumit Kumar | Instructor: Prof. Silony Gupta\n\n**Computer Applications for Business**\nFaculty: Prof. Gyanesh Raj | Instructor: Prof. Vinay Kumar Jha\n\n**Marketing and Sales Management**\nFaculty: Prof. Ankur Kapoor | Instructor: Prof. Vaishali Garg\n\n**Entrepreneurship Basics**\nFaculty: Prof. Pradeep Hota | Instructor: Prof. Harsimar Kaur`
-            },
-            {
-                id: 'recordings_bc',
-                category: 'BC Recordings',
-                suggestionPool: [
-                    "Business Communication ki recording kaha milegi?",
-                    "business communication ki recording chahiye",
-                    "I missed the BC live session",
-                    "Where is the Business Communication recording?"
-                ],
-                keywords: [
-                    'business communication recording', 'bc recording', 'business communication missed class', 'business communication recorded session', 
-                    'bc recorded class', 'business communication lecture recording', 'business communication video', 'business communication ki recording chahiye'
-                ],
-                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Business Communication** in the folder below:`,
-                sources: [ { label: 'Business Communication Recordings →', url: 'https://drive.google.com/drive/folders/1phsWKzXuc7av-XMqNp6GqXpY8Ghay0_o' } ]
-            },
-            {
-                id: 'recordings_bm',
-                category: 'Maths Recordings',
-                suggestionPool: [
-                    "maths ka recorded lecture chahiye",
-                    "Where are the business maths recordings?",
-                    "I missed the maths class",
-                    "business mathematics recorded video"
-                ],
-                keywords: [
-                    'business mathematics recording', 'business maths recording', 'maths recording', 'bm recording', 'business mathematics missed class', 
-                    'maths recorded session', 'maths lecture recording', 'business maths video', 'maths ka recorded lecture chahiye'
-                ],
-                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Business Mathematics** in the folder below:`,
-                sources: [ { label: 'Business Mathematics Recordings →', url: 'https://drive.google.com/drive/folders/1y2ihZf7El6ZI33Kq2WCgFobDAOGsnjce?usp=sharing' } ]
-            },
-            {
-                id: 'recordings_cab',
-                category: 'CAB Recordings',
-                suggestionPool: [
-                    "computer applications ka session miss ho gaya",
-                    "Where is the CAB recording?",
-                    "computer applications recorded lecture",
-                    "CAB video link"
-                ],
-                keywords: [
-                    'computer applications recording', 'cab recording', 'computer application missed class', 'computer applications recorded session', 
-                    'computer application lecture recording', 'cab video', 'computer applications ka session miss ho gaya'
-                ],
-                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Computer Applications for Business** in the folder below:`,
-                sources: [ { label: 'Computer Applications Recordings →', url: 'https://drive.google.com/drive/folders/19MjPFcCTz0HHc3DHz-uwsxQCQ9TM9qqT?usp=sharing' } ]
-            },
-            {
-                id: 'recordings_msm',
-                category: 'Marketing Recordings',
-                suggestionPool: [
-                    "marketing recording",
-                    "Where can I find marketing recorded sessions?",
-                    "I missed the marketing class",
-                    "marketing and sales video"
-                ],
-                keywords: [
-                    'marketing recording', 'sales recording', 'msm recording', 'marketing and sales missed class', 'marketing recorded session', 
-                    'marketing lecture recording', 'marketing video', 'marketing ki recording'
-                ],
-                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Marketing and Sales Management** in the folder below:`,
-                sources: [ { label: 'Marketing and Sales Recordings →', url: 'https://drive.google.com/drive/folders/1myekXrGGqqdmqCbiJAt4Ex-qR45OgMc9?usp=sharing' } ]
-            },
-            {
-                id: 'recordings_eb',
-                category: 'Entrepreneurship Recordings',
-                suggestionPool: [
-                    "entrepreneurship ki video kaha hai?",
-                    "Where are the entrepreneurship recordings?",
-                    "I missed the EB live session",
-                    "entrepreneurship basics recorded lecture"
-                ],
-                keywords: [
-                    'entrepreneurship recording', 'eb recording', 'entrepreneurship basics missed class', 'entrepreneurship recorded session', 
-                    'entrepreneurship lecture recording', 'entrepreneurship video', 'entrepreneurship ka lecture miss ho gaya'
-                ],
-                markdown: `{{Name}}, you can access the recorded sessions and missed live classes for **Entrepreneurship Basics** in the folder below:`,
-                sources: [ { label: 'Entrepreneurship Basics Recordings →', url: 'https://drive.google.com/drive/folders/1EnolLSEK-ZUMNwE4_gkhld3Bpj-u76Xc?usp=sharing' } ]
-            },
-            {
-                id: 'recordings_general',
-                category: 'Recordings General',
-                suggestionPool: [
-                    "Can I access the recorded sessions?",
-                    "Where are recorded classes?",
-                    "recording kaha milegi?",
-                    "I missed the live session",
-                    "Where can I watch recording?"
-                ],
-                keywords: [
-                    'recorded class', 'recorded lecture', 'recorded session', 'recording', 'recorded video', 'class recording', 'lecture recording', 
-                    'missed class', 'missed lecture', 'missed live session', 'couldn\'t attend class', 'could not attend class', 'missed the session', 
-                    'missed today\'s class', 'missed live class', 'where is recording', 'where can i watch recording', 'recording kaha milegi', 
-                    'recording kahan milegi', 'recording kaha hai', 'recording kidhar hai', 'class ki recording', 'lecture ki recording', 
-                    'live session ki recording', 'miss ho gaya', 'class miss ho gayi', 'session miss ho gaya', 'live class miss ho gayi', 
-                    'video kaha milega', 'video kahan milega', 'recorded video kaha hai', 'recording bhejo', 'recorded lecture chahiye'
-                ],
-                markdown: `{{Name}}, here are the folders containing the recorded sessions and missed live classes for all subjects:`,
-                sources: [
-                    { label: 'Business Communication Recordings →', url: 'https://drive.google.com/drive/folders/1phsWKzXuc7av-XMqNp6GqXpY8Ghay0_o' },
-                    { label: 'Business Mathematics Recordings →', url: 'https://drive.google.com/drive/folders/1y2ihZf7El6ZI33Kq2WCgFobDAOGsnjce?usp=sharing' },
-                    { label: 'Computer Applications Recordings →', url: 'https://drive.google.com/drive/folders/19MjPFcCTz0HHc3DHz-uwsxQCQ9TM9qqT?usp=sharing' },
-                    { label: 'Marketing and Sales Recordings →', url: 'https://drive.google.com/drive/folders/1myekXrGGqqdmqCbiJAt4Ex-qR45OgMc9?usp=sharing' },
-                    { label: 'Entrepreneurship Basics Recordings →', url: 'https://drive.google.com/drive/folders/1EnolLSEK-ZUMNwE4_gkhld3Bpj-u76Xc?usp=sharing' }
-                ]
-            },
-            {
-                id: 'bba_connect_fees',
-                category: 'BBA Connect',
-                suggestionPool: [
-                    "What is BBA Connect?",
-                    "bba connect ka 500 kisliye hai?",
-                    "Is BBA Connect compulsory?",
-                    "bba connect kab hai?",
-                    "Can parents attend BBA Connect?",
-                    "Are parents allowed at BBA Connect?",
-                    "BBA Connect mein parents allowed hain?"
-                ],
-                keywords: [
-                    'bba connect', 'BBA Connect', 'bba connect fees', 'bba connect fee', 'bba connect charges', 'bba connect cost', 'bba connect price', 
-                    'bba connect payment', 'bba connect registration fee', 'bba connect participation fee', 'bba connect event', 'bba connect meetup', 
-                    'bba connect meet up', 'bba connect meeting', 'bba connect programme', 'bba connect program', 'what is bba connect', 'what\'s bba connect', 
-                    'what is bba connect fees', 'what is bba connect fee', 'why bba connect fee', 'why bba connect fees', 'what does bba connect fee cover', 
-                    'what does the 500 cover', 'what is the 500 for', '500 rupees bba connect', '500 rs bba connect', '500 bba connect', 'bba connect 500', 
-                    'bba connect 500 rupees', 'bba connect 500 rs', 'bba connect september', 'bba connect september 26', 'bba connect 26 september', 
-                    'bba connect date', 'bba connect time', 'bba connect venue', 'bba connect location', 'bba connect campus', 'bba connect accommodation', 
-                    'bba connect food', 'bba connect lunch', 'bba connect snacks', 'bba connect eligibility', 'who can attend bba connect', 
-                    'is bba connect compulsory', 'is bba connect mandatory', 'is bba connect optional', 'bba connect optional', 'bba connect attendance', 
-                    'bba connect meetup fees', 'bba connect event fees', 'bba connect in person', 'bba connect in-person', 'bba connect campus meetup', 
-                    'bba connect activities', 'bba connect kya hai', 'bba connect kya h', 'bba connect kya hota hai', 'bba connect kya hota h', 
-                    'bba connect kisliye hai', 'bba connect ka kya hai', 'bba connect ka fee', 'bba connect ki fee', 'bba connect ke fees', 
-                    'bba connect ki fees', 'bba connect ka paisa', 'bba connect ka payment', 'bba connect ke paise', 'bba connect ke 500', 
-                    'bba connect ka 500', '500 rupay bba connect', '500 rupees bba connect', '500 rs bba connect', 'bba connect mein kya milega', 
-                    'bba connect me kya milega', 'bba connect mein kya hai', 'bba connect me kya hai', 'bba connect ka paisa kisliye', '500 kisliye hai', 
-                    '500 ka kya hai', '500 kyu dena hai', '500 kyun dena hai', 'bba connect compulsory hai', 'bba connect mandatory hai', 
-                    'bba connect optional hai', 'bba connect jana zaroori hai', 'bba connect jaana zaroori hai', 'bba connect mein jana hai', 
-                    'bba connect me jana hai', 'bba connect kab hai', 'bba connect kaha hai', 'bba connect kahan hai', 'bba connect kitne baje hai', 
-                    'bba connect mein food milega', 'bba connect me lunch milega', 'bba connect me snacks milega', 'bba connect accommodation', 
-                    'bba connect stay', 'bba connect campus mein', 'bba connect campus me', 'bba connect meetup kya hai', 'bba connect event kya hai', 
-                    'bba conect', 'bba connnect', 'bba connectt', 'bba connet', 'bba con', 'bba meet', 'bba meetup fee', 'bba meet up fee', 
-                    'bba connect fees kya', 'bba connect fee kya', 'bba connect ka fee kya', 'bba connect ka fees kya', 'bba connect 500 kyun', 
-                    'bba connect 500 kyu', 'bba connect 500 kisliye', 'Can parents attend BBA Connect', 'Are parents allowed at BBA Connect', 'BBA Connect mein parents allowed hain', 'BBA Connect mein parents aa sakte hain'
-                ],
-                markdown: `"BBA Connect is an optional in-person meet-up for BBA students at the IIM Udaipur campus, scheduled for 26 September 2026, shortly after the Mid-Terms.\n\nThe ₹500 participation fee covers snacks, lunch, planned activities and other event-related expenses. No additional payment is required.\n\nThe event is mainly about meeting fellow BBA students, getting familiar with the campus and taking part in the planned activities, including a guided campus tour.\n\nIt runs from 10:00 a.m. to 4:00 p.m.\n\nParticipation is optional."`,
-                sources: []
-            },
-            {
-                id: 'casual_conversation',
-                category: 'Casual Conversation',
-                suggestionPool: [],
-                keywords: [
-                    ' hi ', ' hello ', ' hey ', ' hii ', ' hiii ', ' helo ', ' helloo ', ' heyy ', 
-                    ' heyyy ', ' yo ', ' hi circle ', ' hello circle ', ' hey circle ', ' hi satya ', 
-                    ' hello satya ', ' hey satya '
-                ],
-                markdown: `` // Handled dynamically in matchIntent
-            },
-            {
-                id: 'mid_sem_exam_allowed_items',
-                category: 'Exam Allowed Items',
-                suggestionPool: [
-                    "What can I take to the exam centre?",
-                    "exam mein kya allowed hai?",
-                    "Can I take a water bottle to the exam?",
-                    "pen pencil allowed hai?"
-                ],
-                keywords: [
-                    'exam centre', 'exam center', 'examination centre', 'examination center', 
-                    'mid sem', 'mid-sem', 'midsem', 'mid sem exam', 'mid semester exam', 
-                    'midterm', 'mid term', 'mid-term exam', 'midterm exam', 'exam hall', 
-                    'examination hall', 'exam room', 'exam venue', 'what can I carry', 
-                    'what can i take', 'what can we carry', 'what can we take', 'what should I carry', 
-                    'what should I take', 'things allowed', 'items allowed', 'allowed items', 
-                    'what is allowed', 'what can I bring', 'what can we bring', 'can I bring', 
-                    'can we bring', 'can I take', 'can we take', 'can I carry', 'can we carry', 
-                    'allowed in exam', 'allowed in exam hall', 'allowed in exam centre', 
-                    'allowed in exam center', 'water bottle', 'water', 'bottle', 
-                    'can I bring water bottle', 'can I take water bottle', 'can we carry water bottle', 
-                    'water bottle allowed', 'bottle allowed', 'pen', 'pencil', 'pen and pencil', 
-                    'pen pencil', 'can I bring pen', 'can I bring pencil', 'can I take pen', 
-                    'can I take pencil', 'pen allowed', 'pencil allowed', 'pen and pencil allowed',
-                    'exam centre mein kya le ja sakte hai', 'exam centre mein kya le ja sakte hai', 
-                    'exam mein kya le ja sakte hai', 'mid sem mein kya le jana hai', 
-                    'mid sem exam mein kya le ja sakte hai', 'exam hall mein kya le ja sakte hai', 
-                    'exam centre pe kya le jana hai', 'exam center pe kya le jana hai', 
-                    'kya kya le ja sakte hai exam mein', 'kya carry kar sakte hai exam mein', 
-                    'kya allowed hai exam mein', 'exam mein kya allowed hai', 'bottle le ja sakte hai', 
-                    'water bottle le ja sakte hai', 'paani ki bottle le ja sakte hai', 'pen le ja sakte hai', 
-                    'pencil le ja sakte hai', 'pen pencil le ja sakte hai', 'pen allowed hai', 
-                    'pencil allowed hai', 'bottle allowed hai', 'exam mein bottle allowed hai', 
-                    'exam mein pen allowed hai', 'exam mein pencil allowed hai', 'kya leke jana hai', 
-                    'kya lekar jana hai', 'exam ke liye kya le jana hai', 'exm centre', 'exam centar', 
-                    'exam center mein', 'exam centre mein', 'midsem exam mein', 'bottle le ja skte', 
-                    'bottle le ja sakte', 'pen pencial', 'pencil pen', 'paani bottle', 'water botle', 
-                    'exam mein kya leke jaye', 'exam me kya le ja skte'
-                ],
-                markdown: `{{Name}}, for the Mid-Term Examination, students may be allowed to carry a transparent water bottle, pen, and pencil to the examination centre. Please verify the instructions provided by the examination centre before the exam.`
-            },
-            {
-                id: 'business_mathematics_onscreen_calculator',
-                category: 'Maths Calculator',
-                suggestionPool: [
-                    "Maths exam mein calculator milega kya?",
-                    "Will there be a calculator in the maths exam?",
-                    "on screen calculator hoga?"
-                ],
-                keywords: [
-                    'calculator', 'calculator allowed', 'is calculator allowed', 'can we use calculator', 
-                    'can I use calculator', 'can we bring calculator', 'can I bring calculator', 
-                    'do I need calculator', 'calculator in maths exam', 'calculator in mathematics exam', 
-                    'maths calculator', 'mathematics calculator', 'business mathematics calculator', 
-                    'business maths calculator', 'math exam calculator', 'mathematics exam calculator', 
-                    'mid sem maths calculator', 'mid sem mathematics calculator', 'calculator in exam', 
-                    'calculator during exam', 'calculator available', 'will calculator be provided', 
-                    'is calculator provided', 'calculator provided in exam', 'on screen calculator', 
-                    'onscreen calculator', 'on-screen calculator', 'online calculator', 'computer calculator', 
-                    'calculator on computer', 'calculator on the computer', 'calculator at exam centre', 
-                    'calculator at exam center', 'exam centre calculator', 'exam center calculator',
-                    'maths exam mein calculator', 'mathematics exam mein calculator', 'maths ke exam mein calculator', 
-                    'math ke exam mein calculator', 'business maths mein calculator', 'business mathematics mein calculator', 
-                    'calculator allowed hai', 'calculator le ja sakte hai', 'calculator le jana hai', 
-                    'calculator lana hai', 'calculator chahiye kya', 'calculator milega', 'calculator diya jayega', 
-                    'exam mein calculator milega', 'exam centre mein calculator', 'exam center mein calculator', 
-                    'computer mein calculator hoga', 'computer pe calculator hoga', 'computer par calculator hoga', 
-                    'on screen calculator hoga', 'screen pe calculator hoga', 'maths exam mein calculator milega', 
-                    'maths exam ke liye calculator', 'kya calculator allowed hai', 'kya calculator leke jana hai', 
-                    'calculator exam centre pe hoga', 'calculator exam center pe hoga', 'caluclator', 'calcualtor', 
-                    'calculater', 'calulator', 'calcuator', 'calculater allowed', 'maths exam calc', 'on screen calc', 
-                    'onscreen calc', 'screen calculator', 'math calculator', 'business math calc', 'calculator milega kya', 
-                    'calculator allowed he', 'calculator allowed hai kya', 'calculator le ja skte', 'calculator le ja sakte', 
-                    'calculator exam me', 'maths mein calculator hoga'
-                ],
-                markdown: `{{Name}}, for the Business Mathematics examination, an on-screen calculator will be available on the computer at the examination centre.`
-            },
-            {
-                id: 'mid_term_syllabus',
-                category: 'Mid-Term Syllabus',
-                suggestionPool: [
-                    "What is the Mid-Term syllabus?",
-                    "Mid-Term syllabus kya hai?",
-                    "Mid sem mein kya padhna hai?",
-                    "Mid sem ke videos kaha hain?",
-                    "Where are the Mid-Term playlists?",
-                    "Business Communication Mid-Term videos",
-                    "Business Mathematics Mid-Term videos",
-                    "Computer Applications Mid-Term videos",
-                    "Marketing and Sales Mid-Term videos",
-                    "Entrepreneurship Basics Mid-Term videos",
-                    "Mid sem playlist kahan hai?",
-                    "Midterm ki preparation ke liye videos kaha hain?"
-                ],
-                keywords: [
-                    'mid term', 'mid-term', 'midterm', 'mid sem', 'mid-sem', 'mid sem syllabus', 'mid-sem syllabus', 
-                    'midterm syllabus', 'mid term syllabus', 'mid term portion', 'midterm portion', 'mid sem portion', 
-                    'mid-sem portion', 'mid sem portions', 'midterm portions', 'mid semester syllabus', 'mid semester portion', 
-                    'mid-semester syllabus', 'mid-semester portion', 'mid exam', 'mid sem exam', 'midterm exam', 'mid term exam', 
-                    'mid semester exam', 'mid-semester exam', 'mid sem examination', 'mid term examination', 'midterm examination', 
-                    'mid sem videos', 'midterm videos', 'mid sem lectures', 'midterm lectures', 'mid sem playlist', 'midterm playlist', 
-                    'mid sem youtube', 'mid term youtube', 'mid sem recordings', 'mid term recordings', 'what is mid sem syllabus', 
-                    'what is mid term syllabus', 'what is midterm syllabus', 'what comes in mid sem', 'what comes in midterm', 
-                    'what to study for mid sem', 'what to study for midterm', 'mid sem mein kya hai', 'mid sem me kya hai', 
-                    'mid sem me kya padhna hai', 'mid sem mein kya padhna hai', 'midterm mein kya hai', 'midterm me kya hai', 
-                    'midterm me kya padhna hai', 'mid sem ka syllabus', 'mid sem ka portion', 'mid sem ki tayari', 'midterm ki tayari', 
-                    'mid sem ke videos', 'mid sem ki videos', 'mid term ke videos', 'midterm ke videos', 'syllabus for mid sem', 
-                    'syllabus for mid term', 'videos for mid sem', 'videos for midterm', 'lectures for mid sem', 'mid sem playlist kaha hai', 
-                    'mid sem playlist kahan hai', 'midterm playlist kaha hai', 'midterm playlist kahan hai', 'business communication mid sem', 
-                    'business mathematics mid sem', 'computer applications mid sem', 'computer applications for business mid sem', 
-                    'marketing and sales management mid sem', 'entrepreneurship basics mid sem', 'midsem', 'midsem syllabus', 
-                    'midsem sylabus', 'midterm sylabus', 'mid term sylabus', 'mid sem sylabus', 'midsem syallbus', 'mid sem syallbus', 
-                    'mid term syallbus', 'midterm syallbus', 'mid sem sillabus', 'mid sem silabus', 'mid term silabus', 'mid sem porion', 
-                    'midterm poriton', 'midterm porton', 'mid sem vedios', 'mid term vedios', 'midsem vedio', 'midterm vidoes', 
-                    'mid sem lecture', 'midsem lecutres', 'mid sem plalist', 'midterm plalist', 'portions', '13 september', 'exam syllabus'
-                ],
-                markdown: `### Mid-Term Examination Syllabus\n\n{{Name}}, here’s the current **Mid-Term syllabus**, subject by subject.\n\nThe following playlists contain the available video lectures relevant to the Mid-Term preparation.\n\n### Business Communication\n\n**Videos uploaded:** 1–80\n\n[Watch the Business Communication playlist →](https://youtube.com/playlist?list=PLO6lKmVH-LHc&si=Fueo6s_1gvNdXSjU)\n\n### Business Mathematics\n\n**Videos uploaded:** 1–84\n\n[Watch the Business Mathematics playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SALcAYjbujfMUwAI4S9Cx9c&si=BFPR6-SGkhXkdx8D)\n\n### Computer Applications for Business\n\n**Videos uploaded:** 1–84\n\n[Watch the Computer Applications playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SCk7LmDwxbmiYXrwn4DaZZm&si=Fa3zKY4xWgzYWP-5)\n\n### Marketing and Sales Management\n\n**Videos uploaded:** 1–92\n\n[Watch the Marketing and Sales Management playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SCqngJcM7uWg81BnOXiuaNM&si=Ub0UqIAqkdYzliPQ)\n\n### Entrepreneurship Basics\n\n**Videos uploaded:** 1–77\n\n[Watch the Entrepreneurship Basics playlist →](https://youtube.com/playlist?list=PL59tH4pjx8SB2v1pdapHJcxcGq-Mj4r4-&si=6HkLwbhlIB9YeiU1)\n\n---\n\nFor **handbooks, practice assignments, PPTs, and other LMS resources**, simply ask Circle AI.`
-            },
-            {
-                id: 'material_pages_to_study',
-                category: 'Study Material Pages',
-                suggestionPool: [
-                    "How much of the booklet to study?",
-                    "notes kaha tak padhne hai?",
-                    "till what page to read?",
-                    "material syllabus cutoff"
-                ],
-                keywords: ['how many pages', 'booklet', 'till what page', 'material kaha tak', 'notes kaha tak', 'how much material', 'how much is included', 'what to read', 'cutoff'],
-                markdown: `### How Much of the Booklet or Material Should You Study?\n\n{{Name}}, for the 13 September Mid-Term Examination, the safest approach is to prepare all the material that has been uploaded to the Drive/LMS by 31 August.\n\nThere isn't a separate page-wise cutoff for the booklet or study material. If the material has been uploaded by 31 August, treat it as part of your Mid-Term preparation.\n\nSo rather than stopping at a particular page, make sure you cover all relevant material available by the 31 August cutoff.\n\nIn short:\n\nUploaded by 31 August = Prepare it for the 13 September Mid-Term Examination.`
-            },
-            {
-                id: 'course_resources',
-                category: 'Drive Resources',
-                suggestionPool: [
-                    "Where can I find the subject notes?",
-                    "Where are the subject notes?",
-                    "drive link chahiye",
-                    "pdf notes kaha milenge?"
-                ],
-                keywords: ['resources', 'notes', 'drive link', 'drive folder', 'pdf', 'study material', 'drive'],
-                markdown: `{{Name}}, here are the resources and study materials for your courses. You can access the respective Drive folders below:`,
-                sources: [
-                    { label: 'Business Communication →', url: 'https://drive.google.com/drive/folders/17NWgy1nZh0Q0YZDdB-jGADXvF1xzB9y7' },
-                    { label: 'Business Mathematics →', url: 'https://drive.google.com/drive/folders/1clDRkrYLOSmwkPm_ECf0jb6c2cWRegR2' },
-                    { label: 'Computer Applications →', url: 'https://drive.google.com/drive/folders/1NTolhLXk9X3q1477yC5gTMs84UosRRxa' },
-                    { label: 'Marketing and Sales →', url: 'https://drive.google.com/drive/folders/1IZkknweXDJyp041U-EstCd3DnvLLl-aK' },
-                    { label: 'Entrepreneurship Basics →', url: 'https://drive.google.com/drive/folders/1dvmCB-j0B9MaUfquajX9_qj2xsI26E41' }
-                ]
-            },
-            {
-                id: 'live_doubt_sessions',
-                category: 'Zoom Links',
-                suggestionPool: [
-                    "Where are the Zoom links?",
-                    "live class link",
-                    "doubt session zoom link",
-                    "zoom password kya hai?"
-                ],
-                keywords: ['live session', 'doubt session', 'zoom link', 'class link', 'live class', 'zoom'],
-                markdown: `{{Name}}, here are the Zoom links for the live doubt sessions across all subjects.\n\n**Zoom Password:** \`BBA@\``,
-                sources: [
-                    { label: 'Business Communication →', url: 'https://zoom.us/j/95377500458?pwd=MPNPXq0T7p18ucnEkyT12UwKd3KKF6.1' },
-                    { label: 'Business Mathematics →', url: 'https://zoom.us/j/94603435344?pwd=K0ISxY9uI6YUx8IdZ7UenTlPqN6XHt.1' },
-                    { label: 'Computer Applications →', url: 'https://zoom.us/j/99488305050?pwd=ecgD4jI4zLBIAbhpHE4Hduvr3RjqwF.1' },
-                    { label: 'Marketing and Sales →', url: 'https://zoom.us/j/97161433198?pwd=2FkPRj2JcpzIoOWfLniQUuY7n15M46.1' },
-                    { label: 'Entrepreneurship Basics →', url: 'https://zoom.us/j/92263061614?pwd=ixVO2y4CCSvmnuw3tUDrhdlWDPA1bl.1' }
-                ]
-            },
-            {
-                id: 'about_bba_circle',
-                category: 'About BBA Circle',
-                suggestionPool: [
-                    "What is BBA Circle?"
-                ],
-                keywords: ['what is bba circle', 'about bba circle', 'bba circle community', 'Circle community kya hai', 'BBA Circle community kya hai'],
-                markdown: `Well {{Name}}, BBA Circle is a community for BBA students to learn, connect, collaborate, and grow together.\n\nBenefits include:\n- Academic discussions and peer-to-peer learning\n- Crash courses and revision sessions by students\n- Masterclasses and learning sessions led by entrepreneurs\n- Study resources, notes, and useful materials\n- Discussions around assignments and examinations\n- Opportunities to teach, learn, and collaborate\n\n**Peer-Led Crash Courses:**\nFrom 6 September to 10 September, students interested in teaching can volunteer to conduct crash course sessions and help their peers while revising their own syllabus.\n\nBBA Circle handles coordination, moderation, and promotion. The community is entirely student-led.`,
-                sources: [
-                    { label: 'Join BBA Circle WhatsApp →', url: 'https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My' }
-                ]
-            },
-            {
-                id: 'backlogs_syllabus_completion',
-                category: 'Backlogs',
-                suggestionPool: [
-                    "How to cover my backlog?",
-                    "How can I finish my syllabus quickly?",
-                    "missed class cover kaise karu?",
-                    "syllabus completion strategy"
-                ],
-                keywords: ['backlog', 'missed class', 'complete syllabus', 'how to cover', 'cover syllabus'],
-                markdown: `If you are trying to cover backlogs or complete the syllabus, {{Name}}, your primary focus should be preparing all the material uploaded to the Drive/LMS by the 31 August cutoff.\n\nAdditionally, **Peer-Led Crash Courses** are being organized within the BBA Circle community from 6 September to 10 September. These are highly recommended for revising and catching up on missed concepts with the help of your peers.`,
-                sources: [
-                    { label: 'Join BBA Circle for Revision Sessions →', url: 'https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My' }
-                ]
-            },
-            {
-                id: 'casual_intent',
-                category: 'Casual Conversation',
-                suggestionPool: [],
-                keywords: ['how are you', 'how are u', 'hows it going', 'how are you doing'],
-                markdown: `Doing well, {{Name}}. What can I help you figure out?`
-            },
-            {
-                id: 'thanks_intent',
-                category: 'Casual Conversation',
-                suggestionPool: [],
-                keywords: ['thank you', 'thanks', 'thx', 'tysm'],
-                markdown: `You're welcome, {{Name}}.`
-            },
-            {
-                id: 'goodbye_intent',
-                category: 'Casual Conversation',
-                suggestionPool: [],
-                keywords: ['bye', 'goodbye', 'see ya', 'cya', 'good night', 'catch you later'],
-                markdown: `See you, {{Name}}. Good luck with your preparation.`
-            }
-        ];
-
-        const fallbackResponse = {
-            markdown: `{{Name}}, I don't have enough verified information to answer that reliably.\n\nI don't want to guess and give you incorrect information.\n\nFor questions outside my current knowledge base, you can also ask the student community at **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**, where students share resources, discuss academics, participate in revision sessions, and help each other out.`,
-            sources: [
-                { label: 'BBA Circle WhatsApp →', url: 'https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My' }
-            ]
-        };
-
-        const greetingsList = [
-            "What are you stuck on today, {{Name}}?",
-            "{{Name}}, turn confusion into clarity.",
-            "What do you want to understand, {{Name}}?",
-            "Hey {{Name}}. Got a question? Let's figure it out.",
-            "Your next answer is one question away, {{Name}}.",
-            "Don't just study it. Understand it, {{Name}}.",
-            "Stuck on a concept, {{Name}}? Ask away.",
-            "Make your doubts disappear, {{Name}}.",
-            "Think it. Ask it. Understand it, {{Name}}.",
-            "One question can change everything, {{Name}}.",
-            "From \"I don't get it\" to \"I got it\", {{Name}}.",
-            "Your study companion is ready, {{Name}}.",
-            "Ask. Learn. Move forward, {{Name}}."
-        ];
-
-        const casualResponses = [
-            "Hey {{Name}}. What are you stuck on today?",
-            "Hi {{Name}}. What would you like to understand?",
-            "Hey {{Name}}. Got a question?",
-            "Hello {{Name}}. Ask away."
-        ];
-
-        const circleRecommendations = [
-            "Need more help? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**, a student-led BBA community for learning, resources, and peer discussion.",
-            "Still stuck? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)** for peer learning, resources, revision sessions, and academic discussions.",
-            "Have more doubts? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)** for academic discussions and peer-to-peer learning.",
-            "Looking for more resources or peer help? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**.",
-            "Need help beyond this answer? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)** to learn, share, and grow with other BBA students.",
-            "Want to study with your peers? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**."
-        ];
-
-
-        /*******************************************************
-         * INFINITE SUGGESTION PILL SYSTEM
-         *******************************************************/
-        const fixedSuggestions = [
-            { text: 'Follow on LinkedIn', url: 'https://www.linkedin.com/in/satyaprakashsamal/' },
-            { text: 'Want to join BBA Circle?', url: 'https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My' }
-        ];
-
-        // Gather all suggestions grouped by category
-        const categorizedSuggestions = {};
-        knowledgeBase.forEach(intent => {
-            if (intent.suggestionPool && intent.suggestionPool.length > 0) {
-                if (!categorizedSuggestions[intent.category]) {
-                    categorizedSuggestions[intent.category] = [];
-                }
-                categorizedSuggestions[intent.category].push(...intent.suggestionPool);
-            }
-        });
-
-        const availableCategories = Object.keys(categorizedSuggestions);
-        
-        let lastCategory = null;
-        let recentPrompts = [];
-        
-        // Generator function for infinite suggestions
-        function* suggestionGenerator() {
-            while (true) {
-                let cat;
-                // Choose a random category different from the last one
-                do {
-                    cat = availableCategories[Math.floor(Math.random() * availableCategories.length)];
-                } while (cat === lastCategory && availableCategories.length > 1);
-                
-                lastCategory = cat;
-                
-                // Shuffle the prompts in the chosen category
-                let prompts = [...categorizedSuggestions[cat]].sort(() => 0.5 - Math.random());
-                
-                let selectedPrompt = null;
-                for (let p of prompts) {
-                    if (!recentPrompts.includes(p)) {
-                        selectedPrompt = p;
-                        break;
-                    }
-                }
-                
-                // If all prompts in this category have been used recently, just pick the first one
-                if (!selectedPrompt) {
-                    selectedPrompt = prompts[0];
-                }
-                
-                // Manage recent prompts history to avoid immediate repetition
-                recentPrompts.push(selectedPrompt);
-                if (recentPrompts.length > 15) {
-                    recentPrompts.shift();
-                }
-                
-                yield selectedPrompt;
-            }
-        }
-        
-        let suggGen = null;
-        
-        function resetSuggestionGenerator() {
-            lastCategory = null;
-            recentPrompts = [];
-            suggGen = suggestionGenerator();
-        }
-
-        let isAppendingSuggestions = false;
-        function loadMoreSuggestions(container) {
-            if (isAppendingSuggestions) return;
-            isAppendingSuggestions = true;
-            
-            const fragment = document.createDocumentFragment();
-            for (let i = 0; i < 5; i++) {
-                const q = suggGen.next().value;
-                fragment.appendChild(createSuggestionPillElement(q));
-            }
-            
-            container.appendChild(fragment);
-            
-            setTimeout(() => { isAppendingSuggestions = false; }, 100);
-        }
-
-        function renderSuggestionPills() {
-            const container = document.getElementById('suggestion-pills');
-            container.innerHTML = '';
-            
-            // Add fixed pills
-            fixedSuggestions.forEach(item => {
-                container.appendChild(createSuggestionPillElement(item.text, true, item.url));
-            });
-
-            resetSuggestionGenerator();
-            
-            // Initial load of random pills
-            for (let i = 0; i < 15; i++) {
-                container.appendChild(createSuggestionPillElement(suggGen.next().value));
-            }
-            
-            container.classList.remove('hidden');
-            container.style.opacity = '0';
-            container.style.transform = 'translateY(6px)';
-            
-            void container.offsetWidth;
-            
-            container.style.opacity = '1';
-            container.style.transform = 'translateY(0)';
-            
-            container.scrollLeft = 0;
-        }
-
-        /*******************************************************
-         * 3. STATE, UTILS & INITIALIZATION
-         *******************************************************/
-        let userName = "";
-        let greetingLoopActive = false;
-        let isChatMode = false;
-        let isProcessing = false;
-        let promoTimer = null;
-        let promoBannerConsent = true; // Added live consent tracking
-        
-        // Track promo shown in session storage instead of window scope
-        // This ensures the logic holds across manual refreshes but resets per new tab/session.
-        function setPromoShownInSession() {
-            sessionStorage.setItem('circlePromoShownSession', 'true');
-        }
-        function hasPromoBeenShownInSession() {
-            return sessionStorage.getItem('circlePromoShownSession') === 'true';
-        }
-
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-        function formatText(text, name) {
-            if (name) {
-                const cleanName = name.charAt(0).toUpperCase() + name.slice(1);
-                return text.replace(/\{\{Name\}\}/g, cleanName);
-            } else {
-                let res = text.replace(/\{\{Name\}\},\s*([a-z])/g, (match, p1) => p1.toUpperCase());
-                res = res.replace(/,\s*\{\{Name\}\}/g, "");
-                res = res.replace(/\s*\{\{Name\}\}/g, "");
-                return res;
-            }
-        }
-
-        async function logToGoogleSheets(data) {
-            try {
-                await fetch(GOOGLE_SHEETS_ENDPOINT, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(data)
-                });
-            } catch (err) {
-                console.warn("Analytics logging failed silently.", err);
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const isRegistered = localStorage.getItem('circle_user_registered');
-            userName = localStorage.getItem('circle_username') || "";
-            
-            localStorage.removeItem('circle_promo_shown'); // Legacy cleanup
-            
-            // Improve Circle Preference
-            const savedImproveSetting = getPreference('circleImproveEnabled', 'true');
-            const improveToggleEl = document.getElementById('improve-circle-toggle');
-            improveToggleEl.checked = savedImproveSetting === 'true';
-            
-            // Show Banner Preference
-            const savedPromoSetting = getPreference('circleShowPromoBanner', 'true');
-            promoBannerConsent = (savedPromoSetting === 'true'); // Live sync
-            const promoToggleEl = document.getElementById('promo-banner-toggle');
-            promoToggleEl.checked = promoBannerConsent;
-
-            // Model Selection Preference
-            let currentModel = getPreference('circleSelectedModel', 'core');
-            if (currentModel !== 'swift' && currentModel !== 'core') {
-                currentModel = 'core'; // invalid value fallback
-                setPreference('circleSelectedModel', 'core');
-            } else {
-                // Ensure default is explicitly saved if missing
-                setPreference('circleSelectedModel', currentModel);
-            }
-            selectModelUI(currentModel);
-
-            if (isRegistered && userName) {
-                startMainInterface();
-            } else {
-                startOnboardingSequence();
-            }
-            setupEventListeners();
-        });
-
-        // Helper to update the visual model state
-        function selectModelUI(modelVal) {
-            const btnLabel = document.getElementById('model-btn-label');
-            if (btnLabel) {
-                btnLabel.textContent = modelVal === 'swift' ? 'Circle Swift' : 'Circle Core';
-            }
-            const opts = document.querySelectorAll('.model-option');
-            opts.forEach(opt => opt.classList.remove('selected'));
-            const targetOpt = document.querySelector(`.model-option[data-model="${modelVal}"]`);
-            if (targetOpt) {
-                targetOpt.classList.add('selected');
-            }
-        }
-
-        /*******************************************************
-         * 4. CINEMATIC ONBOARDING SEQUENCE
-         *******************************************************/
-        async function startOnboardingSequence() {
-            const layer = document.getElementById('onboarding-layer');
-            const logo = document.getElementById('intro-logo');
-            const brand = document.getElementById('intro-brand');
-            const nameStep = document.getElementById('intro-name-step');
-            const nameInput = document.getElementById('name-input');
-            
-            layer.classList.remove('hidden');
-
-            logo.classList.remove('hidden');
-            await sleep(50);
-            logo.classList.remove('anim-enter');
-
-            await sleep(3000);
-            
-            logo.classList.add('anim-exit');
-            await sleep(1200);
-            logo.classList.add('hidden');
-            
-            brand.classList.remove('hidden');
-            await sleep(50);
-            brand.classList.remove('anim-enter');
-            
-            await sleep(2000);
-            
-            brand.classList.add('anim-exit');
-            await sleep(1200);
-            brand.classList.add('hidden');
-            
-            nameStep.classList.remove('hidden');
-            await sleep(50);
-            nameStep.classList.remove('anim-enter');
-            nameInput.focus();
-        }
-
-        async function submitName() {
-            const nameInput = document.getElementById('name-input');
-            const wrapper = document.getElementById('name-wrapper');
-            const nameVal = nameInput.value.trim();
-
-            if (!nameVal) {
-                wrapper.style.borderColor = "#ff4444";
-                setTimeout(() => wrapper.style.borderColor = "rgba(255,255,255,0.3)", 1500);
-                return;
-            }
-
-            localStorage.setItem('circle_user_registered', 'true');
-            localStorage.setItem('circle_username', nameVal);
-            userName = nameVal;
-
-            logToGoogleSheets({ type: "user", name: userName });
-
-            const nameStep = document.getElementById('intro-name-step');
-            const welcome = document.getElementById('intro-welcome');
-            
-            nameStep.classList.add('anim-exit');
-            await sleep(1200);
-            nameStep.classList.add('hidden');
-
-            welcome.textContent = formatText("Welcome to Circle AI, {{Name}}.", userName);
-            welcome.classList.remove('hidden');
-            await sleep(50);
-            welcome.classList.remove('anim-enter');
-            
-            await sleep(2500);
-
-            welcome.classList.add('anim-exit');
-            await sleep(1200);
-            
-            document.getElementById('onboarding-layer').classList.add('hidden');
-            startMainInterface();
-        }
-
-        /*******************************************************
-         * 5. MAIN LANDING EXPERIENCE & PILLS
-         *******************************************************/
-        function createSuggestionPillElement(text, isLink = false, url = '') {
-            const el = document.createElement(isLink ? 'a' : 'button');
-            el.className = 'suggestion-pill font-ui';
-            el.textContent = text;
-            if (isLink) {
-                el.href = url;
-                el.target = '_blank';
-                el.rel = 'noopener noreferrer';
-            } else {
-                el.onclick = () => {
-                    document.getElementById('chat-input').value = text;
-                    handleChatSubmission();
-                };
-            }
-            return el;
-        }
-
-        async function startMainInterface() {
-            const mainLayer = document.getElementById('main-layer');
-            mainLayer.classList.remove('hidden');
-            
-            await sleep(50);
-            mainLayer.classList.add('main-layer-visible');
-
-            renderSuggestionPills();
-
-            const rot = document.getElementById('greeting-rotator');
-            let currentIdx = Math.floor(Math.random() * greetingsList.length);
-            
-            rot.textContent = formatText(greetingsList[currentIdx], userName);
-            rot.classList.remove('hidden');
-            
-            await sleep(50);
-            rot.classList.remove('anim-enter');
-            
-            greetingLoopActive = true;
-            rotateGreetingsLoop(rot, currentIdx);
-            
-            document.getElementById('settings-btn').classList.remove('hidden');
-            document.getElementById('model-btn').classList.remove('hidden');
-            
-            const pwaInstalled = localStorage.getItem('circle_pwa_installed') === 'true';
-            if (!pwaInstalled && !isRunningAsInstalledPWA() && deferredPrompt) {
-                document.getElementById('install-btn').classList.remove('hidden');
-            }
-            
-            document.getElementById('share-btn').classList.remove('hidden');
-        }
-
-        async function rotateGreetingsLoop(rot, currentIdx) {
-            while (greetingLoopActive) {
-                await sleep(5000); 
-                if (!greetingLoopActive) break;
-                
-                rot.classList.add('anim-exit');
-                await sleep(1200); 
-                if (!greetingLoopActive) break;
-                
-                currentIdx = (currentIdx + 1) % greetingsList.length;
-                rot.textContent = formatText(greetingsList[currentIdx], userName);
-                
-                rot.style.transition = 'none';
-                rot.classList.remove('anim-exit');
-                rot.classList.add('anim-enter');
-                
-                void rot.offsetWidth;
-                
-                rot.style.transition = ''; 
-                rot.classList.remove('anim-enter');
-            }
-        }
-
-
-        /*******************************************************
-         * 6. PROMOTIONAL POPUP LOGIC
-         *******************************************************/
-        function showPromoModal() {
-            const modal = document.getElementById('promo-modal');
-            const closeBtn = document.getElementById('promo-close');
-            const ring = document.querySelector('.promo-ring-progress');
-            
-            modal.classList.remove('hidden');
-            void modal.offsetWidth;
-            modal.classList.add('show');
-            
-            closeBtn.classList.add('promo-disabled');
-            closeBtn.setAttribute('aria-disabled', 'true');
-            
-            ring.style.display = 'block';
-            ring.style.animation = 'none';
-            void ring.offsetWidth;
-            ring.style.animation = 'ring-erase 3s linear forwards';
-            
-            if (promoTimer) clearTimeout(promoTimer);
-            
-            promoTimer = setTimeout(() => {
-                closeBtn.classList.remove('promo-disabled');
-                closeBtn.setAttribute('aria-disabled', 'false');
-                ring.style.display = 'none';
-            }, 3000);
-        }
-
-        function closePromoModal() {
-            const modal = document.getElementById('promo-modal');
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                if (promoTimer) clearTimeout(promoTimer);
-            }, 500);
-        }
-
-        /*******************************************************
-         * 6.5 SETTINGS LOGIC
-         *******************************************************/
-        function toggleSettings() {
-            const modal = document.getElementById('settings-modal');
-            if (modal.classList.contains('show')) {
-                modal.classList.remove('show');
-                setTimeout(() => { modal.classList.add('hidden'); }, 400);
-            } else {
-                modal.classList.remove('hidden');
-                void modal.offsetWidth;
-                modal.classList.add('show');
-            }
-        }
-        
-        function closeSettings() {
-            const modal = document.getElementById('settings-modal');
-            if (modal.classList.contains('show')) {
-                modal.classList.remove('show');
-                setTimeout(() => { modal.classList.add('hidden'); }, 400);
-            }
-        }
-
-        /*******************************************************
-         * 6.6 SHARE LOGIC
-         *******************************************************/
-        async function handleShare() {
-            const shareTitle = "Circle AI | BBA Assistant";
-            const shareText = "Circle AI is a free, 24×7 virtual BBA assistant built for BBA students.\n\nIt helps students quickly find information about the BBA Programme, including syllabus, examinations, assessments, academic updates, LMS information, study resources, and common programme queries.\n\nAsk Circle AI instead of searching through old WhatsApp messages, LMS discussions, emails, and scattered information.\n\nCircle AI | BBA Assistant";
-            const shareUrl = "https://shorturl.at/APPeS";
-            
-            let sharedSuccessfully = false;
-
-            if (navigator.canShare) {
-                try {
-                    const response = await fetch('circle-promo.png');
-                    const blob = await response.blob();
-                    const file = new File([blob], 'circle-promo.png', { type: 'image/png' });
-                    
-                    if (navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: shareTitle,
-                            text: shareText,
-                            url: shareUrl
-                        });
-                        sharedSuccessfully = true;
-                    }
-                } catch (error) {
-                    console.log("Image share failed, falling back to text.", error);
-                }
-            }
-            
-            if (!sharedSuccessfully && navigator.share) {
-                try {
-                    await navigator.share({
-                        title: shareTitle,
-                        text: shareText,
-                        url: shareUrl
-                    });
-                    sharedSuccessfully = true;
-                } catch (error) {
-                    console.log("Text share failed or user cancelled.", error);
-                }
-            }
-            
-            if (!sharedSuccessfully) {
-                // Graceful fallback to clipboard
-                const fallbackText = `${shareText}\n${shareUrl}`;
-                try {
-                    await navigator.clipboard.writeText(fallbackText);
-                    showToast("Share text copied");
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                }
-            }
-        }
-        
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        /*******************************************************
-         * 7. EVENT LISTENERS & SCROLLING MANAGEMENT
-         *******************************************************/
-        function setupEventListeners() {
-            document.getElementById('name-submit').addEventListener('click', submitName);
-            document.getElementById('name-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') submitName();
-            });
-
-            const chatInput = document.getElementById('chat-input');
-            const chatSubmit = document.getElementById('chat-submit');
-            const newChatBtn = document.getElementById('new-chat-btn');
-            const promoCloseBtn = document.getElementById('promo-close');
-            
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsCloseBtn = document.getElementById('settings-close');
-            const improveToggle = document.getElementById('improve-circle-toggle');
-            const promoBannerToggle = document.getElementById('promo-banner-toggle');
-            
-            const installBtn = document.getElementById('install-btn');
-            const installCloseBtn = document.getElementById('install-close');
-            const pwaInstallBtn = document.getElementById('pwa-install-btn');
-            
-            const shareBtn = document.getElementById('share-btn');
-            
-            const modelBtn = document.getElementById('model-btn');
-            const modelMenu = document.getElementById('model-menu');
-            const modelOptions = document.querySelectorAll('.model-option');
-
-            chatInput.addEventListener('focus', stopGreetingRotation);
-            chatInput.addEventListener('input', stopGreetingRotation);
-
-            chatSubmit.addEventListener('click', handleChatSubmission);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleChatSubmission();
-            });
-
-            newChatBtn.addEventListener('click', startNewChat);
-            promoCloseBtn.addEventListener('click', closePromoModal);
-            
-            settingsBtn.addEventListener('click', toggleSettings);
-            settingsCloseBtn.addEventListener('click', closeSettings);
-            
-            installBtn.addEventListener('click', showInstallModal);
-            installCloseBtn.addEventListener('click', closeInstallModal);
-            pwaInstallBtn.addEventListener('click', handleInstallClick);
-            
-            shareBtn.addEventListener('click', handleShare);
-            
-            improveToggle.addEventListener('change', (e) => {
-                setPreference('circleImproveEnabled', e.target.checked ? 'true' : 'false');
-            });
-            
-            promoBannerToggle.addEventListener('change', (e) => {
-                promoBannerConsent = e.target.checked;
-                setPreference('circleShowPromoBanner', promoBannerConsent ? 'true' : 'false');
-                if (!promoBannerConsent) {
-                    if (promoTimer) clearTimeout(promoTimer);
-                    closePromoModal(); // Hide safely if it's currently showing
-                }
-            });
-            
-            // Model menu interactions
-            const modelBtnChevron = document.getElementById('model-btn-chevron');
-            const chevronDown = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 9.5L12 14.5L17 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-            const chevronUp = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 14.5L12 9.5L17 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
-            modelBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isShowing = modelMenu.classList.contains('show');
-                if (isShowing) {
-                    modelMenu.classList.remove('show');
-                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
-                } else {
-                    modelMenu.classList.add('show');
-                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronUp;
-                }
-            });
-            
-            modelOptions.forEach(opt => {
-                opt.addEventListener('click', (e) => {
-                    const selected = e.currentTarget.getAttribute('data-model');
-                    setPreference('circleSelectedModel', selected);
-                    selectModelUI(selected);
-                    modelMenu.classList.remove('show');
-                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
-                });
-            });
-            
-            document.addEventListener('click', (e) => {
-                if (modelBtn && modelMenu && !modelBtn.contains(e.target) && !modelMenu.contains(e.target)) {
-                    modelMenu.classList.remove('show');
-                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
-                }
-            });
-            
-            // Allow escape key to close settings, install modal, model menu
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeSettings();
-                    closeInstallModal();
-                    modelMenu.classList.remove('show');
-                    if (modelBtnChevron) modelBtnChevron.innerHTML = chevronDown;
-                }
-            });
-
-            const pillsContainer = document.getElementById('suggestion-pills');
-            
-            // Middle-mouse drag to pan desktop UX
-            let isDown = false;
-            let startX;
-            let scrollLeftPos;
-
-            pillsContainer.addEventListener('mousedown', (e) => {
-                if (e.button === 1) { // Middle mouse button
-                    e.preventDefault();
-                    isDown = true;
-                    startX = e.pageX - pillsContainer.offsetLeft;
-                    scrollLeftPos = pillsContainer.scrollLeft;
-                }
-            });
-            pillsContainer.addEventListener('mouseleave', () => { isDown = false; });
-            pillsContainer.addEventListener('mouseup', (e) => { if (e.button === 1) isDown = false; });
-            pillsContainer.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - pillsContainer.offsetLeft;
-                const walk = (x - startX) * 2;
-                pillsContainer.scrollLeft = scrollLeftPos - walk;
-            });
-            
-            // Desktop horizontal scrolling via mouse wheel
-            pillsContainer.addEventListener('wheel', (e) => {
-                if (e.deltaY !== 0) {
-                    e.preventDefault();
-                    pillsContainer.scrollLeft += e.deltaY;
-                }
-            }, { passive: false });
-
-            // Infinite scroll trigger dynamically tied to scroll event
-            let isProgrammaticScroll = false;
-
-            pillsContainer.addEventListener('scroll', () => {
-                if (isProgrammaticScroll) return;
-
-                // Load more on the right
-                if (pillsContainer.scrollWidth - pillsContainer.clientWidth - pillsContainer.scrollLeft < 300) {
-                    loadMoreSuggestions(pillsContainer, 'append');
-                }
-
-                // Load more on the left
-                if (pillsContainer.scrollLeft < 50) {
-                    isProgrammaticScroll = true;
-                    const oldScrollWidth = pillsContainer.scrollWidth;
-                    
-                    loadMoreSuggestions(pillsContainer, 'prepend');
-                    
-                    const newScrollWidth = pillsContainer.scrollWidth;
-                    // Adjust scroll to maintain position seamlessly without visual jump
-                    pillsContainer.scrollLeft += (newScrollWidth - oldScrollWidth);
-                    
-                    setTimeout(() => { isProgrammaticScroll = false; }, 20);
-                }
-            });
-        }
-
-        function stopGreetingRotation() {
-            if (greetingLoopActive) {
-                greetingLoopActive = false;
-                const rot = document.getElementById('greeting-rotator');
-                if (!rot.classList.contains('anim-exit')) {
-                    rot.classList.add('anim-exit');
-                }
-            }
-        }
-
-        function isUserNearBottom() {
-            const chatContainer = document.getElementById('chat-container');
-            // 150px threshold allows the user to still be considered "at the bottom" 
-            // even if new lines push content down slightly before the scroll catches up
-            return (chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 150;
-        }
-
-        function scrollToBottom() {
-            const chatContainer = document.getElementById('chat-container');
-            chatContainer.scrollTo({
-                top: chatContainer.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-
-        let scrollFramePending = false;
-        function smartScrollToBottom() {
-            if (scrollFramePending) return;
-            scrollFramePending = true;
-            requestAnimationFrame(() => {
-                scrollFramePending = false;
-                if (isUserNearBottom()) {
-                    scrollToBottom();
-                }
-            });
-        }
-
-        /*******************************************************
-         * 8. START NEW CHAT (The '+' Button logic)
-         *******************************************************/
-        async function startNewChat() {
-            if (isProcessing || !isChatMode) return;
-            
-            const chatContainer = document.getElementById('chat-container');
-            chatContainer.style.opacity = '0';
-            
-            await sleep(600);
-            chatContainer.innerHTML = '';
-            
-            isChatMode = false;
-            
-            document.body.classList.remove('chat-active');
-            document.getElementById('new-chat-btn').classList.add('hidden');
-            document.getElementById('model-btn').classList.remove('mobile-model-hidden');
-            
-            // Stop any ongoing speech when starting a new chat
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-            
-            const chatInput = document.getElementById('chat-input');
-            chatInput.value = '';
-            
-            document.getElementById('glow-spinner-elem').classList.add('glow-spinner-reset');
-            
-            renderSuggestionPills();
-            
-            const rot = document.getElementById('greeting-rotator');
-            let currentIdx = Math.floor(Math.random() * greetingsList.length);
-            rot.textContent = formatText(greetingsList[currentIdx], userName);
-            
-            rot.style.transition = 'none';
-            rot.classList.add('anim-enter');
-            rot.classList.remove('anim-exit', 'hidden');
-            
-            void rot.offsetWidth;
-            
-            rot.style.transition = '';
-            rot.classList.remove('anim-enter');
-            
-            greetingLoopActive = true;
-            rotateGreetingsLoop(rot, currentIdx);
-            
-            chatContainer.style.opacity = '1';
-        }
-
-
-        /*******************************************************
-         * 9. CHAT INTERACTION LOGIC
-         *******************************************************/
-        async function handleChatSubmission() {
-            if (isProcessing) return;
-            
-            const chatInput = document.getElementById('chat-input');
-            const query = chatInput.value.trim();
-            if (!query) return;
-            
-            // Stop any ongoing speech when a new query is submitted
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-
-            chatInput.value = "";
-            stopGreetingRotation();
-            
-            // Check promo banner setting
-            const consent = promoBannerConsent === true && getPreference('circleShowPromoBanner', 'true') === 'true';
-            const alreadyShown = sessionStorage.getItem('circlePromoShownSession') === 'true';
-            
-            // Show promotional poster ONCE per session on first prompt IF setting is ON
-            if (consent && !alreadyShown) {
-                if (promoTimer) clearTimeout(promoTimer);
-                promoTimer = setTimeout(() => {
-                    // Double check preference in case it was toggled during the timeout
-                    const finalConsent = promoBannerConsent === true && getPreference('circleShowPromoBanner', 'true') === 'true';
-                    if (!finalConsent) {
-                        return;
-                    }
-                    if (sessionStorage.getItem('circlePromoShownSession') === 'true') {
-                        return;
-                    }
-                    sessionStorage.setItem('circlePromoShownSession', 'true');
-                    showPromoModal();
-                }, 1500); 
-            }
-
-            const pills = document.getElementById('suggestion-pills');
-            if (pills && !pills.classList.contains('hidden')) {
-                pills.style.opacity = '0';
-                pills.style.transform = 'translateY(6px)';
-                setTimeout(() => pills.classList.add('hidden'), 600);
-            }
-
-            if (!isChatMode) {
-                document.body.classList.add('chat-active');
-                document.getElementById('glow-spinner-elem').classList.remove('glow-spinner-reset');
-                
-                setTimeout(() => {
-                    document.getElementById('new-chat-btn').classList.remove('hidden');
-                }, 600);
-                
-                isChatMode = true;
-            }
-            
-            document.getElementById('model-btn').classList.add('mobile-model-hidden');
-
-            logToGoogleSheets({ type: "query", name: userName, prompt: query });
-            
-            isProcessing = true;
-
-            appendUserMessage(query);
-            // User intentionally submitted, so hard scroll down is appropriate here
-            scrollToBottom();
-            
-            const processStartTime = performance.now();
-
-            const dotId = 'dot-' + Date.now();
-            appendThinkingDot(dotId);
-            scrollToBottom();
-
-            // Check selected model
-            let currentModel = getPreference('circleSelectedModel', 'core');
-            if (currentModel !== 'swift') {
-                currentModel = 'core';
-            }
-
-            // Adjust delay based on model
-            if (currentModel === 'swift') {
-                await sleep(500);
-            } else {
-                await sleep(6000);
-            }
-
-            document.getElementById(dotId).remove();
-            
-            const processEndTime = performance.now();
-            const elapsedSeconds = ((processEndTime - processStartTime) / 1000).toFixed(2);
-            
-            const responseData = matchIntent(query);
-
-            const aiContainer = document.createElement('div');
-            aiContainer.className = 'msg-ai font-conversational';
-            document.getElementById('chat-container').appendChild(aiContainer);
-
-            const personalizedMarkdown = formatText(responseData.markdown, userName);
-            let finalCombinedMarkdown = personalizedMarkdown;
-            
-            if (responseData.intentId !== 'student_wellbeing') {
-                const recIdx = Math.floor(Math.random() * circleRecommendations.length);
-                const recommendationText = circleRecommendations[recIdx];
-                finalCombinedMarkdown += "\n\n" + recommendationText;
-            }
-
-            await typewriteHTML(aiContainer, parseBasicMarkdown(finalCombinedMarkdown));
-            
-            if (responseData.intentId === 'student_wellbeing' && responseData.severity === 'general') {
-                const dlBtnContainer = document.createElement('div');
-                dlBtnContainer.className = 'sources-container font-ui';
-                
-                const dlBtn = document.createElement('button');
-                dlBtn.className = 'source-btn font-ui';
-                dlBtn.innerHTML = 'Try Dream Labs &rarr;';
-                
-                dlBtn.onclick = async () => {
-                    dlBtnContainer.remove();
-                    isProcessing = true; 
-                    await startDreamLabsFlow(aiContainer);
-                    isProcessing = false;
-                };
-                
-                dlBtnContainer.appendChild(dlBtn);
-                dlBtnContainer.style.opacity = '0';
-                dlBtnContainer.style.transition = 'opacity 0.8s ease';
-                aiContainer.appendChild(dlBtnContainer);
-                
-                void dlBtnContainer.offsetWidth;
-                dlBtnContainer.style.opacity = '1';
-                smartScrollToBottom();
-            }
-
-            if (responseData.sources && responseData.sources.length > 0) {
-                appendSources(aiContainer, responseData.sources);
-                smartScrollToBottom();
-            }
-            
-            // Only add metadata to normal answers (not Dream Labs triggers to avoid messy UI during terminal flow)
-            if (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe') {
-                appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown, currentModel);
-                smartScrollToBottom();
-            }
-
-            isProcessing = false;
-
-            if (pills) {
-                pills.classList.remove('hidden');
-                void pills.offsetWidth;
-                pills.style.opacity = '1';
-                pills.style.transform = 'translateY(0)';
-            }
-            smartScrollToBottom();
-        }
-
-        /*******************************************************
-         * 10. DOM MANIPULATION & UI RENDERING
-         *******************************************************/
-        function appendUserMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'msg-user font-conversational';
-            div.textContent = text;
-            document.getElementById('chat-container').appendChild(div);
-        }
-
-        function appendThinkingDot(id) {
-            const div = document.createElement('div');
-            div.className = 'thinking-dot';
-            div.id = id;
-            document.getElementById('chat-container').appendChild(div);
-        }
-
-        function appendSources(container, sources) {
-            const sourceDiv = document.createElement('div');
-            sourceDiv.className = 'sources-container font-ui';
-            
-            sources.forEach(src => {
-                const a = document.createElement('a');
-                a.className = 'source-btn';
-                a.href = src.url;
-                a.target = "_blank";
-                a.rel = "noopener noreferrer";
-                a.textContent = src.label;
-                sourceDiv.appendChild(a);
-            });
-            
-            sourceDiv.style.opacity = '0';
-            sourceDiv.style.transition = 'opacity 0.8s ease';
-            container.appendChild(sourceDiv);
-            
-            void sourceDiv.offsetWidth;
-            sourceDiv.style.opacity = '1';
-        }
-        
-        function appendResponseMetadata(container, timeSeconds, rawMarkdown, modelUsed) {
-            const metaDiv = document.createElement('div');
-            metaDiv.className = 'response-metadata-container';
-            
-            const modelCapsule = document.createElement('div');
-            modelCapsule.className = 'meta-capsule';
-            const modelLabel = (modelUsed === 'swift') ? 'Circle Swift' : 'Circle Core';
-            modelCapsule.textContent = modelLabel;
-            
-            const timeCapsule = document.createElement('div');
-            timeCapsule.className = 'meta-capsule';
-            timeCapsule.innerHTML = `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>${timeSeconds}s`;
-            
-            const speakCapsule = document.createElement('div');
-            speakCapsule.className = 'meta-capsule meta-btn';
-            
-            const speakIcon = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
-            const stopIcon = `<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>`;
-            
-            speakCapsule.innerHTML = `${speakIcon}Read aloud`;
-            
-            // Clean markdown for speech
-            let cleanTextForSpeech = rawMarkdown
-                .replace(/<[^>]*>/g, '') // remove any explicit html
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // replace markdown links with just the link text
-                .replace(/[#*_~`]/g, ''); // remove markdown symbols
-            
-            let isPlaying = false;
-            
-            speakCapsule.addEventListener('click', () => {
-                if (!('speechSynthesis' in window)) return;
-                
-                if (isPlaying) {
-                    window.speechSynthesis.cancel();
-                    isPlaying = false;
-                    speakCapsule.classList.remove('playing');
-                    speakCapsule.innerHTML = `${speakIcon}Read aloud`;
-                } else {
-                    window.speechSynthesis.cancel(); // Cancel any existing speech
-                    
-                    const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
-                    
-                    utterance.onend = () => {
-                        isPlaying = false;
-                        speakCapsule.classList.remove('playing');
-                        speakCapsule.innerHTML = `${speakIcon}Read aloud`;
-                    };
-                    
-                    utterance.onerror = () => {
-                        isPlaying = false;
-                        speakCapsule.classList.remove('playing');
-                        speakCapsule.innerHTML = `${speakIcon}Read aloud`;
-                    }
-                    
-                    window.speechSynthesis.speak(utterance);
-                    isPlaying = true;
-                    speakCapsule.classList.add('playing');
-                    speakCapsule.innerHTML = `${stopIcon}Stop`;
-                }
-            });
-            
-            metaDiv.appendChild(modelCapsule);
-            metaDiv.appendChild(timeCapsule);
-            metaDiv.appendChild(speakCapsule);
-            container.appendChild(metaDiv);
-            
-            void metaDiv.offsetWidth;
-            metaDiv.style.opacity = '1';
-        }
-        
-        async function startDreamLabsFlow(container) {
-            const dotId = 'dl-dot-' + Date.now();
-            const dot = document.createElement('div');
-            dot.className = 'thinking-dot';
-            dot.id = dotId;
-            container.appendChild(dot);
-            scrollToBottom();
-            
-            const pills = document.getElementById('suggestion-pills');
-            if (pills && !pills.classList.contains('hidden')) {
-                pills.style.opacity = '0';
-                pills.style.transform = 'translateY(6px)';
-                setTimeout(() => pills.classList.add('hidden'), 600);
-            }
-
-            await sleep(1000); 
-            
-            dot.remove(); 
-            
-            const wrapper = document.createElement('div');
-            wrapper.className = 'dl-wrapper';
-            
-            const terminal = document.createElement('div');
-            terminal.className = 'dl-container';
-            
-            const header = document.createElement('div');
-            header.className = 'dl-header';
-            header.innerHTML = 'DREAM LABS <div class="dl-header-sub">• breathing tool</div>';
-            terminal.appendChild(header);
-            
-            const terminalAreaWrapper = document.createElement('div');
-            terminalAreaWrapper.className = 'dl-terminal-area-wrapper';
-            terminal.appendChild(terminalAreaWrapper);
-            
-            wrapper.appendChild(terminal);
-            container.appendChild(wrapper);
-            smartScrollToBottom();
-            
-            const sequence = [
-                { wait: 800, text: "initializing environment..." },
-                { wait: 800, text: "checking breathing sequence..." },
-                { wait: 800, text: "grounding protocol selected" },
-                { wait: 800, text: "box breathing selected" },
-                { wait: 900, text: "preparing 4-second rhythm..." },
-                { wait: 900, text: "synchronizing inhale..." },
-                { wait: 900, text: "synchronizing hold..." },
-                { wait: 900, text: "synchronizing exhale..." },
-                { wait: 800, text: "ready" }
-            ];
-            
-            for (let step of sequence) {
-                const line = document.createElement('div');
-                line.className = 'dl-line';
-                line.textContent = step.text;
-                terminalAreaWrapper.appendChild(line);
-                
-                void line.offsetWidth; 
-                line.classList.add('active');
-                smartScrollToBottom();
-                
-                await sleep(step.wait - 300);
-                line.classList.remove('active');
-                await sleep(300);
-                line.remove();
-            }
-            
-            terminalAreaWrapper.style.opacity = '0';
-            await sleep(400);
-            terminalAreaWrapper.style.display = 'none';
-            
-            const breathingArea = document.createElement('div');
-            breathingArea.className = 'dl-breathing-area';
-            breathingArea.innerHTML = `
-                <div class="dl-phase">INHALE</div>
-                <div class="dl-timer">4</div>
-                <div class="dl-box-container">
-                    <div class="dl-box expand"></div>
-                </div>
-                <div style="margin-top: 24px; font-size: 11px; opacity: 0.5; letter-spacing: 1px; text-transform: none; font-family: var(--font-conversational);">inhale • hold • exhale</div>
-            `;
-            terminal.appendChild(breathingArea);
-            
-            const sourceCodeText = `<!-- HTML -->
-<div class="dl-breathing-area">
-    <div class="dl-phase">INHALE</div>
-    <div class="dl-timer">4</div>
-    <div class="dl-box-container">
-        <div class="dl-box expand"></div>
-    </div>
-</div>
-
-/* CSS */
-.dl-box {
-    width: 36px; height: 36px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.05);
-    transition: transform 4s linear;
-}
-.dl-box.expand { transform: scale(1.7); }
-.dl-box.contract { transform: scale(1); }
-
-// JavaScript
-let t = 4, pIdx = 0;
-const phases = [
-    { name: 'INHALE', class: 'expand' },
-    { name: 'HOLD', class: 'expand' },
-    { name: 'EXHALE', class: 'contract' },
-    { name: 'HOLD', class: 'contract' }
-];
-setInterval(() => {
-    t--;
-    if (t < 1) {
-        t = 4;
-        pIdx = (pIdx + 1) % 4;
-        phaseEl.textContent = phases[pIdx].name;
-        boxEl.className = 'dl-box ' + phases[pIdx].class;
-    }
-    timerEl.textContent = t;
-}, 1000);`;
-
-            const sourceToggle = document.createElement('div');
-            sourceToggle.className = 'dl-source-toggle font-conversational';
-            sourceToggle.innerHTML = `<span>Source Code</span> <span class="dl-chevron">▼</span>`;
-            
-            const sourceContent = document.createElement('div');
-            sourceContent.className = 'dl-source-content';
-            sourceContent.textContent = sourceCodeText;
-            
-            sourceToggle.onclick = () => {
-                const chevron = sourceToggle.querySelector('.dl-chevron');
-                if (sourceContent.style.display === 'none' || !sourceContent.style.display) {
-                    sourceContent.style.display = 'block';
-                    chevron.textContent = '▲';
-                } else {
-                    sourceContent.style.display = 'none';
-                    chevron.textContent = '▼';
-                }
-                smartScrollToBottom();
+        (() => {
+            // Fixed release moment: 06 October 2026, 11:11 PM IST (UTC+05:30).
+            const RELEASE_AT = Date.parse("2026-10-06T23:11:00+05:30");
+
+            const hero = document.getElementById("hero");
+            const countdown = document.getElementById("countdown");
+            const launchMessage = document.getElementById("launchMessage");
+
+            const nodes = {
+                days: document.getElementById("days"),
+                hours: document.getElementById("hours"),
+                minutes: document.getElementById("minutes"),
+                seconds: document.getElementById("seconds")
             };
-            
-            terminal.appendChild(sourceToggle);
-            terminal.appendChild(sourceContent);
-            
-            breathingArea.style.opacity = '0';
-            breathingArea.style.display = 'block';
-            breathingArea.style.transition = 'opacity 1s ease';
-            void breathingArea.offsetWidth;
-            breathingArea.style.opacity = '1';
-            smartScrollToBottom();
-            
-            const phaseEl = breathingArea.querySelector('.dl-phase');
-            const timerEl = breathingArea.querySelector('.dl-timer');
-            const boxEl = breathingArea.querySelector('.dl-box');
-            
-            const phases = [
-                { name: 'INHALE', class: 'expand' },
-                { name: 'HOLD', class: 'expand' },
-                { name: 'EXHALE', class: 'contract' },
-                { name: 'HOLD', class: 'contract' }
-            ];
-            
-            let pIdx = 0;
-            let t = 4;
-            
-            void boxEl.offsetWidth;
-            boxEl.className = 'dl-box expand'; 
-            
-            setInterval(() => {
-                t--;
-                if (t < 1) {
-                    t = 4;
-                    pIdx = (pIdx + 1) % 4;
-                    phaseEl.textContent = phases[pIdx].name;
-                    boxEl.className = 'dl-box ' + phases[pIdx].class;
-                }
-                timerEl.textContent = t;
-            }, 1000);
 
-            if (pills) {
-                pills.classList.remove('hidden');
-                void pills.offsetWidth;
-                pills.style.opacity = '1';
-                pills.style.transform = 'translateY(0)';
-            }
-            smartScrollToBottom();
-        }
-
-        /*******************************************************
-         * 11. INTENT MATCHING ENGINE (No Backend/API)
-         *******************************************************/
-        function matchIntent(query) {
-            const normalizedQuery = query.toLowerCase().replace(/[^\w\s-]/gi, ' ');
-            const paddedQuery = " " + normalizedQuery + " "; 
-            let matchedIntents = [];
-
-            knowledgeBase.forEach(intent => {
-                let score = 0;
-                let severity = 'none';
-
-                if (intent.id === 'casual_conversation') {
-                    intent.keywords.forEach(kw => {
-                        if (paddedQuery.includes(kw)) {
-                            score += kw.length;
-                        }
-                    });
-                    if (score >= 3) {
-                        matchedIntents.push({ intent: intent, score: score, severity: severity });
-                    }
-                } else if (intent.id === 'student_wellbeing') {
-                    let isSevere = false;
-                    let isGeneral = false;
-
-                    intent.keywords_severe.forEach(kw => {
-                        let regex = new RegExp('\\b' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
-                        if (regex.test(normalizedQuery)) {
-                            score += kw.length;
-                            isSevere = true;
-                        }
-                    });
-
-                    intent.keywords_general.forEach(kw => {
-                        let regex = new RegExp('\\b' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
-                        if (regex.test(normalizedQuery)) {
-                            score += kw.length;
-                            isGeneral = true;
-                        }
-                    });
-
-                    if (score > 0) {
-                        if (isSevere) {
-                            score += 10000;
-                            severity = 'severe';
-                        } else {
-                            score += 5000;
-                            severity = 'general';
-                        }
-                        matchedIntents.push({ intent: intent, score: score, severity: severity });
-                    }
-                } else {
-                    intent.keywords.forEach(kw => {
-                        if (normalizedQuery.includes(kw.toLowerCase())) {
-                            score += kw.length; 
-                        }
-                    });
-                    if (score >= 3) {
-                        matchedIntents.push({ intent: intent, score: score, severity: severity });
-                    }
-                }
-            });
-
-            if (matchedIntents.length > 0) {
-                let hasSubstantive = matchedIntents.some(m => m.intent.id !== 'casual_conversation' && m.score >= 3);
-                if (hasSubstantive) {
-                    matchedIntents = matchedIntents.filter(m => m.intent.id !== 'casual_conversation');
-                }
-
-                matchedIntents.sort((a, b) => b.score - a.score);
-                
-                let topMatches = [matchedIntents[0]];
-                if (matchedIntents.length > 1) {
-                    let secondMatch = matchedIntents[1];
-                    if (secondMatch.score >= 4 && secondMatch.intent.id !== topMatches[0].intent.id) {
-                        let topIsWellbeing = topMatches[0].intent.id === 'student_wellbeing';
-                        let secondIsWellbeing = secondMatch.intent.id === 'student_wellbeing';
-                        
-                        if (!topIsWellbeing && !secondIsWellbeing) {
-                            topMatches.push(secondMatch);
-                        }
-                    }
-                }
-                
-                topMatches.forEach(m => {
-                    if (m.intent.id === 'casual_conversation') {
-                        m.intent.markdown = casualResponses[Math.floor(Math.random() * casualResponses.length)];
-                    } else if (m.intent.id === 'student_wellbeing') {
-                        m.intent.markdown = m.severity === 'severe' ? m.intent.markdown_severe : m.intent.markdown_general;
-                    }
-                });
-
-                let finalMarkdown = topMatches.map(m => m.intent.markdown).join('\n\n');
-                let finalSources = [];
-                
-                topMatches.forEach(m => {
-                    if (m.intent.sources) {
-                        finalSources = finalSources.concat(m.intent.sources);
-                    }
-                });
-                
-                return { markdown: finalMarkdown, sources: finalSources, intentId: topMatches[0].intent.id, severity: topMatches[0].severity };
+            function pad(value) {
+                return String(Math.max(0, value)).padStart(2, "0");
             }
 
-            return { ...fallbackResponse, intentId: 'fallback', severity: 'none' };
-        }
-
-        /*******************************************************
-         * 12. MARKDOWN PARSER & TYPEWRITER ANIMATION
-         *******************************************************/
-        function parseBasicMarkdown(md) {
-            let html = md;
-            
-            // Protect anchor tags safely
-            html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">$1</a>');
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-            
-            let lines = html.split('\n');
-            let result = '';
-            let inList = false;
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                
-                if (line.startsWith('### ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h3>${line.substring(4)}</h3>`;
-                } else if (line.startsWith('## ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h2>${line.substring(3)}</h2>`;
-                } else if (line.startsWith('# ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h1>${line.substring(2)}</h1>`;
-                } else if (line.startsWith('> ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += `<blockquote>${line.substring(2)}</blockquote>`;
-                } else if (line.startsWith('- ') || line.startsWith('* ')) {
-                    if (!inList) { result += '<ul>'; inList = true; }
-                    result += `<li>${line.substring(2)}</li>`;
-                } else if (line === '') {
-                    if (inList) { result += '</ul>'; inList = false; }
-                } else if (line.startsWith('<')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += line; // Direct HTML injection (e.g. <table>, <tr>, etc)
-                } else {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += `<p>${line}</p>`;
-                }
+            function showReleased() {
+                hero.classList.add("released");
+                countdown.classList.add("finished");
+                launchMessage.setAttribute("aria-live", "polite");
             }
-            if (inList) { result += '</ul>'; }
-            
-            // Remove empty paragraph tags that might occur
-            result = result.replace(/<p><\/p>/g, '');
-            
-            return result;
-        }
 
-        async function typewriteHTML(container, htmlString) {
-            let currentHTML = "";
-            let i = 0;
-            const MAX_RENDER_TIME = 1400; // Leaves a 100ms safety margin to hit the 1.5s total target
-            const startTime = performance.now();
+            function tick() {
+                const remaining = RELEASE_AT - Date.now();
 
-            while (i < htmlString.length) {
-                // Determine scrolling condition BEFORE injecting the next chunk to prevent jumps overriding user intent
-                const nearBottom = isUserNearBottom();
-
-                if (htmlString[i] === '<') {
-                    let tag = "";
-                    while (htmlString[i] !== '>' && i < htmlString.length) {
-                        tag += htmlString[i];
-                        i++;
-                    }
-                    tag += '>';
-                    currentHTML += tag;
-                } else {
-                    currentHTML += htmlString[i];
-                    container.innerHTML = currentHTML;
-                    
-                    if (nearBottom) smartScrollToBottom();
-                    
-                    const elapsed = performance.now() - startTime;
-                    if (elapsed >= MAX_RENDER_TIME) {
-                        break; // Exhausted budget, flush instantly
-                    }
-
-                    // Variable typing speed for more natural feel
-                    let charDelay = 2 + Math.random() * 10; 
-                    if (['.', '!', '?'].includes(htmlString[i])) {
-                        charDelay += 40;
-                    } else if (htmlString[i] === ',') {
-                        charDelay += 20;
-                    } else if (htmlString[i] === ' ') {
-                        charDelay += 5;
-                    }
-                    
-                    // Clamp delay so we don't overshoot the total budget
-                    const remaining = MAX_RENDER_TIME - elapsed;
-                    if (charDelay > remaining) {
-                        charDelay = remaining;
-                    }
-                    
-                    if (charDelay > 0) {
-                        await sleep(charDelay);
-                    }
+                if (remaining <= 0) {
+                    showReleased();
+                    return;
                 }
-                i++;
-            }
-            
-            // Final render injection
-            const finalNearBottom = isUserNearBottom();
-            container.innerHTML = htmlString;
-            if (finalNearBottom) smartScrollToBottom();
-        }
 
+                const totalSeconds = Math.floor(remaining / 1000);
+
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                nodes.days.textContent = pad(days);
+                nodes.hours.textContent = pad(hours);
+                nodes.minutes.textContent = pad(minutes);
+                nodes.seconds.textContent = pad(seconds);
+            }
+
+            tick();
+            setInterval(tick, 250);
+        })();
     </script>
 </body>
 </html>
