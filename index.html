@@ -6527,6 +6527,7 @@ body.circle-ask-mode #app-shell-header.ready ~ .circle-learn-disclaimer {
         let learnActiveIndex = 0;
         let learnLastSkipKey = null;
         let learnPendingAutoPlay = false;
+        let learnRestoringSavedIndex = null;
         let learnProgress = {};
         let learnProgressSheetLastKey = '';
         let learnProgressSheetLastAt = 0;
@@ -8203,6 +8204,7 @@ setInterval(() => {
 
             const initialCourse = getLearnCourse(learnActiveCourseId);
             const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
+            learnRestoringSavedIndex = savedIndex > 0 ? savedIndex : null;
             const iframe = createLearnIframe(learnActiveCourseId, LEARN_INTRO_SKIP_SECONDS);
             if (!iframe) return;
 
@@ -8228,24 +8230,21 @@ setInterval(() => {
                          * Wait for YouTube to expose its playlist before rendering
                          * the custom thumbnail rail. */
                         refreshLearnPlaylist(0);
+                        learnActiveIndex = savedIndex;
                         renderLearnCourseMenu();
                         updateLearnCourseUI();
+                        renderLearnThumbnails();
 
-                        if (initialCourse.type === 'playlist') {
-                            /* Keep the user's saved lecture visible in the custom
-                             * thumbnail scroller when Learn is opened again. */
-                            positionSavedLearnThumbnail(savedIndex);
-
-                            if (savedIndex > 0) {
-                                setTimeout(() => {
-                                    try {
-                                        learnActiveIndex = savedIndex;
-                                        learnPlayer.playVideoAt(savedIndex);
-                                        renderLearnThumbnails();
-                                    } catch (_) {}
-                                    positionSavedLearnThumbnail(savedIndex);
-                                }, 500);
-                            }
+                        if (initialCourse.type === 'playlist' && savedIndex > 0) {
+                            setTimeout(() => {
+                                try {
+                                    learnActiveIndex = savedIndex;
+                                    learnPlayer.playVideoAt(savedIndex);
+                                } catch (_) {}
+                                renderLearnThumbnails();
+                            }, 500);
+                        } else if (savedIndex === 0) {
+                            learnRestoringSavedIndex = null;
                         }
 
                         const shouldAutoPlay = learnPendingAutoPlay;
@@ -8628,35 +8627,6 @@ setInterval(() => {
             return saved && Number.isInteger(saved.index) ? saved.index : 0;
         }
 
-        function scrollLearnThumbnailIntoView(index, behavior = 'smooth') {
-            const container = document.getElementById('learn-thumbnails');
-            if (!container || !learnPlaylistIds.length) return false;
-
-            const targetIndex = Math.max(0, Math.min(Number(index) || 0, learnPlaylistIds.length - 1));
-            const target = container.querySelector('.learn-thumb[data-learn-index="' + targetIndex + '"]');
-            if (!target) return false;
-
-            const containerRect = container.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const isVisible = targetRect.top >= containerRect.top && targetRect.bottom <= containerRect.bottom;
-
-            if (!isVisible) {
-                const targetTop = target.offsetTop - Math.max(0, (container.clientHeight - target.offsetHeight) / 2);
-                container.scrollTo({
-                    top: Math.max(0, targetTop),
-                    behavior
-                });
-            }
-            return true;
-        }
-
-        function positionSavedLearnThumbnail(savedIndex, attempt = 0) {
-            if (scrollLearnThumbnailIntoView(savedIndex, 'smooth')) return;
-            if (attempt < 8) {
-                setTimeout(() => positionSavedLearnThumbnail(savedIndex, attempt + 1), 180);
-            }
-        }
-
         function safeLearnPlaylistIndex() {
             try {
                 const index = learnPlayer.getPlaylistIndex();
@@ -8761,6 +8731,7 @@ setInterval(() => {
             learnActiveCourseId = nextCourseId;
             const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
             learnActiveIndex = savedIndex;
+            learnRestoringSavedIndex = savedIndex > 0 ? savedIndex : null;
             learnLastSkipKey = null;
             learnPlaylistIds = [];
             learnPendingAutoPlay = Boolean(autoPlay);
@@ -8817,7 +8788,11 @@ setInterval(() => {
             const ids = safeLearnPlaylist();
             if (ids.length) {
                 learnPlaylistIds = ids;
-                learnActiveIndex = Math.max(0, Math.min(safeLearnPlaylistIndex(), ids.length - 1));
+                if (Number.isInteger(learnRestoringSavedIndex)) {
+                    learnActiveIndex = Math.max(0, Math.min(learnRestoringSavedIndex, ids.length - 1));
+                } else {
+                    learnActiveIndex = Math.max(0, Math.min(safeLearnPlaylistIndex(), ids.length - 1));
+                }
                 learnCourseStats[learnActiveCourseId] = { total: ids.length, updatedAt: Date.now() };
                 saveLearnAuxState();
                 renderLearnThumbnails();
@@ -8912,6 +8887,7 @@ setInterval(() => {
             flushLearnNotesSave();
             const max = learnPlaylistIds.length ? learnPlaylistIds.length - 1 : 0;
             learnActiveIndex = Math.max(0, Math.min(index, max));
+            learnRestoringSavedIndex = null;
             learnLastSkipKey = null;
 
             const course = getLearnCourse(learnActiveCourseId);
@@ -8955,6 +8931,23 @@ setInterval(() => {
 
         function handleLearnPlayerStateChange(event) {
             if (!learnPlayerReady) return;
+
+            if (Number.isInteger(learnRestoringSavedIndex)) {
+                let currentRestoreIndex = null;
+                try {
+                    currentRestoreIndex = safeLearnPlaylistIndex();
+                } catch (_) {}
+
+                if (currentRestoreIndex === learnRestoringSavedIndex) {
+                    learnActiveIndex = learnRestoringSavedIndex;
+                    learnRestoringSavedIndex = null;
+                } else {
+                    learnActiveIndex = learnRestoringSavedIndex;
+                    renderLearnThumbnails();
+                    updateLearnCourseUI();
+                    return;
+                }
+            }
 
             if (event.data === YT.PlayerState.PLAYING) {
                 learnActiveIndex = safeLearnPlaylistIndex();
