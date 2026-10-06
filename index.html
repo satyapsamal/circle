@@ -8231,10 +8231,21 @@ setInterval(() => {
                         renderLearnCourseMenu();
                         updateLearnCourseUI();
 
-                        if (initialCourse.type === 'playlist' && savedIndex > 0) {
-                            setTimeout(() => {
-                                try { learnPlayer.playVideoAt(savedIndex); } catch (_) {}
-                            }, 500);
+                        if (initialCourse.type === 'playlist') {
+                            /* Keep the user's saved lecture visible in the custom
+                             * thumbnail scroller when Learn is opened again. */
+                            positionSavedLearnThumbnail(savedIndex);
+
+                            if (savedIndex > 0) {
+                                setTimeout(() => {
+                                    try {
+                                        learnActiveIndex = savedIndex;
+                                        learnPlayer.playVideoAt(savedIndex);
+                                        renderLearnThumbnails();
+                                    } catch (_) {}
+                                    positionSavedLearnThumbnail(savedIndex);
+                                }, 500);
+                            }
                         }
 
                         const shouldAutoPlay = learnPendingAutoPlay;
@@ -8615,6 +8626,35 @@ setInterval(() => {
         function getLearnSavedIndex(courseId) {
             const saved = learnProgress[courseId];
             return saved && Number.isInteger(saved.index) ? saved.index : 0;
+        }
+
+        function scrollLearnThumbnailIntoView(index, behavior = 'smooth') {
+            const container = document.getElementById('learn-thumbnails');
+            if (!container || !learnPlaylistIds.length) return false;
+
+            const targetIndex = Math.max(0, Math.min(Number(index) || 0, learnPlaylistIds.length - 1));
+            const target = container.querySelector('.learn-thumb[data-learn-index="' + targetIndex + '"]');
+            if (!target) return false;
+
+            const containerRect = container.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const isVisible = targetRect.top >= containerRect.top && targetRect.bottom <= containerRect.bottom;
+
+            if (!isVisible) {
+                const targetTop = target.offsetTop - Math.max(0, (container.clientHeight - target.offsetHeight) / 2);
+                container.scrollTo({
+                    top: Math.max(0, targetTop),
+                    behavior
+                });
+            }
+            return true;
+        }
+
+        function positionSavedLearnThumbnail(savedIndex, attempt = 0) {
+            if (scrollLearnThumbnailIntoView(savedIndex, 'smooth')) return;
+            if (attempt < 8) {
+                setTimeout(() => positionSavedLearnThumbnail(savedIndex, attempt + 1), 180);
+            }
         }
 
         function safeLearnPlaylistIndex() {
