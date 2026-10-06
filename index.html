@@ -6528,6 +6528,7 @@ body.circle-ask-mode #app-shell-header.ready ~ .circle-learn-disclaimer {
         let learnLastSkipKey = null;
         let learnPendingAutoPlay = false;
         let learnRestoringSavedIndex = null;
+        let learnFocusSavedThumbnailPending = false;
         let learnProgress = {};
         let learnProgressSheetLastKey = '';
         let learnProgressSheetLastAt = 0;
@@ -8205,6 +8206,7 @@ setInterval(() => {
             const initialCourse = getLearnCourse(learnActiveCourseId);
             const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
             learnRestoringSavedIndex = savedIndex > 0 ? savedIndex : null;
+            learnFocusSavedThumbnailPending = true;
             const iframe = createLearnIframe(learnActiveCourseId, LEARN_INTRO_SKIP_SECONDS);
             if (!iframe) return;
 
@@ -8732,6 +8734,7 @@ setInterval(() => {
             const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
             learnActiveIndex = savedIndex;
             learnRestoringSavedIndex = savedIndex > 0 ? savedIndex : null;
+            learnFocusSavedThumbnailPending = true;
             learnLastSkipKey = null;
             learnPlaylistIds = [];
             learnPendingAutoPlay = Boolean(autoPlay);
@@ -8856,6 +8859,36 @@ setInterval(() => {
             window.addEventListener('resize', syncLearnPlaylistHeight);
         }
 
+        function focusLearnThumbnail(index, attempts = 0) {
+            const container = document.getElementById('learn-thumbnails');
+            if (!container || !learnPlaylistIds.length) return;
+
+            const targetIndex = Math.max(0, Math.min(Number(index) || 0, learnPlaylistIds.length - 1));
+            const target = container.querySelector('.learn-thumb[data-learn-index="' + targetIndex + '"]');
+            if (!target) {
+                if (attempts < 8) {
+                    setTimeout(() => focusLearnThumbnail(targetIndex, attempts + 1), 120);
+                }
+                return;
+            }
+
+            const containerRect = container.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+
+            if (container.clientHeight <= 0 || targetRect.height <= 0) {
+                if (attempts < 8) {
+                    setTimeout(() => focusLearnThumbnail(targetIndex, attempts + 1), 120);
+                }
+                return;
+            }
+
+            const targetTop = targetRect.top - containerRect.top + container.scrollTop;
+            const centeredTop = targetTop - Math.max(0, (container.clientHeight - targetRect.height) / 2);
+            const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+
+            container.scrollTop = Math.max(0, Math.min(centeredTop, maxScrollTop));
+        }
+
         function renderLearnThumbnails() {
             const container = document.getElementById('learn-thumbnails');
             if (!learnPlaylistIds.length) {
@@ -8880,6 +8913,13 @@ setInterval(() => {
             container.querySelectorAll('.learn-thumb').forEach(button => {
                 button.addEventListener('click', () => openLearnLesson(Number(button.dataset.learnIndex)));
             });
+
+            if (learnFocusSavedThumbnailPending) {
+                learnFocusSavedThumbnailPending = false;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => focusLearnThumbnail(learnActiveIndex));
+                });
+            }
         }
 
         function openLearnLesson(index) {
@@ -8888,6 +8928,7 @@ setInterval(() => {
             const max = learnPlaylistIds.length ? learnPlaylistIds.length - 1 : 0;
             learnActiveIndex = Math.max(0, Math.min(index, max));
             learnRestoringSavedIndex = null;
+            learnFocusSavedThumbnailPending = false;
             learnLastSkipKey = null;
 
             const course = getLearnCourse(learnActiveCourseId);
