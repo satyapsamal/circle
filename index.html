@@ -5046,12 +5046,12 @@ body.circle-ask-mode.chat-active #app-new-chat-btn.visible {
     transition: opacity .7s cubic-bezier(.25,1,.5,1);
 }
 
-#app-shell-header.ready ~ .circle-learn-disclaimer {
+#app-shell-header.ready ~ #learn-layer.visible .circle-learn-disclaimer {
     opacity: .58;
     pointer-events: auto;
 }
 
-body.circle-ask-mode #app-shell-header.ready ~ .circle-learn-disclaimer {
+body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
     opacity: 0;
     pointer-events: none;
 }
@@ -5072,11 +5072,20 @@ body.circle-ask-mode #app-shell-header.ready ~ .circle-learn-disclaimer {
 
 @media (max-width: 768px) {
     .circle-learn-disclaimer {
-        bottom: 9px;
-        width: 96vw;
-        padding: 0 10px;
+        position: relative;
+        left: auto;
+        bottom: auto;
+        transform: none;
+        width: 100%;
+        margin: 22px auto 8px;
+        padding: 0 10px 8px;
         font-size: 13px;
         line-height: 1.45;
+    }
+
+    #learn-layer.visible .circle-learn-disclaimer {
+        opacity: .58;
+        pointer-events: auto;
     }
 }
 </style>
@@ -5410,11 +5419,10 @@ body.circle-ask-mode #app-shell-header.ready ~ .circle-learn-disclaimer {
                     </div>
                 </div>
             </div>
+            <div class="circle-learn-disclaimer" aria-label="Circle attribution">
+                Circle is developed by <a href="https://www.linkedin.com/in/satyaprakashsamal">Satya Prakash Samal</a> as an independent, non-monetary student initiative and is not affiliated with or endorsed by any institution.
+            </div>
         </section>
-
-        <div class="circle-learn-disclaimer" aria-label="Circle attribution">
-            Circle is developed by <a href="https://www.linkedin.com/in/satyaprakashsamal">Satya Prakash Samal</a> as an independent, non-monetary student initiative and is not affiliated with or endorsed by any institution.
-        </div>
 
         <!-- Main Conversational Interface -->
         <div id="main-layer" class="main-layer-fade hidden">
