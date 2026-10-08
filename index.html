@@ -1262,7 +1262,7 @@
             opacity: 0;
             pointer-events: none;
             transition: all 0.3s ease;
-            z-index: 99999;
+            z-index: 150000;
         }
         .toast.show {
             opacity: 1;
@@ -3240,12 +3240,88 @@
 .profile-modal-header strong { font:600 14px var(--font-conversational); color:#f2f2f2; }
 .profile-modal-close { width:30px; height:30px; border:1px solid rgba(255,255,255,.10); border-radius:9px; background:rgba(255,255,255,.03); color:#aaa; cursor:pointer; font-size:18px; }
 .profile-modal-close:hover { color:#fff; background:rgba(255,255,255,.07); }
-.profile-edit-photo-label { position:relative; width:94px; height:94px; margin:0 auto 15px; border-radius:50%; overflow:hidden;
-    border:1px solid rgba(255,255,255,.15); background:#171717; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-.profile-edit-photo-label img { width:100%; height:100%; object-fit:cover; }
-.profile-edit-photo-overlay { position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px;
-    font:600 8px var(--font-conversational); color:#fff; background:linear-gradient(transparent,rgba(0,0,0,.72)); opacity:0; transition:opacity .18s ease; }
-.profile-edit-photo-label:hover .profile-edit-photo-overlay { opacity:1; }
+.profile-edit-photo-label {
+    position:relative;
+    width:94px;
+    height:94px;
+    margin:0 auto 15px;
+    border-radius:50%;
+    overflow:visible;
+    border:3px solid #fff;
+    background:#171717;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 10px 28px rgba(0,0,0,.30);
+}
+.profile-edit-photo-label img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+    display:block;
+    transition:filter .2s ease, transform .2s ease;
+}
+.profile-edit-photo-overlay {
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border-radius:50%;
+    font-size:0;
+    color:#fff;
+    background:rgba(0,0,0,.30);
+    backdrop-filter:blur(1px);
+    -webkit-backdrop-filter:blur(1px);
+    opacity:0;
+    transition:opacity .18s ease, background .18s ease;
+    z-index:2;
+}
+.profile-edit-photo-overlay svg {
+    width:28px;
+    height:28px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.profile-edit-photo-label:hover img {
+    filter:blur(2.2px) brightness(.62);
+    transform:scale(1.025);
+}
+.profile-edit-photo-label:hover .profile-edit-photo-overlay {
+    opacity:1;
+    background:rgba(0,0,0,.38);
+}
+.profile-edit-photo-shield {
+    position:absolute;
+    right:-5px;
+    bottom:-5px;
+    width:38px;
+    height:38px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:3px solid #000;
+    border-radius:50%;
+    background:#fff;
+    color:#000;
+    box-shadow:0 5px 18px rgba(0,0,0,.45);
+    z-index:4;
+}
+.profile-edit-photo-shield svg {
+    width:19px;
+    height:19px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
 #profile-edit-photo-input { display:none; }
 .profile-edit-field { display:flex; flex-direction:column; gap:7px; margin-top:14px; }
 .profile-edit-field label { color:#878787; font:500 9px var(--font-conversational); }
@@ -3257,10 +3333,11 @@
 #profile-edit-cancel { border:1px solid rgba(255,255,255,.10); background:transparent; color:#aaa; }
 #profile-edit-save { border:1px solid rgba(84,219,148,.28); background:rgba(84,219,148,.10); color:#8aeab7; }
 #profile-edit-save:hover { background:rgba(84,219,148,.15); }
-.profile-edit-note { margin-top:10px; color:#555; font:500 8px/1.4 var(--font-conversational); }
+.profile-edit-note { margin-top:10px; color:#777; font:500 11px/1.5 var(--font-conversational); }
 @media (max-width:768px) {
     .more-profile-item { padding:10px 8px; }
     .profile-modal-card { padding:17px; border-radius:16px; }
+    .profile-edit-note { font-size:10px; }
 }
 </style>
 
@@ -5090,6 +5167,643 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
 }
 </style>
 
+
+<style id="circle-portrait-tablet-learn-fix">
+@media (min-width: 769px) and (max-width: 1100px) and (orientation: portrait) {
+    #learn-layer {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: calc(var(--shell-header-height) + 10px) 10px 28px !important;
+    }
+    .learn-shell {
+        width: 100% !important;
+        max-width: none !important;
+        display: block !important;
+    }
+    .learn-left-column { display: none !important; }
+
+    /* Match the actual mobile Learn controls at this breakpoint too.
+       These rules prevent the native button styles from stretching the
+       My Learnings / study controls into a large white block. */
+    #learn-mobile-tools {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 10px !important;
+        position: relative !important;
+        z-index: 20 !important;
+    }
+
+    .learn-mobile-tool-buttons {
+        display: grid !important;
+        grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .learn-mobile-tool-button {
+        min-width: 0 !important;
+        min-height: 56px !important;
+        height: 56px !important;
+        width: 100% !important;
+        max-height: 56px !important;
+        padding: 9px 10px !important;
+        border: 1px solid rgba(255,255,255,.10) !important;
+        border-radius: 13px !important;
+        background: linear-gradient(180deg,#111,#0a0a0a) !important;
+        color: #fff !important;
+        display: grid !important;
+        grid-template-columns: 20px minmax(0,1fr) auto 17px !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-align: left !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        overflow: hidden !important;
+    }
+
+    .learn-mobile-tool-icon,
+    .learn-mobile-tool-icon svg {
+        width: 19px !important;
+        height: 19px !important;
+        max-width: 19px !important;
+        max-height: 19px !important;
+    }
+
+    .learn-mobile-tool-icon {
+        color: #d7d7d7 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 19px !important;
+    }
+
+    .learn-mobile-tool-copy {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .learn-mobile-tool-copy strong {
+        display: block !important;
+        color: #eee !important;
+        font: 700 10px/1.2 var(--font-conversational) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .learn-mobile-tool-copy span {
+        display: block !important;
+        margin-top: 3px !important;
+        color: #777 !important;
+        font: 500 8px/1.2 var(--font-conversational) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .learn-mobile-tool-meta {
+        color: #999 !important;
+        text-align: right !important;
+        font: 600 8px/1.2 var(--font-conversational) !important;
+        white-space: nowrap !important;
+    }
+
+    .learn-mobile-tool-chevron,
+    .learn-mobile-tool-chevron svg {
+        width: 17px !important;
+        height: 17px !important;
+        max-width: 17px !important;
+        max-height: 17px !important;
+    }
+
+    .learn-mobile-tool-chevron {
+        color: #ddd !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .learn-mobile-tool-overlay {
+        position: absolute !important;
+        top: 64px !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-height: 0 !important;
+        margin-top: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        border: 1px solid transparent !important;
+        border-radius: 15px !important;
+        background: rgba(8,8,8,.98) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,.45) !important;
+        transition: max-height .24s ease, opacity .18s ease, border-color .18s ease !important;
+    }
+
+    .learn-mobile-tool-overlay.open {
+        max-height: min(62vh,520px) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        border-color: rgba(255,255,255,.12) !important;
+    }
+
+    .learn-mobile-tool-pane {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        max-height: min(62vh,520px) !important;
+        overflow: hidden !important;
+    }
+
+    .learn-mobile-tool-pane[hidden] {
+        display: none !important;
+    }
+
+    .learn-mobile-overlay-heading {
+        flex: 0 0 52px !important;
+        min-height: 52px !important;
+        padding: 10px 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        border-bottom: 1px solid rgba(255,255,255,.07) !important;
+    }
+
+    #learn-mobile-course-list,
+    #learn-mobile-todo-list {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        max-height: calc(min(62vh,520px) - 52px) !important;
+        overflow-y: auto !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+        padding: 7px !important;
+    }
+
+    #learn-mobile-course-list::-webkit-scrollbar,
+    #learn-mobile-todo-list::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0 !important;
+        display: none !important;
+    }
+
+    .learn-mobile-overlay-heading strong {
+        display: block !important;
+        color: #eee !important;
+        font: 700 11px var(--font-conversational) !important;
+    }
+
+    .learn-mobile-overlay-heading span {
+        display: block !important;
+        margin-top: 3px !important;
+        color: #777 !important;
+        font: 500 8px var(--font-conversational) !important;
+    }
+
+    .learn-main-column {
+        width: 100% !important;
+        min-width: 0 !important;
+        position: relative !important;
+    }
+    #learn-mobile-tools {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 10px !important;
+        position: relative !important;
+        z-index: 20 !important;
+    }
+    .learn-workspace {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto !important;
+        gap: 10px !important;
+        align-items: start !important;
+    }
+    .learn-video-stage {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16 / 9 !important;
+    }
+    .learn-playlist {
+        width: 100% !important;
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+        aspect-ratio: auto !important;
+        overflow: hidden !important;
+    }
+    #learn-thumbnails {
+        height: 100% !important;
+        max-height: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-auto-rows: max-content !important;
+        align-content: start !important;
+        gap: 8px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    #learn-thumbnails::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0 !important;
+        display: none !important;
+    }
+    .learn-thumb {
+        width: 100% !important;
+        aspect-ratio: 16 / 9 !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+    }
+    .learn-controls {
+        width: 100% !important;
+        align-items: center !important;
+        padding-top: 11px !important;
+    }
+}
+</style>
+
+
+<style id="circle-content-language-ui">
+.content-language-select {
+    min-width: 112px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,.05);
+    color: #eee;
+    font: 500 11px var(--font-conversational);
+    cursor: pointer;
+    outline: none;
+}
+.content-language-select:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.22);
+}
+.content-language-select:focus {
+    border-color: rgba(255,255,255,.24);
+}
+.content-language-select option {
+    background: #0a0a0a;
+    color: #eee;
+}
+@media (max-width: 768px) {
+    .content-language-select {
+        min-width: 100px;
+        height: 34px;
+    }
+}
+</style>
+
+
+<style id="circle-profile-reminder-ui">
+#profile-reminder {
+    position: fixed;
+    left: 50%;
+    bottom: 78px;
+    transform: translateX(-50%) translateY(12px);
+    width: min(680px, calc(100vw - 32px));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 14px 13px 17px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 15px;
+    background: rgba(12,12,12,.94);
+    box-shadow: 0 18px 45px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.035);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 120000;
+    transition: opacity .35s cubic-bezier(.25,1,.5,1),
+                transform .35s cubic-bezier(.25,1,.5,1),
+                visibility .35s ease;
+}
+#profile-reminder.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+.profile-reminder-copy {
+    min-width: 0;
+    flex: 1;
+}
+.profile-reminder-title {
+    display: block;
+    color: #f2f2f2;
+    font: 600 13px/1.25 var(--font-conversational);
+}
+.profile-reminder-subtitle {
+    display: block;
+    margin-top: 4px;
+    color: #888;
+    font: 500 11px/1.5 var(--font-conversational);
+}
+.profile-reminder-action {
+    flex: 0 0 auto;
+    min-width: 106px;
+    height: 35px;
+    padding: 0 13px;
+    border: 1px solid rgba(84,219,148,.28);
+    border-radius: 10px;
+    background: rgba(84,219,148,.10);
+    color: #8aeab7;
+    font: 600 10px var(--font-conversational);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.profile-reminder-action:hover {
+    background: rgba(84,219,148,.16);
+    border-color: rgba(84,219,148,.40);
+    transform: translateY(-1px);
+}
+.profile-reminder-close {
+    flex: 0 0 auto;
+    width: 27px;
+    height: 27px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    background: transparent;
+    color: #777;
+    font: 500 16px/1 var(--font-conversational);
+    cursor: pointer;
+}
+.profile-reminder-close:hover {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+}
+@media (max-width: 768px) {
+    #profile-reminder {
+        bottom: 20px;
+        width: calc(100vw - 24px);
+        padding: 12px;
+        gap: 10px;
+        border-radius: 14px;
+    }
+    .profile-reminder-title { font-size: 12px; }
+    .profile-reminder-subtitle { font-size: 10px; }
+    .profile-reminder-action {
+        min-width: 92px;
+        height: 34px;
+        padding: 0 10px;
+    }
+}
+</style>
+
+
+<style id="circle-profile-cropper-ui">
+#profile-crop-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 140000;
+    transition: opacity .28s ease, visibility .28s ease;
+}
+#profile-crop-modal.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+.profile-crop-card {
+    width: min(92vw, 430px);
+    max-height: min(92vh, 690px);
+    overflow-y: auto;
+    background: #090909;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.035);
+    padding: 20px;
+}
+.profile-crop-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.profile-crop-title {
+    color: #fff;
+    font: 600 18px/1.2 var(--font-conversational);
+}
+.profile-crop-subtitle {
+    margin-top: 5px;
+    color: #8b8b8b;
+    font: 500 12px/1.5 var(--font-conversational);
+}
+.profile-crop-close {
+    display: none !important;
+    flex: 0 0 auto;
+    width: 31px;
+    height: 31px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 50%;
+    background: rgba(255,255,255,.035);
+    color: #aaa;
+    font: 400 18px/1 var(--font-conversational);
+    cursor: pointer;
+}
+.profile-crop-close:hover {
+    color: #fff;
+    background: rgba(255,255,255,.08);
+}
+.profile-crop-stage {
+    position: relative;
+    width: min(82vw, 350px);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #111;
+    border: 1px solid rgba(255,255,255,.14);
+    touch-action: none;
+    cursor: grab;
+}
+.profile-crop-stage.dragging {
+    cursor: grabbing;
+}
+#profile-crop-image,
+#profile-crop-image-dim,
+#profile-crop-image-clear {
+    position: absolute;
+    left: 0;
+    top: 0;
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+    will-change: transform;
+}
+#profile-crop-image {
+    z-index: 1;
+}
+#profile-crop-image-dim {
+    z-index: 2;
+    filter: brightness(.40) saturate(.72);
+}
+#profile-crop-image-clear {
+    z-index: 3;
+    clip-path: circle(0px at 0px 0px);
+    -webkit-clip-path: circle(0px at 0px 0px);
+}
+.profile-crop-shade {
+    display: none !important;
+}
+.profile-crop-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(to right,
+            transparent 32.9%, rgba(255,255,255,.18) 33.1%, transparent 33.3%,
+            transparent 66.2%, rgba(255,255,255,.18) 66.4%, transparent 66.6%),
+        linear-gradient(to bottom,
+            transparent 32.9%, rgba(255,255,255,.18) 33.1%, transparent 33.3%,
+            transparent 66.2%, rgba(255,255,255,.18) 66.4%, transparent 66.6%);
+}
+.profile-crop-circle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 68%;
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid rgba(255,255,255,.95);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,.35),
+        0 0 24px rgba(255,255,255,.06);
+    pointer-events: none;
+}
+.profile-crop-border {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 14px;
+    pointer-events: none;
+}
+.profile-crop-controls {
+    margin-top: 17px;
+}
+.profile-crop-zoom-label {
+    display: flex;
+    justify-content: space-between;
+    color: #777;
+    font: 500 10px var(--font-conversational);
+    margin-bottom: 7px;
+}
+#profile-crop-zoom {
+    width: 100%;
+    accent-color: #fff;
+    cursor: pointer;
+}
+.profile-crop-hint {
+    margin-top: 9px;
+    text-align: center;
+    color: #8b8b8b;
+    font: 500 11px/1.5 var(--font-conversational);
+}
+.profile-crop-actions {
+    display: flex;
+    gap: 9px;
+    margin-top: 17px;
+}
+.profile-crop-action {
+    flex: 1;
+    height: 40px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,.11);
+    background: rgba(255,255,255,.04);
+    color: #ddd;
+    font: 600 11px var(--font-conversational);
+    cursor: pointer;
+}
+.profile-crop-action:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.20);
+}
+.profile-crop-action.primary {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+.profile-crop-action.primary:hover {
+    background: #eee;
+}
+@media (max-width: 768px) {
+    .profile-crop-card {
+        width: calc(100vw - 20px);
+        padding: 15px;
+        border-radius: 18px;
+    }
+    .profile-crop-title { font-size: 16px; }
+    .profile-crop-subtitle { font-size: 11px; }
+    .profile-crop-hint { font-size: 10px; }
+    .profile-crop-stage {
+        width: min(88vw, 350px);
+        border-radius: 12px;
+    }
+    .profile-crop-actions {
+        margin-top: 14px;
+    }
+}
+</style>
+
+
+<style id="circle-thumbnail-resize-fix">
+/* Keep the Learn playlist thumbnails in the same single-column logic used by
+   the normal desktop playlist when the browser is temporarily resized. */
+@media (min-width: 769px) and (max-width: 1099px) and (orientation: landscape) {
+    #learn-thumbnails,
+    .learn-thumbnails {
+        display: flex !important;
+        flex-direction: column !important;
+        align-content: flex-start !important;
+        align-items: stretch !important;
+        grid-template-columns: none !important;
+        grid-auto-columns: none !important;
+        grid-auto-rows: max-content !important;
+        gap: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    #learn-thumbnails .learn-thumb,
+    .learn-thumbnails .learn-thumb {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        aspect-ratio: 16 / 9 !important;
+        margin: 0 0 9px !important;
+    }
+
+    #learn-thumbnails .learn-thumb:last-child,
+    .learn-thumbnails .learn-thumb:last-child {
+        margin-bottom: 0 !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -5190,6 +5904,17 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                     Show the Circle AI promotional banner once when you send your first prompt in a new session.
                 </div>
                 
+                <div class="settings-row" style="margin-top: 24px;">
+                    <span>Content Language</span>
+                    <select id="content-language-select" class="content-language-select" aria-label="Content Language">
+                        <option value="hindi">Hindi</option>
+                        <option value="english">English</option>
+                    </select>
+                </div>
+                <div class="settings-desc" style="margin-bottom: 28px;">
+                    Choose your preferred language for learning in Circle.
+                </div>
+
                 <div class="settings-footer">
                     If you have any queries, suggestions, or feedback,<br>please share them with us <a href="https://shorturl.at/NwAMA" target="_blank" rel="noopener noreferrer">here</a>.
                 </div>
@@ -5279,15 +6004,71 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             </button>
         </div>
 
+        <div id="profile-reminder" aria-hidden="true">
+            <div class="profile-reminder-copy">
+                <span class="profile-reminder-title">Customise your profile</span>
+                <span id="profile-reminder-subtitle" class="profile-reminder-subtitle">Hey there, use a clear selfie for better security and a more personalised experience.</span>
+            </div>
+            <button id="profile-reminder-action" class="profile-reminder-action" type="button">Customise</button>
+            <button id="profile-reminder-close" class="profile-reminder-close" type="button" aria-label="Close profile reminder">×</button>
+        </div>
+
+
+        <div id="profile-crop-modal" aria-hidden="true">
+            <div class="profile-crop-card" role="dialog" aria-modal="true" aria-labelledby="profile-crop-title">
+                <div class="profile-crop-header">
+                    <div>
+                        <div id="profile-crop-title" class="profile-crop-title">Adjust Your Profile Picture.</div>
+                        <div class="profile-crop-subtitle">Move and zoom your photo until it looks just right inside the circle.</div>
+                    </div>
+                </div>
+
+                <div id="profile-crop-stage" class="profile-crop-stage">
+                    <img id="profile-crop-image" src="" alt="">
+                    <img id="profile-crop-image-dim" src="" alt="" aria-hidden="true">
+                    <img id="profile-crop-image-clear" src="" alt="" aria-hidden="true">
+                    <div class="profile-crop-shade" aria-hidden="true"></div>
+                    <div class="profile-crop-grid" aria-hidden="true"></div>
+                    <div class="profile-crop-circle" aria-hidden="true"></div>
+                    <div class="profile-crop-border" aria-hidden="true"></div>
+                </div>
+
+                <div class="profile-crop-controls">
+                    <div class="profile-crop-zoom-label">
+                        <span>Zoom</span>
+                        <span id="profile-crop-zoom-value">100%</span>
+                    </div>
+                    <input id="profile-crop-zoom" type="range" min="100" max="260" step="1" value="100" aria-label="Zoom profile picture">
+                    <div class="profile-crop-hint">Your information stays private. It's not accessible to anyone, not even Circle.</div>
+                </div>
+
+                <div class="profile-crop-actions">
+                    <button id="profile-crop-cancel" class="profile-crop-action" type="button">Cancel</button>
+                    <button id="profile-crop-apply" class="profile-crop-action primary" type="button">Apply</button>
+                </div>
+            </div>
+        </div>
+
         <div id="profile-modal" aria-hidden="true">
             <div class="profile-modal-card" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
                 <div class="profile-modal-header">
                     <strong id="profile-modal-title">My Profile</strong>
                     <button id="profile-edit-close" class="profile-modal-close" type="button" aria-label="Close profile">×</button>
                 </div>
-                <label class="profile-edit-photo-label" for="profile-edit-photo-input">
+                <label class="profile-edit-photo-label" for="profile-edit-photo-input" aria-label="Change profile picture">
                     <img id="profile-edit-photo-preview" src="" alt="Profile picture">
-                    <span class="profile-edit-photo-overlay">Change picture</span>
+                    <span class="profile-edit-photo-overlay" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8.5 5.5 10 3.5h4l1.5 2H18a3 3 0 0 1 3 3v7.5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8.5a3 3 0 0 1 3-3h2.5Z"/>
+                            <circle cx="12" cy="12.5" r="3.4"/>
+                        </svg>
+                    </span>
+                    <span class="profile-edit-photo-shield" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2.75 19 5.5v5.35c0 4.35-2.75 8.12-7 10.4-4.25-2.28-7-6.05-7-10.4V5.5l7-2.75Z"/>
+                            <path d="m8.6 12.2 2.15 2.15 4.65-4.65"/>
+                        </svg>
+                    </span>
                     <input id="profile-edit-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
                 </label>
                 <div class="profile-edit-field">
@@ -6523,6 +7304,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
         let isProcessing = false;
         let promoTimer = null;
         let promoBannerConsent = true; // Added live consent tracking
+        let circleReturningUser = false;
 
         /* Unified shell + Learn state */
         let profilePhotoDataUrl = localStorage.getItem('circle_v2_profile_photo_data_url') || '';
@@ -6573,35 +7355,59 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
         }
 
         const LEARN_INTRO_SKIP_SECONDS = 10;
+        let learnContentLanguage = localStorage.getItem('circle_v2_content_language') === 'english'
+            ? 'english'
+            : 'hindi';
+
         const LEARN_COURSES = {
             businessCommunication: {
                 name: 'Business Communication',
                 type: 'playlist',
                 playlistId: 'PL59tH4pjx8SAWnw-k80wuzLi-l9HIqYzf',
+                playlists: {
+                    hindi: 'PL59tH4pjx8SAWnw-k80wuzLi-l9HIqYzf',
+                    english: 'PLO6lKmVH-LHc'
+                },
                 code: 'BBA111'
             },
             businessMathematics: {
                 name: 'Business Mathematics',
                 type: 'playlist',
                 playlistId: 'PL59tH4pjx8SALcAYjbujfMUwAI4S9Cx9c',
+                playlists: {
+                    hindi: 'PL59tH4pjx8SALcAYjbujfMUwAI4S9Cx9c',
+                    english: 'PLdrrCj5qtwEY'
+                },
                 code: 'BBA113'
             },
             computerApplications: {
                 name: 'Computer Application for Business',
                 type: 'playlist',
                 playlistId: 'PL59tH4pjx8SCk7LmDwxbmiYXrwn4DaZZm',
+                playlists: {
+                    hindi: 'PL59tH4pjx8SCk7LmDwxbmiYXrwn4DaZZm',
+                    english: 'PLdrrCj5qtwEY'
+                },
                 code: 'BBA112'
             },
             marketingSales: {
                 name: 'Marketing and Sales Management',
                 type: 'playlist',
                 playlistId: 'PL59tH4pjx8SCqngJcM7uWg81BnOXiuaNM',
+                playlists: {
+                    hindi: 'PL59tH4pjx8SCqngJcM7uWg81BnOXiuaNM',
+                    english: 'PLdrrCj5qtwEY'
+                },
                 code: 'BBA114'
             },
             entrepreneurship: {
                 name: 'Entrepreneurship Basics',
                 type: 'playlist',
                 playlistId: 'PL59tH4pjx8SB2v1pdapHJcxcGq-Mj4r4-',
+                playlists: {
+                    hindi: 'PL59tH4pjx8SB2v1pdapHJcxcGq-Mj4r4-',
+                    english: 'PLdrrCj5qtwEY'
+                },
                 code: 'BBA115'
             }
         };
@@ -6694,6 +7500,12 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
         document.addEventListener("DOMContentLoaded", () => {
             const isRegistered = localStorage.getItem('circle_v2_user_registered');
             userName = localStorage.getItem('circle_v2_username') || "";
+            circleReturningUser = Boolean(isRegistered && userName && profilePhotoDataUrl);
+
+            const savedContentLanguage = localStorage.getItem('circle_v2_content_language');
+            learnContentLanguage = savedContentLanguage === 'english' ? 'english' : 'hindi';
+            const contentLanguageSelect = document.getElementById('content-language-select');
+            if (contentLanguageSelect) contentLanguageSelect.value = learnContentLanguage;
             
             
             // Improve Circle Preference
@@ -6729,7 +7541,11 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             setupEventListeners();
 
             if (isRegistered && userName && profilePhotoDataUrl) {
-                startMainInterface().then(() => switchCircleMode('learn'));
+                setTimeout(showProfileReminder, 4200);
+                startMainInterface().then(() => {
+                    switchCircleMode('learn');
+                    setTimeout(showReturningMotivationToast, 750);
+                });
             } else {
                 startOnboardingSequence();
             }
@@ -6866,18 +7682,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 return;
             }
 
-            try {
-                profilePhotoDataUrl = await compressProfileImage(file, 512, 0.78);
-                const preview = document.getElementById('onboarding-photo-preview');
-                const picker = document.getElementById('onboarding-photo-picker');
-                preview.src = profilePhotoDataUrl;
-                picker.classList.add('has-photo');
-                picker.style.borderColor = '#fff';
-                document.getElementById('profile-upload-error').style.display = 'none';
-            } catch (error) {
-                console.error('Profile image processing failed:', error);
-                showToast('Could not process that picture. Try another image.');
-            }
+            openProfileCropper(file, 'onboarding');
         }
 
         function compressProfileImage(file, maxSize, quality) {
@@ -7046,6 +7851,96 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             }
         }
 
+        function setLearnContentLanguage(language) {
+            const nextLanguage = language === 'english' ? 'english' : 'hindi';
+            const select = document.getElementById('content-language-select');
+            if (select) select.value = nextLanguage;
+            if (nextLanguage === learnContentLanguage) return;
+
+            /* Keep progress tied to the course, not the content language. */
+            persistLearnProgress();
+            learnContentLanguage = nextLanguage;
+
+            try {
+                localStorage.setItem('circle_v2_content_language', learnContentLanguage);
+            } catch (_) {}
+
+            const savedIndex = Math.max(0, getLearnSavedIndex(learnActiveCourseId));
+            learnActiveIndex = savedIndex;
+            learnRestoringSavedIndex = savedIndex > 0 ? savedIndex : null;
+            learnFocusSavedThumbnailPending = true;
+            learnPlaylistIds = [];
+            stopLearnPlaylistRefreshTimer();
+
+            try {
+                if (learnPlayer && typeof learnPlayer.destroy === 'function') {
+                    learnPlayer.destroy();
+                }
+            } catch (_) {}
+
+            learnPlayer = null;
+            learnPlayerReady = false;
+
+            const loading = document.getElementById('learn-loading');
+            if (loading) loading.style.display = 'flex';
+
+            renderLearnCourseMenu();
+            updateLearnCourseUI();
+
+            if (window.YT && window.YT.Player) {
+                initializeLearnPlayer();
+            } else {
+                ensureLearnPlayerAPI();
+            }
+
+            closeSettings();
+        }
+
+        function getProfileReminderPhotoFingerprint(dataUrl) {
+            const value = String(dataUrl || '');
+            let hash = 2166136261;
+            for (let i = 0; i < value.length; i++) {
+                hash ^= value.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return (hash >>> 0).toString(16);
+        }
+
+        function showProfileReminder() {
+            if (!circleReturningUser || !profilePhotoDataUrl) return;
+
+            try {
+                /* One display per browser session, but never permanently dismiss.
+                   The reminder remains eligible in every new session until the
+                   profile picture has actually been changed. */
+                if (sessionStorage.getItem('circle_v2_profile_reminder_session') === 'true') return;
+
+                const currentFingerprint = getProfileReminderPhotoFingerprint(profilePhotoDataUrl);
+                const acknowledgedFingerprint = localStorage.getItem('circle_v2_profile_reminder_photo');
+                if (acknowledgedFingerprint && acknowledgedFingerprint === currentFingerprint) return;
+
+                sessionStorage.setItem('circle_v2_profile_reminder_session', 'true');
+            } catch (_) {}
+
+            const reminder = document.getElementById('profile-reminder');
+            if (!reminder) return;
+
+            const reminderSubtitle = document.getElementById('profile-reminder-subtitle');
+            if (reminderSubtitle) {
+                reminderSubtitle.textContent = `Hey ${userName || 'there'}, use a clear selfie for better security and a more personalised experience.`;
+            }
+
+            reminder.classList.add('show');
+            reminder.setAttribute('aria-hidden', 'false');
+        }
+
+        function dismissProfileReminder() {
+            const reminder = document.getElementById('profile-reminder');
+            if (!reminder) return;
+            reminder.classList.remove('show');
+            reminder.setAttribute('aria-hidden', 'true');
+        }
+
         /*******************************************************
          * 6.6 SHARE LOGIC
          *******************************************************/
@@ -7101,13 +7996,66 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             }
         }
         
-        function showToast(message) {
+        function personalizeToastMessage(message) {
+            const raw = String(message || '');
+            const name = String(userName || '').trim();
+            const displayName = name
+                ? name.charAt(0).toUpperCase() + name.slice(1)
+                : '';
+
+            if (!displayName) {
+                if (raw === 'Please enter your name.') return 'Tell Circle your name to continue.';
+                return raw;
+            }
+
+            const personalised = {
+                'Please choose JPG, PNG or WEBP.': `Please choose a JPG, PNG, or WEBP, ${displayName}.`,
+                'Could not process that picture. Try another image.': `That picture couldn’t be processed, ${displayName}. Try another one.`,
+                'Could not process that picture.': `That picture couldn’t be processed, ${displayName}. Try another one.`,
+                'Share text copied': `Your Circle share text is copied, ${displayName}.`,
+                'Please enter your name.': `Tell Circle your name to continue, ${displayName}.`,
+                'Profile updated.': `Your Circle profile is updated, ${displayName} 🫶`,
+                'Press play to start the lesson.': `Your lesson is ready, ${displayName}. Tap play whenever you’re ready.`,
+                'This YouTube video does not allow embedded playback.': `This lecture can’t play inside Circle right now, ${displayName}. Try another one.`,
+                'This YouTube video is unavailable or private.': `This lecture isn’t available right now, ${displayName}. Let’s try another one.`,
+                'YouTube blocked the embed request. The player is retrying with the required referrer.': `Circle is reconnecting to this lecture, ${displayName}. Give it a moment.`,
+                'This lesson could not be loaded.': `We couldn’t load this lecture, ${displayName}. Let’s try again.`,
+                'YouTube could not load this lesson.': `YouTube couldn’t load this lecture, ${displayName}. Try again in a moment.`
+            };
+
+            return personalised[raw] || raw;
+        }
+
+        function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.textContent = personalizeToastMessage(message);
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, duration);
+        }
+
+        function showReturningMotivationToast() {
+            if (!circleReturningUser) return;
+
+            try {
+                if (sessionStorage.getItem('circle_v2_return_toast_shown') === 'true') return;
+                sessionStorage.setItem('circle_v2_return_toast_shown', 'true');
+            } catch (_) {}
+
+            const messages = [
+                'I’m proud of you, {{Name}} 🫶',
+                'Welcome back, {{Name}}. Let’s keep going.',
+                'You’re doing better than you think, {{Name}}. Keep going.',
+                'One lecture at a time, {{Name}}. You’ve got this.',
+                'Good to see you back, {{Name}}. Your progress is waiting for you.',
+                'Keep showing up, {{Name}}. That’s how progress happens.',
+                'You came back, {{Name}}. That already counts.',
+                'Your progress is still here, {{Name}}. Let’s continue.'
+            ];
+
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            showToast(formatText(message, userName), 5000);
         }
 
         /*******************************************************
@@ -7171,14 +8119,310 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 showToast('Please choose JPG, PNG or WEBP.');
                 return;
             }
+
+            openProfileCropper(file, 'edit');
+        }
+
+
+        function loadImageForProfileValidation(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Unable to read the image.'));
+                img.src = dataUrl;
+            });
+        }
+
+        async function ensureProfilePhotoIsSuitable(dataUrl) {
+            const image = await loadImageForProfileValidation(dataUrl);
+
+            const canvas = document.createElement('canvas');
+            const sampleSize = 96;
+            canvas.width = sampleSize;
+            canvas.height = sampleSize;
+
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return { valid: true, reason: 'validation-unavailable' };
+
+            ctx.drawImage(image, 0, 0, sampleSize, sampleSize);
+
+            const pixels = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+            const totalPixels = pixels.length / 4;
+
+            let luminanceSum = 0;
+            let darkPixels = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+
+                const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                luminanceSum += luminance;
+
+                if (luminance < 55) darkPixels += 1;
+            }
+
+            const averageLuminance = luminanceSum / totalPixels;
+            const darkPixelRatio = darkPixels / totalPixels;
+
+            /* Only reject images that are genuinely solid-black or mostly dark.
+               Normal photos with dark backgrounds/shadows should still pass. */
+            const mostlyDark =
+                averageLuminance < 36 ||
+                (averageLuminance < 48 && darkPixelRatio >= 0.82);
+
+            return {
+                valid: !mostlyDark,
+                reason: mostlyDark ? 'mostly-dark' : 'ok'
+            };
+        }
+
+        let profileCropTarget = null;
+        let profileCropImage = null;
+        let profileCropObjectUrl = null;
+        let profileCropBaseScale = 1;
+        let profileCropScale = 1;
+        let profileCropX = 0;
+        let profileCropY = 0;
+        let profileCropDrag = null;
+
+        function clampProfileCropPosition() {
+            const stage = document.getElementById('profile-crop-stage');
+            if (!stage || !profileCropImage) return;
+
+            const size = stage.clientWidth;
+            const imageWidth = profileCropImage.naturalWidth * profileCropScale;
+            const imageHeight = profileCropImage.naturalHeight * profileCropScale;
+
+            const minX = Math.min(0, size - imageWidth);
+            const maxX = 0;
+            const minY = Math.min(0, size - imageHeight);
+            const maxY = 0;
+
+            profileCropX = Math.max(minX, Math.min(maxX, profileCropX));
+            profileCropY = Math.max(minY, Math.min(maxY, profileCropY));
+        }
+
+        function renderProfileCropper() {
+            const imageEl = document.getElementById('profile-crop-image');
+            const dimImageEl = document.getElementById('profile-crop-image-dim');
+            const clearImageEl = document.getElementById('profile-crop-image-clear');
+            const zoomEl = document.getElementById('profile-crop-zoom');
+            const zoomValue = document.getElementById('profile-crop-zoom-value');
+            const stage = document.getElementById('profile-crop-stage');
+            if (!imageEl || !zoomEl || !zoomValue || !stage || !profileCropImage) return;
+
+            const renderedWidth = `${profileCropImage.naturalWidth * profileCropScale}px`;
+            const renderedHeight = `${profileCropImage.naturalHeight * profileCropScale}px`;
+            const renderedTransform = `translate3d(${profileCropX}px, ${profileCropY}px, 0)`;
+
+            [imageEl, dimImageEl, clearImageEl].forEach(el => {
+                if (!el) return;
+                el.style.width = renderedWidth;
+                el.style.height = renderedHeight;
+                el.style.transform = renderedTransform;
+            });
+
+            if (clearImageEl) {
+                const radius = stage.clientWidth * 0.34;
+                const centerX = stage.clientWidth / 2 - profileCropX;
+                const centerY = stage.clientHeight / 2 - profileCropY;
+                const clip = `circle(${radius}px at ${centerX}px ${centerY}px)`;
+                clearImageEl.style.clipPath = clip;
+                clearImageEl.style.webkitClipPath = clip;
+            }
+
+            const zoomPercent = Math.round((profileCropScale / profileCropBaseScale) * 100);
+            zoomEl.value = String(Math.max(100, Math.min(260, zoomPercent)));
+            zoomValue.textContent = `${zoomPercent}%`;
+        }
+
+        function setProfileCropZoom(percent) {
+            if (!profileCropImage) return;
+
+            const stage = document.getElementById('profile-crop-stage');
+            if (!stage) return;
+
+            const size = stage.clientWidth;
+            const oldScale = profileCropScale;
+            const nextScale = profileCropBaseScale * (Number(percent) / 100);
+            const centerX = (size / 2 - profileCropX) / oldScale;
+            const centerY = (size / 2 - profileCropY) / oldScale;
+
+            profileCropScale = nextScale;
+            profileCropX = size / 2 - centerX * profileCropScale;
+            profileCropY = size / 2 - centerY * profileCropScale;
+
+            clampProfileCropPosition();
+            renderProfileCropper();
+        }
+
+        function closeProfileCropper(resetInput = true) {
+            const modal = document.getElementById('profile-crop-modal');
+            if (!modal) return;
+
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+
+            if (profileCropObjectUrl) {
+                try { URL.revokeObjectURL(profileCropObjectUrl); } catch (_) {}
+            }
+            profileCropObjectUrl = null;
+            profileCropImage = null;
+            profileCropTarget = null;
+            profileCropDrag = null;
+
+            ['profile-crop-image', 'profile-crop-image-dim', 'profile-crop-image-clear'].forEach(id => {
+                const image = document.getElementById(id);
+                if (image) image.removeAttribute('src');
+            });
+
+            if (resetInput) {
+                ['onboarding-photo-input', 'profile-edit-photo-input'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.value = '';
+                });
+            }
+        }
+
+        function openProfileCropper(file, target) {
+            const modal = document.getElementById('profile-crop-modal');
+            const imageEl = document.getElementById('profile-crop-image');
+            const dimImageEl = document.getElementById('profile-crop-image-dim');
+            const clearImageEl = document.getElementById('profile-crop-image-clear');
+            const stage = document.getElementById('profile-crop-stage');
+            const zoomEl = document.getElementById('profile-crop-zoom');
+            if (!modal || !imageEl || !stage || !zoomEl) return;
+
+            if (profileCropObjectUrl) {
+                try { URL.revokeObjectURL(profileCropObjectUrl); } catch (_) {}
+            }
+
+            profileCropTarget = target;
+            profileCropObjectUrl = URL.createObjectURL(file);
+
+            const img = new Image();
+            profileCropImage = img;
+
+            img.onload = () => {
+                const size = stage.clientWidth;
+                profileCropBaseScale = Math.max(
+                    size / img.naturalWidth,
+                    size / img.naturalHeight
+                );
+                profileCropScale = profileCropBaseScale;
+                profileCropX = (size - img.naturalWidth * profileCropScale) / 2;
+                profileCropY = (size - img.naturalHeight * profileCropScale) / 2;
+
+                imageEl.src = profileCropObjectUrl;
+                if (dimImageEl) dimImageEl.src = profileCropObjectUrl;
+                if (clearImageEl) clearImageEl.src = profileCropObjectUrl;
+                zoomEl.value = '100';
+                renderProfileCropper();
+
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+            };
+
+            img.onerror = () => {
+                closeProfileCropper();
+                showToast('Could not process that picture.');
+            };
+
+            img.src = profileCropObjectUrl;
+        }
+
+        async function applyProfileCrop() {
+            const stage = document.getElementById('profile-crop-stage');
+            const applyButton = document.getElementById('profile-crop-apply');
+            if (!stage || !profileCropImage || applyButton?.disabled) return;
+
+            const size = stage.clientWidth;
+            const cropSourceSize = size / profileCropScale;
+            const sourceX = Math.max(
+                0,
+                Math.min(profileCropImage.naturalWidth - cropSourceSize, -profileCropX / profileCropScale)
+            );
+            const sourceY = Math.max(
+                0,
+                Math.min(profileCropImage.naturalHeight - cropSourceSize, -profileCropY / profileCropScale)
+            );
+
+            const outputSize = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = outputSize;
+            canvas.height = outputSize;
+
+            const ctx = canvas.getContext('2d', { alpha: false });
+            if (!ctx) return;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, outputSize, outputSize);
+            ctx.drawImage(
+                profileCropImage,
+                sourceX, sourceY, cropSourceSize, cropSourceSize,
+                0, 0, outputSize, outputSize
+            );
+
+            const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+            if (applyButton) {
+                applyButton.disabled = true;
+                applyButton.setAttribute('aria-busy', 'true');
+            }
+
+            let validation;
             try {
-                profileEditPhotoDataUrl = await compressProfileImage(file, 512, 0.78);
+                validation = await ensureProfilePhotoIsSuitable(croppedDataUrl);
+            } catch (_) {
+                validation = { valid: false, reason: 'validation-unavailable' };
+            }
+
+            if (!validation.valid) {
+                if (applyButton) {
+                    applyButton.disabled = false;
+                    applyButton.removeAttribute('aria-busy');
+                }
+
+                showToast('Please upload a clear selfie for better security and a more personalised experience.', 5000);
+
+                const uploadError = document.getElementById('profile-upload-error');
+                if (uploadError && profileCropTarget === 'onboarding') {
+                    uploadError.textContent = 'Please upload a clear selfie for better security and a more personalised experience.';
+                    uploadError.style.display = 'block';
+                }
+                return;
+            }
+
+            if (applyButton) {
+                applyButton.disabled = false;
+                applyButton.removeAttribute('aria-busy');
+            }
+
+            if (profileCropTarget === 'onboarding') {
+                profilePhotoDataUrl = croppedDataUrl;
+
+                const preview = document.getElementById('onboarding-photo-preview');
+                const picker = document.getElementById('onboarding-photo-picker');
+                if (preview) preview.src = profilePhotoDataUrl;
+                if (picker) {
+                    picker.classList.add('has-photo');
+                    picker.style.borderColor = '#fff';
+                }
+
+                const error = document.getElementById('profile-upload-error');
+                if (error) {
+                    error.textContent = 'Please add a profile picture to continue.';
+                    error.style.display = 'none';
+                }
+            } else if (profileCropTarget === 'edit') {
+                profileEditPhotoDataUrl = croppedDataUrl;
                 const preview = document.getElementById('profile-edit-photo-preview');
                 if (preview) preview.src = profileEditPhotoDataUrl;
-            } catch (error) {
-                console.error('Profile edit image processing failed:', error);
-                showToast('Could not process that picture.');
             }
+
+            closeProfileCropper();
         }
 
         function saveEditedProfile() {
@@ -7190,12 +8434,28 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 return;
             }
             if (!circleUserId) circleUserId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `circle-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+
+            const previousProfilePhoto = profilePhotoDataUrl || '';
+            const nextProfilePhoto = profileEditPhotoDataUrl || previousProfilePhoto || '';
+            const profilePhotoChanged = Boolean(nextProfilePhoto && nextProfilePhoto !== previousProfilePhoto);
+
             userName = nextName;
-            profilePhotoDataUrl = profileEditPhotoDataUrl || profilePhotoDataUrl || '';
+            profilePhotoDataUrl = nextProfilePhoto;
             localStorage.setItem('circle_v2_user_registered','true');
             localStorage.setItem('circle_v2_username', userName);
             localStorage.setItem('circle_v2_user_id', circleUserId);
             localStorage.setItem('circle_v2_profile_photo_data_url', profilePhotoDataUrl);
+
+            if (profilePhotoChanged) {
+                try {
+                    localStorage.setItem(
+                        'circle_v2_profile_reminder_photo',
+                        getProfileReminderPhotoFingerprint(profilePhotoDataUrl)
+                    );
+                } catch (_) {}
+                dismissProfileReminder();
+            }
+
             refreshMoreProfileUI();
             const rot = document.getElementById('greeting-rotator');
             if (rot && document.body.classList.contains('circle-ask-mode') && !isChatMode) {
@@ -7239,11 +8499,16 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             if (!column) return;
 
             let initial = learnLeftLayout;
-            if (!['learning-expanded','learning-collapsed'].includes(initial)) initial = 'learning-expanded';
+            if (window.innerWidth >= 769) {
+                initial = 'learning-expanded';
+            } else if (!['learning-expanded','learning-collapsed'].includes(initial)) {
+                initial = 'learning-expanded';
+            }
             applyLearnLeftLayout(initial, false);
 
             const togglePanel = event => {
                 event.preventDefault();
+                if (window.innerWidth >= 769) return;
                 const next = learnLeftLayout === 'learning-expanded' ? 'learning-collapsed' : 'learning-expanded';
                 applyLearnLeftLayout(next);
             };
@@ -7257,6 +8522,14 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                     if (event.target.closest('.learn-sidebar-control')) return;
                     if (event.key === 'Enter' || event.key === ' ') togglePanel(event);
                 });
+            });
+
+            /* When resizing from a mobile/tablet layout back to desktop,
+               always restore the full My Learnings panel. */
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 769 && learnLeftLayout !== 'learning-expanded') {
+                    applyLearnLeftLayout('learning-expanded', false);
+                }
             });
 
             const toggle = column.querySelector('.learn-sidebar-control-toggle');
@@ -7281,6 +8554,19 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 closeMoreMenu();
                 toggleSettings();
             });
+
+            const contentLanguageSelect = document.getElementById('content-language-select');
+            if (contentLanguageSelect) {
+                contentLanguageSelect.addEventListener('change', (event) => {
+                    setLearnContentLanguage(event.target.value);
+                });
+            }
+
+            document.getElementById('profile-reminder-action').addEventListener('click', () => {
+                dismissProfileReminder();
+                openProfileModal();
+            });
+            document.getElementById('profile-reminder-close').addEventListener('click', dismissProfileReminder);
             document.getElementById('more-share').addEventListener('click', () => {
                 closeMoreMenu();
                 handleShare();
@@ -7297,6 +8583,54 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             document.getElementById('profile-edit-cancel').addEventListener('click', closeProfileModal);
             document.getElementById('profile-edit-save').addEventListener('click', saveEditedProfile);
             document.getElementById('profile-edit-photo-input').addEventListener('change', handleProfileEditPhotoUpload);
+
+            document.getElementById('profile-crop-cancel').addEventListener('click', () => closeProfileCropper());
+            document.getElementById('profile-crop-apply').addEventListener('click', applyProfileCrop);
+
+            document.getElementById('profile-crop-zoom').addEventListener('input', (event) => {
+                setProfileCropZoom(event.target.value);
+            });
+
+            const cropStage = document.getElementById('profile-crop-stage');
+            cropStage.addEventListener('pointerdown', (event) => {
+                if (!profileCropImage) return;
+                cropStage.classList.add('dragging');
+                cropStage.setPointerCapture(event.pointerId);
+                profileCropDrag = {
+                    pointerId: event.pointerId,
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    originX: profileCropX,
+                    originY: profileCropY
+                };
+            });
+
+            cropStage.addEventListener('pointermove', (event) => {
+                if (!profileCropDrag || event.pointerId !== profileCropDrag.pointerId) return;
+
+                profileCropX = profileCropDrag.originX + (event.clientX - profileCropDrag.startX);
+                profileCropY = profileCropDrag.originY + (event.clientY - profileCropDrag.startY);
+                clampProfileCropPosition();
+                renderProfileCropper();
+            });
+
+            const finishCropDrag = (event) => {
+                if (!profileCropDrag || event.pointerId !== profileCropDrag.pointerId) return;
+                profileCropDrag = null;
+                cropStage.classList.remove('dragging');
+                try { cropStage.releasePointerCapture(event.pointerId); } catch (_) {}
+            };
+
+            cropStage.addEventListener('pointerup', finishCropDrag);
+            cropStage.addEventListener('pointercancel', finishCropDrag);
+            cropStage.addEventListener('pointerleave', (event) => {
+                if (event.buttons === 0) finishCropDrag(event);
+            });
+
+            document.getElementById('profile-crop-modal').addEventListener('click', (event) => {
+                if (event.target.id === 'profile-crop-modal') closeProfileCropper();
+            });
+
             document.getElementById('profile-modal').addEventListener('click', (event) => {
                 if (event.target.id === 'profile-modal') closeProfileModal();
             });
@@ -8629,7 +9963,9 @@ setInterval(() => {
         }
 
         function getLearnCourse(courseId) {
-            return LEARN_COURSES[courseId] || LEARN_COURSES.businessCommunication;
+            const base = LEARN_COURSES[courseId] || LEARN_COURSES.businessCommunication;
+            const playlistId = (base.playlists && base.playlists[learnContentLanguage]) || base.playlistId;
+            return Object.assign({}, base, { playlistId });
         }
 
         function getLearnSavedIndex(courseId) {
