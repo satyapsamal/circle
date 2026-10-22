@@ -9307,7 +9307,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
          *******************************************************/
         async function handleShare() {
             const shareTitle = "Circle AI | BBA Assistant";
-            const shareText = "Circle AI is a free, 24×7 virtual BBA assistant built for BBA students.\n\nIt helps students quickly find information about the BBA Programme, including syllabus, examinations, assessments, academic updates, LMS information, study resources, and common programme queries.\n\nAsk Circle AI instead of searching through old WhatsApp messages, LMS discussions, emails, and scattered information.\n\nCircle AI | BBA Assistant";
+            const shareText = "Circle AI is a free, 24×7 virtual BBA assistant built for BBA students.\n\nIt helps students quickly find information about the BBA Programme, including syllabus, examinations, assessments, academic updates, LMS information, study resources, and common programme queries.\n\nCircle AI also includes Learn, a dedicated study space with course-wise learning videos, lessons, study notes, and learning progress tracking to support structured revision.\n\nAsk Circle AI instead of searching through old WhatsApp messages, LMS discussions, emails, and scattered information.\n\nCircle AI | BBA Assistant";
             const shareUrl = "https://shorturl.at/APPeS";
             
             let sharedSuccessfully = false;
@@ -12807,5 +12807,15 @@ setInterval(() => {
         window.addEventListener('beforeunload', function () { flushLearnNotesSave(); persistLearnProgress(); logLearnProgressToGoogleSheets('page_unload'); });
 
     </script>
+
+
+<style id="circle-mobile-model-selector-chat-state">
+/* On mobile, show the model selector only before the first message in Ask. */
+@media (max-width: 768px) {
+    body.circle-ask-mode.chat-active #shell-model-slot {
+        display: none !important;
+    }
+}
+</style>
 </body>
 </html>
