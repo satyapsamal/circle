@@ -8595,7 +8595,9 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body,
-                    keepalive: true,
+                    // Profile requests include a Base64 image and can exceed the Fetch keepalive body limit (64 KiB).
+                    // Keep the existing behavior for small analytics events, but send profile uploads as regular requests.
+                    keepalive: data.type !== 'user_profile',
                     cache: 'no-store'
                 });
             } catch (err) {
