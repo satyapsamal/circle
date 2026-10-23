@@ -5517,6 +5517,14 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
     border-radius: 15px; background: #fff;
 }
 #donation-qr { width: 170px; height: 170px; display: flex; align-items: center; justify-content: center; }
+.donation-qr-loading {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid rgba(0,0,0,.10);
+    border-top-color: rgba(0,0,0,.82);
+    border-right-color: rgba(0,0,0,.46);
+    animation: learnLoadingPulse 1.35s cubic-bezier(.25,.95,.35,1) infinite;
+    will-change: transform, opacity, filter;
+}
 #donation-qr img, #donation-qr canvas { width: 170px !important; height: 170px !important; display: block; }
 .donation-selected-amount { text-align: center; color: #fff; font: 600 18px var(--font-ui); }
 .donation-upi-label { margin-top: 5px; text-align: center; color: #777; font: 400 10px var(--font-conversational); }
@@ -6619,7 +6627,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 <div class="donation-qr-wrap"><div id="donation-qr" aria-label="UPI donation QR code"></div></div>
                 <div id="donation-selected-amount" class="donation-selected-amount">₹50</div>
                 <div class="donation-upi-label">Scan with any UPI app</div>
-                <div class="donation-upi-id">UPI: satyapsamal@iob</div>
+                <div class="donation-upi-id">UPI: satyasamal@iob</div>
                 <button id="donation-pay-btn" class="donation-pay-btn" type="button">Open UPI app to pay ₹50</button>
                 <p class="donation-note"><span class="donation-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7.75a4 4 0 0 1 8 0V10"/></svg></span><span class="donation-note-copy">Your payment is processed securely through UPI. Circle AI does not store or access your payment details.</span></p>
             </div>
@@ -12092,7 +12100,7 @@ setInterval(() => {
          * DONATION / SUPPORT CIRCLE AI
          * Client-side only. No payment verification is performed.
          *******************************************************/
-        const CIRCLE_DONATION_UPI_ID = 'satyapsamal@iob';
+        const CIRCLE_DONATION_UPI_ID = 'satyasamal@iob';
         const CIRCLE_DONATION_PAYEE = 'Satya Prakash Samal';
         const CIRCLE_DONATION_DEFAULT_AMOUNT = 50;
         const CIRCLE_DONATION_ESTABLISHED_AMOUNT = 100;
@@ -12241,9 +12249,10 @@ setInterval(() => {
                     correctLevel: QRCode.CorrectLevel.M
                 });
             } else {
-                const fallback = document.createElement('div');
-                fallback.style.cssText = 'width:170px;height:170px;display:flex;align-items:center;justify-content:center;text-align:center;color:#111;font:600 11px Arial;padding:15px;box-sizing:border-box;';
-                fallback.textContent = 'Loading QR…';
+                const fallback = document.createElement('span');
+                fallback.className = 'donation-qr-loading';
+                fallback.setAttribute('role', 'status');
+                fallback.setAttribute('aria-label', 'Loading QR');
                 qr.appendChild(fallback);
             }
         }
