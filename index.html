@@ -7977,7 +7977,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                     'bba113 end term', 'bba113 end-term', 'bba113 end semester',
                     'bba114 end term', 'bba114 end-term', 'bba114 end semester',
                     'bba115 end term', 'bba115 end-term', 'bba115 end semester',
-                    '81-tbd', '85-tbd', '93-180', '78-tbd',
+                    '81-160', '85-152', '85-162', '93-180', '78-146',
                     'end sem me kya hai', 'end semester me kya hai', 'endterm sylabus', 'end sem sylabus', 'end term syallbus',
                     'end sem syallbus', 'end term vedios', 'end sem vedios', 'end sem portion kya hai', 'exam syllabus end term'
                 ],
@@ -7988,17 +7988,17 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
 **Source:** End-Term video coverage table shared for Circle AI.
 
 <table>
-<thead><tr><th>S. No.</th><th>Subject</th><th>Videos Included in End Term</th></tr></thead>
+<thead><tr><th>S. No.</th><th>Subject</th><th>Video Range</th></tr></thead>
 <tbody>
-<tr><td>1</td><td>BBA111 – Business Communication</td><td>Video No. 81–TBD</td></tr>
-<tr><td>2</td><td>BBA112 – Business Mathematics</td><td>Video No. 85–TBD</td></tr>
-<tr><td>3</td><td>BBA113 – Computer Applications for Business</td><td>Video No. 85–TBD</td></tr>
+<tr><td>1</td><td>BBA111 – Business Communication</td><td>Video No. 81–160</td></tr>
+<tr><td>2</td><td>BBA112 – Business Mathematics</td><td>Video No. 85–152</td></tr>
+<tr><td>3</td><td>BBA113 – Computer Applications for Business</td><td>Video No. 85–162</td></tr>
 <tr><td>4</td><td>BBA114 – Marketing and Sales Management</td><td>Video No. 93–180</td></tr>
-<tr><td>5</td><td>BBA115 – Entrepreneurship Basics</td><td>Video No. 78–TBD</td></tr>
+<tr><td>5</td><td>BBA115 – Entrepreneurship Basics</td><td>Video No. 78–146</td></tr>
 </tbody>
 </table>
 
-You can watch the relevant video lectures in **Circle AI → Learn** by selecting the subject. Ranges marked **TBD** have not yet been confirmed in the supplied table.`
+You can watch the relevant video lectures in **Circle AI → Learn** by selecting the subject.`
             },
             {
                 id: 'mid_term_syllabus',
@@ -10321,86 +10321,87 @@ settingsBtn.addEventListener('click', toggleSettings);
         let circleBundleNudgeShownFallback = false;
 
         function registerCircleBundlePrompt() {
+            /* Every submitted Ask prompt earns one notes-nudge display after its response. */
             try {
                 const previous = Number(sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY) || '0');
                 const nextCount = (Number.isFinite(previous) && previous > 0 ? previous : 0) + 1;
                 sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY, String(nextCount));
-                if (nextCount === 1 && sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) !== 'true') {
-                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY, 'true');
-                }
+                sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY, 'true');
             } catch (_) {
                 circleBundleNudgePromptCountFallback += 1;
-                if (circleBundleNudgePromptCountFallback === 1) circleBundleNudgePendingFallback = true;
+                circleBundleNudgePendingFallback = true;
             }
         }
 
         function showCircleBundleNudgeIfPending() {
             let shouldShow = false;
             try {
-                shouldShow = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true' &&
-                    sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) !== 'true';
-                if (shouldShow) {
-                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY, 'true');
-                    sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
-                }
+                shouldShow = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true';
+                if (shouldShow) sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
             } catch (_) {
-                shouldShow = circleBundleNudgePendingFallback && !circleBundleNudgeShownFallback;
-                if (shouldShow) {
-                    circleBundleNudgePendingFallback = false;
-                    circleBundleNudgeShownFallback = true;
-                }
+                shouldShow = circleBundleNudgePendingFallback;
+                if (shouldShow) circleBundleNudgePendingFallback = false;
             }
-            if (!shouldShow || document.getElementById('circle-bundle-nudge')) return;
+            if (!shouldShow) return;
 
-            const message = "Hi Satya! I'm interested in The Circle One-Shot Notes Bundle for ₹249. Could you please share the free sample notes and payment details so I can make an informed decision?";
-            const nudge = document.createElement('aside');
-            nudge.id = 'circle-bundle-nudge';
-            nudge.className = 'circle-bundle-nudge';
-            nudge.setAttribute('aria-label', 'The Circle One-Shot Notes Bundle');
-            nudge.setAttribute('aria-hidden', 'false');
+            let nudge = document.getElementById('circle-bundle-nudge');
+            const isAlreadyVisible = Boolean(nudge && nudge.classList.contains('show') &&
+                nudge.getAttribute('aria-hidden') !== 'true');
 
-            const icon = document.createElement('div');
-            icon.className = 'circle-bundle-nudge-icon';
-            icon.setAttribute('aria-hidden', 'true');
-            icon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5A2.5 2.5 0 0 0 17.5 16H4V5.5Zm0 0V19a2 2 0 0 0 2 2h12.5A1.5 1.5 0 0 0 20 19.5V18H6.5A2.5 2.5 0 0 1 4 15.5V5.5Z"/></svg>';
-
-            const copy = document.createElement('div');
-            copy.className = 'circle-bundle-nudge-copy';
-            const heading = document.createElement('span');
-            heading.className = 'circle-bundle-nudge-heading';
-            heading.textContent = 'Invest in your academic comeback.';
-            const subtitle = document.createElement('span');
-            subtitle.className = 'circle-bundle-nudge-subtitle';
-            subtitle.textContent = 'Get the complete BBA One-Shot Notes Bundle for ₹249.';
-            copy.append(heading, subtitle);
-
-            const action = document.createElement('a');
-            action.className = 'circle-bundle-nudge-action';
-            action.textContent = 'Get the Bundle';
-            action.href = `https://wa.me/918962007267?text=${encodeURIComponent(message)}`;
-            action.target = '_blank';
-            action.rel = 'noopener noreferrer';
-            action.setAttribute('aria-label', 'Get the Bundle on WhatsApp');
-
-            const close = document.createElement('button');
-            close.className = 'circle-bundle-nudge-close';
-            close.type = 'button';
-            close.textContent = '×';
-            close.setAttribute('aria-label', 'Dismiss One-Shot Notes reminder');
-            close.addEventListener('click', () => {
-                nudge.classList.remove('show');
+            if (!nudge) {
+                const message = "Hi Satya! I'm interested in The Circle One-Shot Notes Bundle for ₹249. Could you please share the free sample notes and payment details so I can make an informed decision?";
+                nudge = document.createElement('aside');
+                nudge.id = 'circle-bundle-nudge';
+                nudge.className = 'circle-bundle-nudge';
+                nudge.setAttribute('aria-label', 'The Circle One-Shot Notes Bundle');
                 nudge.setAttribute('aria-hidden', 'true');
-                /* Give the Support Circle AI reminder its own turn after this banner closes. */
-                if (typeof resumeDonationNudgeAfterBundleDismissal === 'function') {
-                    resumeDonationNudgeAfterBundleDismissal();
-                }
-            });
 
-            nudge.append(icon, copy, action, close);
-            document.body.appendChild(nudge);
+                const icon = document.createElement('div');
+                icon.className = 'circle-bundle-nudge-icon';
+                icon.setAttribute('aria-hidden', 'true');
+                icon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5A2.5 2.5 0 0 0 17.5 16H4V5.5Zm0 0V19a2 2 0 0 0 2 2h12.5A1.5 1.5 0 0 0 20 19.5V18H6.5A2.5 2.5 0 0 1 4 15.5V5.5Z"/></svg>';
+
+                const copy = document.createElement('div');
+                copy.className = 'circle-bundle-nudge-copy';
+                const heading = document.createElement('span');
+                heading.className = 'circle-bundle-nudge-heading';
+                heading.textContent = 'Invest in your academic comeback.';
+                const subtitle = document.createElement('span');
+                subtitle.className = 'circle-bundle-nudge-subtitle';
+                subtitle.textContent = 'Get the complete BBA One-Shot Notes Bundle for ₹249.';
+                copy.append(heading, subtitle);
+
+                const action = document.createElement('a');
+                action.className = 'circle-bundle-nudge-action';
+                action.textContent = 'Get the Bundle';
+                action.href = `https://wa.me/918962007267?text=${encodeURIComponent(message)}`;
+                action.target = '_blank';
+                action.rel = 'noopener noreferrer';
+                action.setAttribute('aria-label', 'Get the Bundle on WhatsApp');
+
+                const close = document.createElement('button');
+                close.className = 'circle-bundle-nudge-close';
+                close.type = 'button';
+                close.textContent = '×';
+                close.setAttribute('aria-label', 'Dismiss One-Shot Notes reminder');
+                close.addEventListener('click', () => {
+                    nudge.classList.remove('show');
+                    nudge.setAttribute('aria-hidden', 'true');
+                    /* Give the Support Circle AI reminder its own turn after this banner closes. */
+                    if (typeof resumeDonationNudgeAfterBundleDismissal === 'function') {
+                        resumeDonationNudgeAfterBundleDismissal();
+                    }
+                });
+
+                nudge.append(icon, copy, action, close);
+                document.body.appendChild(nudge);
+            }
+
+            /* Reuse the same banner after dismissal instead of creating duplicates. */
             requestAnimationFrame(() => {
+                nudge.setAttribute('aria-hidden', 'false');
                 nudge.classList.add('show');
-                if (typeof deferDonationNudgeForBundle === 'function') {
+                if (!isAlreadyVisible && typeof deferDonationNudgeForBundle === 'function') {
                     deferDonationNudgeForBundle();
                 }
             });
