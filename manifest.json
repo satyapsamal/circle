@@ -1,7 +1,7 @@
 {
-  "name": "Circle",
-  "short_name": "Circle",
-  "description": "A free, 24×7 virtual BBA assistant built specifically for BBA students.",
+  "name": "Circle AI",
+  "short_name": "Circle AI",
+  "description": "A free, 24×7 virtual assistant built specifically for BBA students.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
