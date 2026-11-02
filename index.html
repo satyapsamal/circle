@@ -8321,10 +8321,52 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             });
         }
 
+        function createCircleLibraryPromotion() {
+            const message = "Hi Satya! I'm interested in The Circle One-Shot Notes Bundle for ₹249. Could you please share the free sample notes and payment details so I can make an informed decision?";
+            const card = document.createElement('section');
+            card.className = 'circle-library-promo-card';
+            card.setAttribute('aria-label', 'Pinned One-Shot Notes promotion');
+
+            const heading = document.createElement('strong');
+            heading.className = 'circle-library-promo-title';
+            heading.textContent = 'Invest in your academic comeback.';
+
+            const description = document.createElement('p');
+            description.className = 'circle-library-promo-description';
+            description.textContent = 'Get the complete BBA One-Shot Notes Bundle for ₹249.';
+
+            const divider = document.createElement('div');
+            divider.className = 'circle-library-promo-divider';
+            divider.setAttribute('aria-hidden', 'true');
+
+            const actions = document.createElement('div');
+            actions.className = 'circle-library-promo-actions';
+
+            const sampleLink = document.createElement('a');
+            sampleLink.className = 'circle-library-promo-link';
+            sampleLink.href = 'https://shorturl.at/HXHk1';
+            sampleLink.target = '_blank';
+            sampleLink.rel = 'noopener noreferrer';
+            sampleLink.textContent = 'Checkout the Sample notes →';
+
+            const bundleLink = document.createElement('a');
+            bundleLink.className = 'circle-library-promo-link';
+            bundleLink.href = `https://wa.me/918962007267?text=${encodeURIComponent(message)}`;
+            bundleLink.target = '_blank';
+            bundleLink.rel = 'noopener noreferrer';
+            bundleLink.textContent = 'Grab the Bundle';
+
+            actions.append(sampleLink, bundleLink);
+            card.append(heading, description, divider, actions);
+            return card;
+        }
+
         function renderCircleLibraryNotes() {
             const list = document.getElementById('circle-library-note-list');
             if (!list) return;
             list.replaceChildren();
+            // This promotional resource is always first and is not stored with user notes.
+            list.appendChild(createCircleLibraryPromotion());
             const entries = getCircleLibraryEntries();
 
             if (!entries.length) {
@@ -10032,7 +10074,10 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             });
 
             refreshMoreProfileUI();
-            document.getElementById('app-new-chat-btn').addEventListener('click', startNewChat);
+            document.getElementById('app-new-chat-btn').addEventListener('click', () => {
+                triggerCircleHaptic(10);
+                startNewChat();
+            });
 
             /* Learn navigation */
             const learnCourseButton = document.getElementById('learn-course-btn');
@@ -10093,7 +10138,10 @@ const installBtn = document.getElementById('install-btn');
                 if (e.key === 'Enter') handleChatSubmission();
             });
 
-            newChatBtn.addEventListener('click', startNewChat);
+            newChatBtn.addEventListener('click', () => {
+                triggerCircleHaptic(10);
+                startNewChat();
+            });
 settingsBtn.addEventListener('click', toggleSettings);
             settingsCloseBtn.addEventListener('click', closeSettings);
             
@@ -10831,10 +10879,12 @@ setInterval(() => {
         }
 
 
-        function triggerCircleHaptic() {
-            // Vibration is supported on some mobile browsers; ignore unsupported devices.
+        function triggerCircleHaptic(duration = 35) {
+            // The duration provides a stronger or lighter pulse where vibration is supported.
             try {
-                if (navigator && typeof navigator.vibrate === 'function') navigator.vibrate(10);
+                if (navigator && typeof navigator.vibrate === 'function') {
+                    navigator.vibrate(Math.max(1, Math.min(100, Number(duration) || 35)));
+                }
             } catch (_) {}
         }
 
@@ -13235,5 +13285,51 @@ setInterval(() => {
     }
 }
 </style>
+
+<style id="circle-library-pinned-promotion-styles">
+    .circle-library-promo-card {
+        margin: 0 0 20px;
+        padding: 16px 15px 14px;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.018));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+    }
+    .circle-library-promo-title {
+        display: block;
+        color: #fff;
+        font: 600 14px/1.4 var(--font-conversational);
+    }
+    .circle-library-promo-description {
+        margin: 5px 0 0;
+        color: #a2a2a2;
+        font: 400 12px/1.55 var(--font-conversational);
+    }
+    .circle-library-promo-divider {
+        height: 1px;
+        margin: 13px 0 11px;
+        background: rgba(255,255,255,.11);
+    }
+    .circle-library-promo-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 9px;
+    }
+    .circle-library-promo-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        color: #e2e2e2 !important;
+        font: 500 12px/1.45 var(--font-conversational);
+        text-decoration: underline !important;
+        text-decoration-thickness: 1px !important;
+        text-underline-offset: 3px;
+        cursor: pointer;
+        transition: color .18s ease;
+    }
+    .circle-library-promo-link:hover { color: #fff !important; }
+</style>
+
 </body>
 </html>
