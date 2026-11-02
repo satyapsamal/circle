@@ -10390,11 +10390,20 @@ settingsBtn.addEventListener('click', toggleSettings);
             close.addEventListener('click', () => {
                 nudge.classList.remove('show');
                 nudge.setAttribute('aria-hidden', 'true');
+                /* Give the Support Circle AI reminder its own turn after this banner closes. */
+                if (typeof resumeDonationNudgeAfterBundleDismissal === 'function') {
+                    resumeDonationNudgeAfterBundleDismissal();
+                }
             });
 
             nudge.append(icon, copy, action, close);
             document.body.appendChild(nudge);
-            requestAnimationFrame(() => nudge.classList.add('show'));
+            requestAnimationFrame(() => {
+                nudge.classList.add('show');
+                if (typeof deferDonationNudgeForBundle === 'function') {
+                    deferDonationNudgeForBundle();
+                }
+            });
         }
 
         function syncAskUtilityVisibility() {
@@ -12286,6 +12295,8 @@ setInterval(() => {
         let circleDonationAmount = CIRCLE_DONATION_DEFAULT_AMOUNT;
         let circleDonationMinimumInputTimer = null;
         let circleDonationNudgeTimer = null;
+        let circleDonationNudgeDeferredByBundle = false;
+        let circleDonationNudgeWasVisibleBeforeBundle = false;
         let circleDonationSupportEngagementTimer = null;
         let circleDonationSupportEngagementPending = false;
         let circleDonationUsageTrackerStarted = false;
@@ -12573,6 +12584,53 @@ setInterval(() => {
             return true;
         }
 
+        function isCircleBundleNudgeVisible() {
+            const bundleNudge = document.getElementById('circle-bundle-nudge');
+            return Boolean(bundleNudge && bundleNudge.classList.contains('show') &&
+                bundleNudge.getAttribute('aria-hidden') !== 'true');
+        }
+
+        function deferDonationNudgeForBundle() {
+            if (!circleReturningUser) return;
+            /* Personalised support prompts use their own usage threshold and are not deferred here. */
+            if (isCircleDonationPersonalizedModeReady()) return;
+
+            const supportNudge = document.getElementById('donation-reminder');
+            if (supportNudge && supportNudge.classList.contains('show')) {
+                /* Pause an already-visible support banner so the two nudges never compete. */
+                circleDonationNudgeWasVisibleBeforeBundle = true;
+                supportNudge.classList.remove('show');
+                supportNudge.setAttribute('aria-hidden', 'true');
+            } else if (shouldShowDonationNudgeForSession()) {
+                /* Hold a scheduled support banner until the notes banner is dismissed. */
+                circleDonationNudgeDeferredByBundle = true;
+            } else {
+                return;
+            }
+
+            if (circleDonationNudgeTimer) {
+                clearTimeout(circleDonationNudgeTimer);
+                circleDonationNudgeTimer = null;
+            }
+        }
+
+        function resumeDonationNudgeAfterBundleDismissal() {
+            const restorePreviouslyVisible = circleDonationNudgeWasVisibleBeforeBundle;
+            if (!circleDonationNudgeDeferredByBundle && !restorePreviouslyVisible) return;
+
+            circleDonationNudgeDeferredByBundle = false;
+            circleDonationNudgeWasVisibleBeforeBundle = false;
+            if (!circleReturningUser) return;
+            if (!restorePreviouslyVisible && !shouldShowDonationNudgeForSession()) return;
+
+            if (circleDonationNudgeTimer) clearTimeout(circleDonationNudgeTimer);
+            /* Wait five seconds after the notes banner closes before showing Support Circle AI. */
+            circleDonationNudgeTimer = setTimeout(() => {
+                circleDonationNudgeTimer = null;
+                showDonationNudge(restorePreviouslyVisible);
+            }, 5000);
+        }
+
         function getCircleDonationDateKeyOffset(daysAgo) {
             const date = new Date();
             date.setHours(12, 0, 0, 0);
@@ -12748,8 +12806,16 @@ setInterval(() => {
             circleDonationUsageTrackerTimer = setInterval(recordCircleDonationUsageTick, 1000);
         }
 
-        function showDonationNudge() {
-            if (!circleReturningUser || !shouldShowDonationNudgeForSession()) return;
+        function showDonationNudge(restorePreviouslyVisible = false) {
+            if (!circleReturningUser || (!restorePreviouslyVisible && !shouldShowDonationNudgeForSession())) return;
+            circleDonationNudgeTimer = null;
+            /* The One-Shot Notes banner takes priority. Its close handler resumes this nudge after 5 seconds. */
+            if (isCircleBundleNudgeVisible()) {
+                if (restorePreviouslyVisible) circleDonationNudgeWasVisibleBeforeBundle = true;
+                else circleDonationNudgeDeferredByBundle = true;
+                return;
+            }
+
             const nudge = document.getElementById('donation-reminder');
             if (!nudge) return;
 
@@ -12759,7 +12825,10 @@ setInterval(() => {
             const donationModal = document.getElementById('donation-modal');
             const otherModalOpen = document.querySelector('.modal.show, .settings-modal.show, #profile-edit-modal.show, #profile-crop-modal.show');
             if (profileVisible || (otherModalOpen && otherModalOpen !== donationModal)) {
-                circleDonationNudgeTimer = setTimeout(showDonationNudge, 2500);
+                circleDonationNudgeTimer = setTimeout(() => {
+                    circleDonationNudgeTimer = null;
+                    showDonationNudge(restorePreviouslyVisible);
+                }, 2500);
                 return;
             }
 
@@ -12773,8 +12842,19 @@ setInterval(() => {
             /* After the baseline is ready, let the personalised threshold choose when
                to open the full support window instead of showing both prompts in one visit. */
             if (isCircleDonationPersonalizedModeReady()) return;
+            if (isCircleBundleNudgeVisible()) {
+                circleDonationNudgeDeferredByBundle = true;
+                if (circleDonationNudgeTimer) {
+                    clearTimeout(circleDonationNudgeTimer);
+                    circleDonationNudgeTimer = null;
+                }
+                return;
+            }
             if (circleDonationNudgeTimer) clearTimeout(circleDonationNudgeTimer);
-            circleDonationNudgeTimer = setTimeout(showDonationNudge, 7000);
+            circleDonationNudgeTimer = setTimeout(() => {
+                circleDonationNudgeTimer = null;
+                showDonationNudge();
+            }, 7000);
         }
 
         function setupDonationUI() {
