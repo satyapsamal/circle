@@ -3218,7 +3218,6 @@
 .profile-edit-field input:focus { border-color:rgba(255,255,255,.24); }
 .profile-modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
 .profile-modal-actions button { border-radius:10px; padding:9px 13px; cursor:pointer; font:600 10px var(--font-conversational); }
-#profile-edit-cancel { border:1px solid rgba(255,255,255,.10); background:transparent; color:#aaa; }
 #profile-edit-save { border:1px solid rgba(84,219,148,.28); background:rgba(84,219,148,.10); color:#8aeab7; }
 #profile-edit-save:hover { background:rgba(84,219,148,.15); }
 .profile-edit-note { margin-top:10px; color:#777; font:500 11px/1.5 var(--font-conversational); }
@@ -6517,8 +6516,8 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
 
         <!-- =====================================================
              UNIFIED CIRCLE APP SHELL
-             Learn is the default mode on every page load.
-             Ask opens the existing Circle AI chat interface.
+             Ask is the default mode on every page load.
+             Learn opens the existing Circle AI learning interface.
              ===================================================== -->
         <header id="app-shell-header" aria-label="Circle AI navigation">
             <div class="shell-brand">
@@ -6530,8 +6529,8 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             </div>
 
             <div class="shell-mode-switch" role="tablist" aria-label="Circle AI mode">
-                <button id="shell-learn-btn" class="shell-mode-btn active" type="button" role="tab" aria-selected="true">Learn</button>
-                <button id="shell-ask-btn" class="shell-mode-btn" type="button" role="tab" aria-selected="false">Ask</button>
+                <button id="shell-learn-btn" class="shell-mode-btn" type="button" role="tab" aria-selected="false">Learn</button>
+                <button id="shell-ask-btn" class="shell-mode-btn active" type="button" role="tab" aria-selected="true">Ask</button>
             </div>
 
             <div class="shell-actions">
@@ -6697,7 +6696,6 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 </div>
                 <div class="profile-edit-note">Your information stays private. It's not accessible to anyone, not even Circle AI.</div>
                 <div class="profile-modal-actions">
-                    <button id="profile-edit-cancel" type="button">Cancel</button>
                     <button id="profile-edit-save" type="button">Save changes</button>
                 </div>
             </div>
@@ -8495,6 +8493,9 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
         let learnNotes = {};
         let learnNotesSaveTimer = null;
         let learnPlaylistRefreshTimer = null;
+        let learnPreloadStarted = false;
+        const learnPreloadedThumbnailIds = new Set();
+        const learnThumbnailPreloadImages = new Set();
         let learnLeftLayout = 'half';
         let profileEditPhotoDataUrl = profilePhotoDataUrl;
         let learnPendingNotePayload = null;
@@ -8713,7 +8714,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
                     if (nameValidation.valid && photoValidation.valid) {
                         setTimeout(showProfileReminder, 4200);
                         startMainInterface().then(() => {
-                            switchCircleMode('learn');
+                            switchCircleMode('ask');
                             startCircleDonationUsageTracker();
                             setTimeout(showReturningMotivationToast, 750);
                             scheduleDonationNudge();
@@ -8990,13 +8991,13 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
 
             document.getElementById('onboarding-layer').classList.add('hidden');
             await startMainInterface();
-            switchCircleMode('learn');
+            switchCircleMode('ask');
             startCircleDonationUsageTracker();
 
             const installPromptShownKey = 'circle_v2_install_registration_prompt_shown_v1';
             if (!isRunningAsInstalledPWA() && localStorage.getItem(installPromptShownKey) !== 'true') {
                 localStorage.setItem(installPromptShownKey, 'true');
-                // Let the Learn screen appear first; installation remains entirely optional.
+                // Let the Ask screen appear first; installation remains entirely optional.
                 setTimeout(() => {
                     if (!isRunningAsInstalledPWA()) showInstallModal();
                 }, 1200);
@@ -9065,8 +9066,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             const mainLayer = document.getElementById('main-layer');
             mainLayer.classList.remove('hidden');
             document.getElementById('app-shell-header').classList.add('ready');
-            // Paint playlist placeholders immediately. The YouTube API is requested when
-            // switchCircleMode('learn') activates the default Learn view.
+            // Show Ask first; Learn is warmed up in the background after the first render.
             
             await sleep(50);
             mainLayer.classList.add('main-layer-visible');
@@ -9087,6 +9087,9 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             refreshInstallControls();
             
             document.getElementById('share-btn').classList.remove('hidden');
+
+            // Keep the first Ask render light, then warm up Learn without blocking it.
+            scheduleLearnExperiencePreload();
         }
 
         function clearGreetingRotationTimers() {
@@ -9936,8 +9939,14 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
         function setupEventListeners() {
             mountShellModelControl();
             /* Unified shell navigation */
-            document.getElementById('shell-learn-btn').addEventListener('click', () => switchCircleMode('learn'));
-            document.getElementById('shell-ask-btn').addEventListener('click', () => switchCircleMode('ask'));
+            document.getElementById('shell-learn-btn').addEventListener('click', () => {
+                triggerCircleHaptic();
+                switchCircleMode('learn');
+            });
+            document.getElementById('shell-ask-btn').addEventListener('click', () => {
+                triggerCircleHaptic();
+                switchCircleMode('ask');
+            });
             document.getElementById('app-more-btn').addEventListener('click', (event) => {
                 event.stopPropagation();
                 toggleMoreMenu();
@@ -9972,7 +9981,6 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
                 openProfileModal();
             });
             document.getElementById('profile-edit-close').addEventListener('click', closeProfileModal);
-            document.getElementById('profile-edit-cancel').addEventListener('click', closeProfileModal);
             document.getElementById('profile-edit-save').addEventListener('click', saveEditedProfile);
             document.getElementById('profile-edit-photo-input').addEventListener('change', handleProfileEditPhotoUpload);
 
@@ -10023,12 +10031,6 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
                 if (event.target.id === 'profile-crop-modal') closeProfileCropper();
             });
 
-            document.getElementById('profile-modal').addEventListener('click', (event) => {
-                if (event.target.id === 'profile-modal') closeProfileModal();
-            });
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') closeProfileModal();
-            });
             refreshMoreProfileUI();
             document.getElementById('app-new-chat-btn').addEventListener('click', startNewChat);
 
@@ -10311,6 +10313,90 @@ settingsBtn.addEventListener('click', toggleSettings);
         /*******************************************************
          * 9. CHAT INTERACTION LOGIC
          *******************************************************/
+        const CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY = 'circle_bundle_nudge_prompt_count_session_v1';
+        const CIRCLE_BUNDLE_NUDGE_PENDING_KEY = 'circle_bundle_nudge_pending_session_v1';
+        const CIRCLE_BUNDLE_NUDGE_SHOWN_KEY = 'circle_bundle_nudge_shown_session_v1';
+        let circleBundleNudgePromptCountFallback = 0;
+        let circleBundleNudgePendingFallback = false;
+        let circleBundleNudgeShownFallback = false;
+
+        function registerCircleBundlePrompt() {
+            try {
+                const previous = Number(sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY) || '0');
+                const nextCount = (Number.isFinite(previous) && previous > 0 ? previous : 0) + 1;
+                sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY, String(nextCount));
+                if (nextCount === 1 && sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) !== 'true') {
+                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY, 'true');
+                }
+            } catch (_) {
+                circleBundleNudgePromptCountFallback += 1;
+                if (circleBundleNudgePromptCountFallback === 1) circleBundleNudgePendingFallback = true;
+            }
+        }
+
+        function showCircleBundleNudgeIfPending() {
+            let shouldShow = false;
+            try {
+                shouldShow = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true' &&
+                    sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) !== 'true';
+                if (shouldShow) {
+                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY, 'true');
+                    sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
+                }
+            } catch (_) {
+                shouldShow = circleBundleNudgePendingFallback && !circleBundleNudgeShownFallback;
+                if (shouldShow) {
+                    circleBundleNudgePendingFallback = false;
+                    circleBundleNudgeShownFallback = true;
+                }
+            }
+            if (!shouldShow || document.getElementById('circle-bundle-nudge')) return;
+
+            const message = "Hi Satya! I'm interested in The Circle One-Shot Notes Bundle for ₹249. Could you please share the free sample notes and payment details so I can make an informed decision?";
+            const nudge = document.createElement('aside');
+            nudge.id = 'circle-bundle-nudge';
+            nudge.className = 'circle-bundle-nudge';
+            nudge.setAttribute('aria-label', 'The Circle One-Shot Notes Bundle');
+            nudge.setAttribute('aria-hidden', 'false');
+
+            const icon = document.createElement('div');
+            icon.className = 'circle-bundle-nudge-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5A2.5 2.5 0 0 0 17.5 16H4V5.5Zm0 0V19a2 2 0 0 0 2 2h12.5A1.5 1.5 0 0 0 20 19.5V18H6.5A2.5 2.5 0 0 1 4 15.5V5.5Z"/></svg>';
+
+            const copy = document.createElement('div');
+            copy.className = 'circle-bundle-nudge-copy';
+            const heading = document.createElement('span');
+            heading.className = 'circle-bundle-nudge-heading';
+            heading.textContent = 'Invest in your academic comeback.';
+            const subtitle = document.createElement('span');
+            subtitle.className = 'circle-bundle-nudge-subtitle';
+            subtitle.textContent = 'Get the complete BBA One-Shot Notes Bundle for ₹249.';
+            copy.append(heading, subtitle);
+
+            const action = document.createElement('a');
+            action.className = 'circle-bundle-nudge-action';
+            action.textContent = 'Get the Bundle';
+            action.href = `https://wa.me/918962007267?text=${encodeURIComponent(message)}`;
+            action.target = '_blank';
+            action.rel = 'noopener noreferrer';
+            action.setAttribute('aria-label', 'Get the Bundle on WhatsApp');
+
+            const close = document.createElement('button');
+            close.className = 'circle-bundle-nudge-close';
+            close.type = 'button';
+            close.textContent = '×';
+            close.setAttribute('aria-label', 'Dismiss One-Shot Notes reminder');
+            close.addEventListener('click', () => {
+                nudge.classList.remove('show');
+                nudge.setAttribute('aria-hidden', 'true');
+            });
+
+            nudge.append(icon, copy, action, close);
+            document.body.appendChild(nudge);
+            requestAnimationFrame(() => nudge.classList.add('show'));
+        }
+
         function syncAskUtilityVisibility() {
             const utilityButtons = document.getElementById('ask-utility-buttons');
             const chatInput = document.getElementById('chat-input');
@@ -10325,6 +10411,7 @@ settingsBtn.addEventListener('click', toggleSettings);
             const chatInput = document.getElementById('chat-input');
             const query = chatInput.value.trim();
             if (!query) return;
+            registerCircleBundlePrompt();
             
             // Stop any ongoing speech when a new query is submitted
             if ('speechSynthesis' in window) {
@@ -10433,6 +10520,7 @@ settingsBtn.addEventListener('click', toggleSettings);
             }
 
             isProcessing = false;
+            showCircleBundleNudgeIfPending();
 
             if (pills) {
                 pills.classList.remove('hidden');
@@ -10733,6 +10821,13 @@ setInterval(() => {
         }
 
 
+        function triggerCircleHaptic() {
+            // Vibration is supported on some mobile browsers; ignore unsupported devices.
+            try {
+                if (navigator && typeof navigator.vibrate === 'function') navigator.vibrate(10);
+            } catch (_) {}
+        }
+
         /* =====================================================
          * UNIFIED SHELL NAVIGATION
          * ===================================================== */
@@ -10756,6 +10851,7 @@ setInterval(() => {
                 stopGreetingRotation(false);
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 
+                document.getElementById('learn-layer').classList.remove('preload-only');
                 document.getElementById('learn-layer').classList.add('visible');
                 document.getElementById('main-layer').classList.add('shell-hidden');
                 setShellModeButton('learn');
@@ -10821,6 +10917,71 @@ setInterval(() => {
         /* =====================================================
          * LEARN ENGINE
          * ===================================================== */
+        function scheduleLearnExperiencePreload() {
+            if (learnPreloadStarted) return;
+            const preload = () => preloadLearnExperience();
+
+            // Use idle time where available so YouTube work never delays the Ask screen.
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(preload, { timeout: 2200 });
+            } else {
+                window.setTimeout(preload, 900);
+            }
+        }
+
+        function preloadLearnExperience() {
+            if (learnPreloadStarted) return;
+            learnPreloadStarted = true;
+
+            const layer = document.getElementById('learn-layer');
+            if (!layer) return;
+
+            // Keep Learn laid out off-screen so its player can warm up while Ask stays visible.
+            if (!layer.classList.contains('visible')) layer.classList.add('preload-only');
+            renderLearnCourseMenu();
+            updateLearnCourseUI();
+            renderLearnThumbnails();
+
+            // Load the API and create the existing paused player in the background.
+            if (window.YT && window.YT.Player) initializeLearnPlayer();
+            else ensureLearnPlayerAPI();
+        }
+
+        function preloadLearnPlaylistThumbnails(videoIds) {
+            if (!Array.isArray(videoIds) || !videoIds.length) return;
+            const pendingIds = videoIds.filter(id => {
+                const normalized = String(id || '').trim();
+                if (!normalized || learnPreloadedThumbnailIds.has(normalized)) return false;
+                learnPreloadedThumbnailIds.add(normalized);
+                return true;
+            });
+            if (!pendingIds.length) return;
+
+            // Fetch a few low-priority images at a time to avoid competing with Ask.
+            let cursor = 0;
+            const loadNextBatch = () => {
+                const batch = pendingIds.slice(cursor, cursor + 5);
+                cursor += batch.length;
+                batch.forEach(videoId => {
+                    const image = new Image();
+                    image.decoding = 'async';
+                    image.loading = 'eager';
+                    try { image.fetchPriority = 'low'; } catch (_) {}
+                    learnThumbnailPreloadImages.add(image);
+                    const release = () => {
+                        image.onload = null;
+                        image.onerror = null;
+                        learnThumbnailPreloadImages.delete(image);
+                    };
+                    image.onload = release;
+                    image.onerror = release;
+                    image.src = `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
+                });
+                if (cursor < pendingIds.length) window.setTimeout(loadNextBatch, 120);
+            };
+            loadNextBatch();
+        }
+
         function ensureLearnPlayerAPI() {
             if (window.YT && window.YT.Player) {
                 initializeLearnIfNeeded();
@@ -11485,6 +11646,7 @@ setInterval(() => {
             const ids = safeLearnPlaylist();
             if (ids.length) {
                 learnPlaylistIds = ids;
+                preloadLearnPlaylistThumbnails(ids);
                 if (Number.isInteger(learnRestoringSavedIndex)) {
                     learnActiveIndex = Math.max(0, Math.min(learnRestoringSavedIndex, ids.length - 1));
                 } else {
@@ -12717,19 +12879,6 @@ setInterval(() => {
                 });
             }
 
-            const modal = document.getElementById('donation-modal');
-            if (modal) {
-                modal.addEventListener('click', event => {
-                    if (event.target === modal) closeDonationModal();
-                });
-            }
-
-            document.addEventListener('keydown', event => {
-                if (event.key === 'Escape') {
-                    closeDonationModal();
-                    dismissDonationNudge();
-                }
-            });
         }
 
         /* =====================================================
@@ -12826,5 +12975,160 @@ setInterval(() => {
     }
 }
 </style>
+
+<style id="circle-targeted-feature-additions">
+/* Background-only Learn preload. The layer stays laid out off-screen until opened. */
+#learn-layer.preload-only {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 auto auto -200vw !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+/* One-Shot Notes nudge: uses the same fixed top-banner treatment as Support Circle AI. */
+.circle-bundle-nudge {
+    position: fixed;
+    overflow: hidden;
+    isolation: isolate;
+    left: 50%;
+    top: calc(var(--shell-header-height) + 18px);
+    width: min(640px, calc(100vw - 32px));
+    min-height: 68px;
+    transform: translate(-50%, -14px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 32001;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px 12px 16px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 15px;
+    background: rgba(12,12,12,.97);
+    box-shadow: 0 18px 50px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.035);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: opacity .32s ease, transform .32s cubic-bezier(.25,1,.5,1), top .32s ease;
+}
+.circle-bundle-nudge.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+}
+.circle-bundle-nudge::after {
+    content: '';
+    position: absolute;
+    top: -80%;
+    left: -24%;
+    width: 22%;
+    height: 260%;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: .72;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.035) 28%, rgba(255,255,255,.13) 50%, rgba(255,255,255,.035) 72%, transparent);
+    filter: blur(1px);
+    transform: translateX(-160%) skewX(-22deg);
+}
+.circle-bundle-nudge.show::after {
+    animation: circleBundleNudgeShine 6.5s ease-in-out .6s infinite;
+}
+@keyframes circleBundleNudgeShine {
+    0%, 72% { transform: translateX(-160%) skewX(-22deg); }
+    100% { transform: translateX(650%) skewX(-22deg); }
+}
+.circle-bundle-nudge > * {
+    position: relative;
+    z-index: 2;
+}
+.circle-bundle-nudge-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 11px;
+    background: rgba(255,255,255,.045);
+    color: #fff;
+}
+.circle-bundle-nudge-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.circle-bundle-nudge-heading {
+    color: #fff;
+    font: 600 13px var(--font-conversational);
+}
+.circle-bundle-nudge-subtitle {
+    color: #8f8f8f;
+    font: 400 11px/1.4 var(--font-conversational);
+}
+.circle-bundle-nudge-action {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 10px;
+    background: #fff;
+    color: #090909 !important;
+    cursor: pointer;
+    font: 600 11px var(--font-conversational);
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: transform .18s ease, background .18s ease;
+}
+.circle-bundle-nudge-action:hover { background: #e9e9e9; }
+.circle-bundle-nudge-close {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #777;
+    cursor: pointer;
+    font: 400 19px/1 var(--font-conversational);
+}
+.circle-bundle-nudge-close:hover { color: #fff; background: rgba(255,255,255,.06); }
+/* Keep both top banners readable if the support reminder is already visible. */
+#donation-reminder.show ~ #circle-bundle-nudge {
+    top: calc(var(--shell-header-height) + 94px);
+}
+@media (max-width: 600px) {
+    .circle-bundle-nudge {
+        top: calc(var(--shell-header-height) + 10px);
+        width: calc(100vw - 20px);
+        padding: 11px 10px 11px 12px;
+        gap: 10px;
+    }
+    .circle-bundle-nudge-icon { width: 34px; height: 34px; flex-basis: 34px; }
+    .circle-bundle-nudge-heading { font-size: 12px; }
+    .circle-bundle-nudge-subtitle { font-size: 10px; }
+    .circle-bundle-nudge-action { min-height: 34px; padding: 0 11px; }
+    .circle-bundle-nudge-close { width: 26px; height: 26px; flex-basis: 26px; }
+    #donation-reminder.show ~ #circle-bundle-nudge {
+        top: calc(var(--shell-header-height) + 84px);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .circle-bundle-nudge.show::after { animation: none !important; }
+}
+</style>
+
 </body>
 </html>
