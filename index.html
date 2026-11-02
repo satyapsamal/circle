@@ -7585,6 +7585,90 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 markdown: `### Question Pattern\n\n{{Name}}, the examination will consist of:\n\n- **Multiple Choice Questions (MCQs)**\n- **Multiple Select Questions (MSQs)**\n\nMCQs generally require the student to select the correct option from the choices provided.\n\nMSQs may require the student to select more than one correct option.\n\nThe overall difficulty may range from **Moderate → Hard**.`
             },
             {
+                id: 'msq_marking_scheme',
+                category: 'MSQ Marking Scheme',
+                suggestionPool: [
+                    "What is the MSQ marking scheme?",
+                    "How are Multiple Select Questions marked?",
+                    "Can I get partial marks in MSQ?",
+                    "What happens when an incorrect option is selected in an MSQ?",
+                    "How are marks awarded when all correct options are selected in an MSQ?"
+                ],
+                keywords: [
+                    'msq marking scheme', 'msq marks', 'msq marking', 'msq scoring', 'msq score', 'msq evaluation',
+                    'msq assessment', 'msq partial marking', 'msq partial marks', 'msq marking rules', 'msq marking criteria',
+                    'partial marking scheme for msq', 'partial marking scheme of msq',
+                    'partial marking scheme for multiple select questions',
+                    'partial marking scheme for multiple selection questions',
+                    'partial marking scheme of multiple select questions',
+                    'partial marks in msq', 'partial marks for msq',
+                    'msq scoring criteria', 'msq marks calculation', 'msq marking pattern', 'msq marks awarded',
+                    'partial marking in msq', 'partial marks in msq', 'partial marks for msq', 'partial marking scheme for msq',
+                    'marking scheme for msq', 'marking scheme of msq', 'multiple select question marking scheme',
+                    'multiple select questions marking scheme', 'multiple selection question marking scheme',
+                    'multiple selection questions marking scheme', 'multiple select question partial marks',
+                    'multiple select questions partial marks', 'multiple selection partial marking',
+                    'marking of multiple select questions', 'how are msq marked', 'how is msq marked',
+                    'how are multiple select questions marked', 'how is multiple selection marked',
+                    'how msq marks are awarded', 'how marks are given in msq', 'marks awarded for msq',
+                    'marks awarded in multiple select questions', 'one correct option selected',
+                    'only one correct option selected', 'one correct option without incorrect option',
+                    'one correct no wrong option', 'correct option no incorrect selected',
+                    'incorrect option selected', 'incorrect option is selected', 'even one incorrect option is selected',
+                    'all correct options are selected', 'wrong option selected', 'one wrong option selected',
+                    'even one incorrect option', 'any incorrect option', 'zero marks for wrong option',
+                    'no marks if wrong option', 'full marks in msq', 'partial marks if one correct',
+                    'all correct options selected', 'select all correct options', 'all right options selected',
+                    'multiple response question marking', 'multiple response questions marking',
+                    'multiple answer question marking', 'multiple answers questions marks',
+                    'choose all that apply marking', 'select all that apply marking',
+                    'select multiple options marking', 'multiple options question scoring',
+                    'multiple option questions marking scheme', 'multi select marking',
+                    'multi-select marking scheme', 'multi select questions marking',
+                    'multiselect question marking', 'multiselect question scoring',
+                    'multiple correct answers scoring', 'multiple correct options marking',
+                    'msq ka marking scheme', 'msq ki marking scheme', 'msq kaise check hota hai',
+                    'msq me marking kaise hoti hai', 'msq mein marking kaise hoti hai',
+                    'msq me partial marks milte hain', 'msq mein partial marks milenge',
+                    'msq me kitne marks milenge', 'msq mein kitne marks milte hain',
+                    'ek sahi option select karne par marks', 'ek correct option select karne par marks',
+                    'galat option select karne par marks', 'wrong option select karne par marks',
+                    'sabhi sahi options select karne par marks', 'saare correct options select karne par marks',
+                    'ek wrong option par zero marks', 'kya msq me partial marking hai',
+                    'kya msq mein partial marks milenge', 'multiple select ka marking scheme',
+                    'multiple selection ka marking scheme', 'multiple option questions ki marking',
+                    'partial marks in multiple select questions', 'partial marks for multiple select questions',
+                    'partial marks in multiple selection questions', 'partial marks for multiple selection questions',
+                    'marking scheme for multiple select questions', 'marking scheme of multiple select questions',
+                    'marking scheme for multiple selection questions', 'marking scheme of multiple selection questions',
+                    'partial marking for multiple select questions', 'partial marking for multiple selection questions',
+                    'msq partial', 'partial marks msq', 'partial marking msq', 'multiple select scoring rules',
+                    'select multiple answers marking scheme', 'select all that apply scoring scheme',
+                    'choose all correct options marking scheme', 'how many marks for one correct option in msq',
+                    'one correct choice only msq', 'one right answer and one wrong answer msq',
+                    'correct and incorrect options selected msq', 'one incorrect option zero marks msq',
+                    'wrong selection msq marks', 'one wrong choice selected multiple select',
+                    'msq mein partial marks', 'msq me partial marks',
+                    'msq mein galat option select karne par', 'msq me galat option select karne par',
+                    'msq mein ek galat option', 'msq me ek galat option',
+                    'msq mein sabhi sahi options', 'msq me sabhi sahi options',
+                    'msq mein ek sahi option', 'msq me ek sahi option',
+                    'msq ke marks kaise milte hain', 'msq ki marking kaise hoti hai',
+                    'msq mein kitne number milte hain', 'msq me kitne number milte hain',
+                    'partial marking kaise hoti hai msq mein', 'msq me wrong answer select karne par marks'
+                ],
+                markdown: `<p>{{Name}}, the MSQ (Multiple Select Questions) marking scheme is:</p>
+<table>
+<thead><tr><th>Selection made</th><th>Marks awarded</th></tr></thead>
+<tbody>
+<tr><td>One correct option + one wrong option selected</td><td><strong>No marks</strong></td></tr>
+<tr><td>Only one correct option selected, without selecting any incorrect option</td><td><strong>Partial marks</strong></td></tr>
+<tr><td>All correct options selected</td><td><strong>Full marks</strong></td></tr>
+<tr><td>Even one incorrect option is selected</td><td><strong>Zero marks</strong></td></tr>
+</tbody>
+</table>`
+            },
+            {
                 id: 'passing_criteria',
                 category: 'Passing Criteria',
                 suggestionPool: [
@@ -12159,6 +12243,8 @@ setInterval(() => {
                         }
                     });
                     if (score >= 3) {
+                        // A specific MSQ marking-scheme match must outrank the broader exam-pattern intent.
+                        if (intent.id === 'msq_marking_scheme') score += 1000;
                         matchedIntents.push({ intent: intent, score: score, severity: severity });
                     }
                 }
@@ -12179,7 +12265,7 @@ setInterval(() => {
                         let topIsWellbeing = topMatches[0].intent.id === 'student_wellbeing';
                         let secondIsWellbeing = secondMatch.intent.id === 'student_wellbeing';
                         
-                        if (!topIsWellbeing && !secondIsWellbeing) {
+                        if (!topIsWellbeing && !secondIsWellbeing && topMatches[0].intent.id !== 'msq_marking_scheme') {
                             topMatches.push(secondMatch);
                         }
                     }
