@@ -11081,7 +11081,44 @@ settingsBtn.addEventListener('click', toggleSettings);
                 a.href = src.url;
                 a.target = "_blank";
                 a.rel = "noopener noreferrer";
-                if (src.download) a.download = src.downloadFilename || '';
+                if (src.download) {
+                    a.setAttribute('download', src.downloadFilename || '');
+                    a.classList.add('source-download-btn');
+                    a.addEventListener('click', async (event) => {
+                        event.preventDefault();
+
+                        // Cross-origin download attributes are ignored by many mobile
+                        // browsers/PWAs. Fetch the PDF and download a Blob URL instead.
+                        const originalUrl = src.url;
+                        const filename = src.downloadFilename || 'Practice Handbook.pdf';
+                        const originalLabel = a.textContent;
+                        a.setAttribute('aria-busy', 'true');
+
+                        try {
+                            const response = await fetch(originalUrl, { mode: 'cors', cache: 'default' });
+                            if (!response.ok) throw new Error('PDF request failed');
+                            const pdfBlob = await response.blob();
+                            if (!pdfBlob || pdfBlob.size === 0) throw new Error('Empty PDF');
+
+                            const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = blobUrl;
+                            downloadLink.download = filename;
+                            downloadLink.style.display = 'none';
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            downloadLink.remove();
+                            setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+                        } catch (error) {
+                            // Fallback: let the mobile browser open its PDF viewer,
+                            // where Save/Download/Share options are available.
+                            window.location.href = originalUrl;
+                        } finally {
+                            a.removeAttribute('aria-busy');
+                            a.textContent = originalLabel;
+                        }
+                    });
+                }
                 a.textContent = src.label;
                 sourceDiv.appendChild(a);
             });
