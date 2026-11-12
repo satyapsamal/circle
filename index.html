@@ -1916,6 +1916,109 @@
 
         #onboarding-photo-input { display: none; }
 
+        /* Phone step reuses the existing Introduce Yourself onboarding screen. */
+        .onboarding-stage-fields,
+        .onboarding-phone-fields {
+            transition: opacity .38s cubic-bezier(.22,1,.36,1), transform .38s cubic-bezier(.22,1,.36,1);
+            will-change: opacity, transform;
+        }
+        .onboarding-stage-fields {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .onboarding-phone-fields {
+            width: min(370px, 88vw);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .onboarding-stage-fields.onboarding-step-exiting,
+        .onboarding-phone-fields.onboarding-step-exiting {
+            opacity: 0;
+            transform: translateY(-9px);
+            pointer-events: none;
+        }
+        .onboarding-stage-fields.onboarding-step-entering,
+        .onboarding-phone-fields.onboarding-step-entering {
+            opacity: 0;
+            transform: translateY(11px);
+            pointer-events: none;
+        }
+        .onboarding-phone-wrapper {
+            width: min(340px, 84vw);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 9px;
+            border-bottom: 1px solid rgba(255,255,255,.3);
+            padding: 0 2px 9px;
+            transition: border-color .3s ease;
+        }
+        .onboarding-phone-wrapper:focus-within {
+            border-bottom-color: rgba(255,255,255,.78);
+        }
+        .onboarding-phone-prefix {
+            flex: 0 0 auto;
+            color: rgba(255,255,255,.78);
+            font: 500 18px var(--font-conversational);
+            letter-spacing: .02em;
+        }
+        #onboarding-phone-input {
+            flex: 1 1 auto;
+            width: 0;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: #fff;
+            font: 500 22px var(--font-conversational);
+            letter-spacing: .04em;
+            text-align: left;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        #onboarding-phone-input::placeholder {
+            color: rgba(255,255,255,.25);
+            font: 400 15px var(--font-conversational);
+            letter-spacing: 0;
+        }
+        .onboarding-phone-explanation {
+            width: min(370px, 88vw);
+            margin-top: 13px;
+            color: rgba(255,255,255,.58);
+            font: 400 11px/1.55 var(--font-conversational);
+            text-align: center;
+        }
+        #phone-submit {
+            flex: 0 0 auto;
+            border: 0;
+            background: transparent;
+            color: var(--text-primary);
+            font: 400 24px var(--font-ui);
+            cursor: pointer;
+            margin-left: 8px;
+            padding: 0 0 0 6px;
+            line-height: 1;
+            opacity: .7;
+            transition: opacity .3s ease, transform .2s ease;
+        }
+        #phone-submit:hover { opacity: 1; }
+        #phone-submit:active { transform: scale(.94); }
+        @media (prefers-reduced-motion: reduce) {
+            .onboarding-stage-fields,
+            .onboarding-phone-fields { transition: none !important; }
+        }
+        #phone-upload-error {
+            display: none;
+            width: min(370px, 88vw);
+            margin-top: 12px;
+            color: #ff7777;
+            font: 500 10px/1.45 var(--font-conversational);
+            text-align: center;
+        }
+
         .profile-photo-note { display: none !important; }
 
         .onboarding-question {
@@ -3216,6 +3319,7 @@
 .profile-edit-field input { width:100%; box-sizing:border-box; border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:11px 12px;
     background:#101010; color:#eee; outline:none; font:500 11px var(--font-conversational); }
 .profile-edit-field input:focus { border-color:rgba(255,255,255,.24); }
+.profile-edit-field input:disabled { background:#090909; color:#777; border-color:rgba(255,255,255,.06); opacity:1; cursor:not-allowed; -webkit-text-fill-color:#777; }
 .profile-modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
 .profile-modal-actions button { border-radius:10px; padding:9px 13px; cursor:pointer; font:600 10px var(--font-conversational); }
 #profile-edit-save { border:1px solid rgba(84,219,148,.28); background:rgba(84,219,148,.10); color:#8aeab7; }
@@ -6359,19 +6463,6 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
 #install-modal .install-instructions ol { margin: 8px 0 0 18px; padding: 0; }
 #install-modal .install-instructions li { margin: 4px 0; }
 #install-modal .install-instructions strong { color: #fff; font-weight: 600; }
-#install-modal .install-continue-btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 11px 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    border-radius: 24px;
-    color: #a8a8a8;
-    background: transparent;
-    font: 500 12px var(--font-conversational);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-#install-modal .install-continue-btn:hover { color: #fff; background: rgba(255,255,255,.045); }
 #install-modal .install-fallback-msg { display: none !important; }
 </style>
 
@@ -6411,32 +6502,47 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 <div class="profile-onboarding-block">
                     <h1 class="onboarding-introduce-title font-ui">Introduce Yourself.</h1>
 
-                    <label id="onboarding-photo-picker" for="onboarding-photo-input" aria-label="Choose profile picture">
-                        <img id="onboarding-photo-preview" alt="">
-                        <span id="onboarding-photo-placeholder" aria-hidden="true">
-                            <svg class="onboarding-camera-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M8.5 5.5 10 3.5h4l1.5 2H18a3 3 0 0 1 3 3v7.5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8.5a3 3 0 0 1 3-3h2.5Z"/>
-                                <circle cx="12" cy="12.5" r="3.4"/>
-                            </svg>
-                        </span>
-                        <span class="onboarding-photo-shield" aria-hidden="true">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M12 2.75 19 5.5v5.35c0 4.35-2.75 8.12-7 10.4-4.25-2.28-7-6.05-7-10.4V5.5l7-2.75Z"/>
-                                <path d="m8.6 12.2 2.15 2.15 4.65-4.65"/>
-                            </svg>
-                        </span>
-                        <input id="onboarding-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
-                    </label>
+                    <div id="onboarding-profile-fields" class="onboarding-stage-fields">
+                        <label id="onboarding-photo-picker" for="onboarding-photo-input" aria-label="Choose profile picture">
+                            <img id="onboarding-photo-preview" alt="">
+                            <span id="onboarding-photo-placeholder" aria-hidden="true">
+                                <svg class="onboarding-camera-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M8.5 5.5 10 3.5h4l1.5 2H18a3 3 0 0 1 3 3v7.5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8.5a3 3 0 0 1 3-3h2.5Z"/>
+                                    <circle cx="12" cy="12.5" r="3.4"/>
+                                </svg>
+                            </span>
+                            <span class="onboarding-photo-shield" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 2.75 19 5.5v5.35c0 4.35-2.75 8.12-7 10.4-4.25-2.28-7-6.05-7-10.4V5.5l7-2.75Z"/>
+                                    <path d="m8.6 12.2 2.15 2.15 4.65-4.65"/>
+                                </svg>
+                            </span>
+                            <input id="onboarding-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
+                        </label>
 
-                    <h2 class="onboarding-question font-ui">What should I call you?</h2>
+                        <h2 class="onboarding-question font-ui">What should I call you?</h2>
 
-                    <div class="name-input-wrapper" id="name-wrapper">
-                        <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="name" maxlength="70">
-                        <button id="name-submit" class="font-ui" aria-label="Continue">→</button>
+                        <div class="name-input-wrapper" id="name-wrapper">
+                            <input type="text" id="name-input" class="font-conversational" placeholder="Your name" autocomplete="name" maxlength="70">
+                            <button id="name-submit" class="font-ui" aria-label="Continue">→</button>
+                        </div>
+
+                        <div class="onboarding-name-explanation font-conversational">
+                            Your name helps keep Circle AI personal, trusted, and safer from impersonation.
+                        </div>
                     </div>
 
-                    <div class="onboarding-name-explanation font-conversational">
-                        Your name helps keep Circle AI personal, trusted, and safer from impersonation.
+                    <div id="onboarding-phone-fields" class="onboarding-phone-fields hidden">
+                        <h2 class="onboarding-question font-ui">What's your phone number?</h2>
+                        <div class="onboarding-phone-wrapper" id="phone-wrapper">
+                            <span class="onboarding-phone-prefix" aria-hidden="true">+91</span>
+                            <input id="onboarding-phone-input" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" pattern="[0-9]{10}" placeholder="10-digit mobile number" aria-label="10-digit Indian mobile number">
+                            <button id="phone-submit" type="button" aria-label="Continue">→</button>
+                        </div>
+                        <div class="onboarding-phone-explanation font-conversational">
+                            Your number helps keep Circle AI personal, trusted, and safer from impersonation. We’ll use it for account identification and safety, never for unsolicited messages.
+                        </div>
+                        <div id="phone-upload-error" role="alert"></div>
                     </div>
 
                     <div class="onboarding-encryption-pill font-conversational">
@@ -6507,7 +6613,6 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 <div id="install-instructions" class="install-instructions" hidden aria-live="polite"></div>
                 <div id="install-fallback-msg" class="install-fallback-msg" role="status"></div>
                 <button id="pwa-install-btn" class="install-action-btn" type="button">Install Circle AI</button>
-                <button id="install-continue-btn" class="install-continue-btn" type="button">Continue without installing</button>
             </div>
         </div>
 
@@ -6694,7 +6799,11 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                     <label for="profile-edit-name">Name</label>
                     <input id="profile-edit-name" type="text" maxlength="70" autocomplete="name" placeholder="Your name">
                 </div>
-                <div class="profile-edit-note">Your information stays private. It's not accessible to anyone, not even Circle AI.</div>
+                <div class="profile-edit-field">
+                    <label for="profile-edit-phone">Phone number</label>
+                    <input id="profile-edit-phone" type="text" value="" disabled aria-disabled="true" aria-label="Phone number. This field is read-only.">
+                </div>
+                <div class="profile-edit-note">Your phone number is kept read-only to protect your account identity. Your profile details stay private.</div>
                 <div class="profile-modal-actions">
                     <button id="profile-edit-save" type="button">Save changes</button>
                 </div>
@@ -7197,9 +7306,8 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             const benefits = document.getElementById('install-benefits');
             const instructions = document.getElementById('install-instructions');
             const button = document.getElementById('pwa-install-btn');
-            const continueButton = document.getElementById('install-continue-btn');
             const fallback = document.getElementById('install-fallback-msg');
-            if (!title || !benefits || !instructions || !button || !continueButton || !fallback) return;
+            if (!title || !benefits || !instructions || !button || !fallback) return;
 
             const environment = getInstallEnvironment();
             const device = getInstallDeviceInfo();
@@ -7210,8 +7318,6 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             instructions.hidden = !installGuideExpanded;
             fallback.style.display = 'none';
             fallback.textContent = '';
-            continueButton.classList.toggle('hidden', installed);
-            continueButton.setAttribute('aria-hidden', installed ? 'true' : 'false');
             button.classList.toggle('hidden', installed);
             button.setAttribute('aria-hidden', installed ? 'true' : 'false');
             button.disabled = installed;
@@ -8621,6 +8727,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
         /* Unified shell + Learn state */
         let profilePhotoDataUrl = localStorage.getItem('circle_v2_profile_photo_data_url') || '';
         let circleUserId = localStorage.getItem('circle_v2_user_id') || '';
+        let circlePhoneNumber = localStorage.getItem('circle_v2_phone_number') || '';
         let learnPlayer = null;
         let learnPlayerReady = false;
         let learnPlayerApiLoading = false;
@@ -8807,7 +8914,12 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
         document.addEventListener("DOMContentLoaded", () => {
             const isRegistered = localStorage.getItem('circle_v2_user_registered');
             userName = localStorage.getItem('circle_v2_username') || "";
-            circleReturningUser = Boolean(isRegistered && userName && profilePhotoDataUrl);
+            const storedPhoneValidation = validateIndianMobileNumber(circlePhoneNumber);
+            circlePhoneNumber = storedPhoneValidation.valid ? storedPhoneValidation.normalized : '';
+            if (circlePhoneNumber) localStorage.setItem('circle_v2_phone_number', circlePhoneNumber);
+            else localStorage.removeItem('circle_v2_phone_number');
+            const hasCompleteLocalProfile = Boolean(isRegistered === 'true' && userName && profilePhotoDataUrl && circlePhoneNumber);
+            circleReturningUser = hasCompleteLocalProfile;
             if (circleReturningUser) recordCircleDonationActiveDay();
 
             const savedContentLanguage = localStorage.getItem('circle_v2_content_language');
@@ -8848,9 +8960,10 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             setupDonationUI();
             refreshInstallControls();
 
-            if (isRegistered === 'true' && userName && profilePhotoDataUrl) {
-                /* Re-check stored profiles at startup. Invalid profiles return to
-                   onboarding, while learning progress and notes remain untouched. */
+            if (hasCompleteLocalProfile) {
+                /* Existing users with all required profile fields enter normally.
+                   Incomplete profiles return to onboarding without touching User ID,
+                   learning progress, lecture notes, course stats, or study settings. */
                 Promise.all([
                     Promise.resolve(validateCircleDisplayName(userName)),
                     ensureProfilePhotoIsSuitable(profilePhotoDataUrl).catch(() => ({ valid: false, reason: 'validation-failed' }))
@@ -8876,11 +8989,13 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
                 }).catch(() => {
                     localStorage.removeItem('circle_v2_user_registered');
                     circleReturningUser = false;
-                    profilePhotoDataUrl = '';
-                    localStorage.removeItem('circle_v2_profile_photo_data_url');
                     startOnboardingSequence();
                 });
             } else {
+                // Missing photo, name, or phone: require profile completion again.
+                // The existing user ID and all learning data remain in LocalStorage.
+                localStorage.removeItem('circle_v2_user_registered');
+                circleReturningUser = false;
                 startOnboardingSequence();
             }
         });
@@ -8912,7 +9027,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             const photoPicker = document.getElementById('onboarding-photo-picker');
             const photoError = document.getElementById('profile-upload-error');
 
-            /* Preserve an existing name/photo for correction when possible. */
+            /* Existing identity and study progress are preserved for profile repair. */
             if (nameInput && userName && !nameInput.value) nameInput.value = userName;
             if (profilePhotoDataUrl) {
                 if (photoPreview) photoPreview.src = profilePhotoDataUrl;
@@ -8927,27 +9042,122 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             logo.classList.remove('hidden');
             await sleep(50);
             logo.classList.remove('anim-enter');
-
             await sleep(3000);
-            
             logo.classList.add('anim-exit');
             await sleep(1200);
             logo.classList.add('hidden');
-            
+
             brand.classList.remove('hidden');
             await sleep(50);
             brand.classList.remove('anim-enter');
-            
             await sleep(2000);
-            
             brand.classList.add('anim-exit');
             await sleep(1200);
             brand.classList.add('hidden');
-            
+
             nameStep.classList.remove('hidden');
             await sleep(50);
             nameStep.classList.remove('anim-enter');
-            document.getElementById('name-input').focus();
+
+            // A returning student with name and photo but no saved phone skips directly
+            // to the phone step. Missing photos always return to the picture/name step.
+            const nameIsValid = validateCircleDisplayName(userName).valid;
+            let savedPhotoIsValid = Boolean(profilePhotoDataUrl);
+            if (savedPhotoIsValid) {
+                const photoCheck = await ensureProfilePhotoIsSuitable(profilePhotoDataUrl)
+                    .catch(() => ({ valid: false }));
+                savedPhotoIsValid = Boolean(photoCheck.valid);
+                if (!savedPhotoIsValid) {
+                    profilePhotoDataUrl = '';
+                    localStorage.removeItem('circle_v2_profile_photo_data_url');
+                    if (photoPreview) photoPreview.removeAttribute('src');
+                    if (photoPicker) photoPicker.classList.remove('has-photo');
+                }
+            }
+
+            if (nameIsValid && savedPhotoIsValid) {
+                const phoneCheck = validateIndianMobileNumber(circlePhoneNumber);
+                if (phoneCheck.valid) {
+                    circlePhoneNumber = phoneCheck.normalized;
+                    await finishCircleProfileRegistration();
+                } else {
+                    await showOnboardingPhoneStep();
+                }
+            } else {
+                await showOnboardingProfileStep();
+            }
+        }
+
+        async function transitionOnboardingFields(fromFields, toFields) {
+            if (fromFields && !fromFields.classList.contains('hidden')) {
+                fromFields.classList.add('onboarding-step-exiting');
+                await sleep(400);
+                fromFields.classList.add('hidden');
+                fromFields.classList.remove('onboarding-step-exiting');
+            }
+
+            if (toFields && toFields.classList.contains('hidden')) {
+                toFields.classList.add('onboarding-step-entering');
+                toFields.classList.remove('hidden');
+                void toFields.offsetWidth;
+                requestAnimationFrame(() => toFields.classList.remove('onboarding-step-entering'));
+            }
+        }
+
+        async function showOnboardingProfileStep() {
+            const profileFields = document.getElementById('onboarding-profile-fields');
+            const phoneFields = document.getElementById('onboarding-phone-fields');
+            await transitionOnboardingFields(phoneFields, profileFields);
+            const nameInput = document.getElementById('name-input');
+            setTimeout(() => nameInput?.focus(), 80);
+        }
+
+        async function showOnboardingPhoneStep() {
+            const profileFields = document.getElementById('onboarding-profile-fields');
+            const phoneFields = document.getElementById('onboarding-phone-fields');
+            const phoneInput = document.getElementById('onboarding-phone-input');
+            const phoneError = document.getElementById('phone-upload-error');
+            if (phoneInput) phoneInput.value = circlePhoneNumber || '';
+            if (phoneError) phoneError.style.display = 'none';
+            await transitionOnboardingFields(profileFields, phoneFields);
+            setTimeout(() => phoneInput?.focus(), 90);
+        }
+
+        function normalizeIndianMobileInput(rawValue) {
+            let digits = String(rawValue == null ? '' : rawValue).replace(/\D/g, '');
+            // Accept pasted country codes while keeping only the 10-digit national number.
+            if (digits.length > 10) {
+                if (digits.startsWith('0091')) digits = digits.slice(4);
+                else if (digits.startsWith('91')) digits = digits.slice(2);
+                else if (digits.startsWith('0')) digits = digits.slice(1);
+            }
+            return digits.slice(0, 10);
+        }
+
+        function validateIndianMobileNumber(rawValue) {
+            const normalized = normalizeIndianMobileInput(rawValue);
+            const fail = message => ({ valid: false, normalized, message });
+            if (!/^\d{10}$/.test(normalized)) {
+                return fail('Enter a valid 10-digit Indian mobile number.');
+            }
+            if (!/^[6-9]/.test(normalized)) {
+                return fail('Indian mobile numbers must begin with 6, 7, 8 or 9.');
+            }
+            if (/^(\d)\1{9}$/.test(normalized)) {
+                return fail('Please enter your actual mobile number, not a repeated placeholder number.');
+            }
+            const obviousTestNumbers = new Set([
+                '0123456789', '1234567890', '9876543210', '0987654321',
+                '1234512345', '1231231231', '9999999999', '8888888888',
+                '7777777777', '6666666666'
+            ]);
+            if (obviousTestNumbers.has(normalized)) {
+                return fail('This looks like a sample or placeholder number. Please enter your mobile number.');
+            }
+            if (/^(\d{2})\1{4}$/.test(normalized) || /^(\d{3})\1{2,}$/.test(normalized)) {
+                return fail('Please enter a genuine 10-digit mobile number, not a repeated pattern.');
+            }
+            return { valid: true, normalized, message: '' };
         }
 
         function validateCircleDisplayName(rawValue) {
@@ -9065,50 +9275,101 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             const wrapper = document.getElementById('name-wrapper');
             const photoPicker = document.getElementById('onboarding-photo-picker');
             const photoError = document.getElementById('profile-upload-error');
-            const nameValidation = validateCircleDisplayName(nameInput.value);
+            const nameValidation = validateCircleDisplayName(nameInput?.value || '');
             const nameVal = nameValidation.normalized;
-
             let valid = true;
 
             if (!profilePhotoDataUrl) {
-                photoPicker.style.borderColor = '#ff4444';
-                photoError.style.display = 'block';
-                setTimeout(() => { photoPicker.style.borderColor = '#fff'; }, 1500);
+                if (photoPicker) {
+                    photoPicker.style.borderColor = '#ff4444';
+                    setTimeout(() => { photoPicker.style.borderColor = '#fff'; }, 1500);
+                }
+                if (photoError) photoError.style.display = 'block';
                 valid = false;
-            } else {
+            } else if (photoError) {
                 photoError.style.display = 'none';
             }
 
             if (!nameValidation.valid) {
-                wrapper.style.borderColor = '#ff4444';
-                setTimeout(() => wrapper.style.borderColor = 'rgba(255,255,255,0.3)', 1500);
+                if (wrapper) {
+                    wrapper.style.borderColor = '#ff4444';
+                    setTimeout(() => { wrapper.style.borderColor = 'rgba(255,255,255,0.3)'; }, 1500);
+                }
                 showToast(nameValidation.message, 4500);
-                nameInput.focus();
+                nameInput?.focus();
                 valid = false;
             }
-
             if (!valid) return;
 
+            // Save locally before the phone step, so a refresh does not lose this stage.
+            userName = nameVal;
+            localStorage.setItem('circle_v2_username', userName);
+            localStorage.setItem('circle_v2_user_id', circleUserId);
+            localStorage.setItem('circle_v2_profile_photo_data_url', profilePhotoDataUrl);
+            refreshMoreProfileUI();
+
+            const savedPhone = validateIndianMobileNumber(circlePhoneNumber);
+            if (savedPhone.valid) {
+                circlePhoneNumber = savedPhone.normalized;
+                await finishCircleProfileRegistration();
+            } else {
+                await showOnboardingPhoneStep();
+            }
+        }
+
+        async function submitOnboardingPhoneNumber() {
+            const phoneInput = document.getElementById('onboarding-phone-input');
+            const phoneWrapper = document.getElementById('phone-wrapper');
+            const phoneError = document.getElementById('phone-upload-error');
+            const result = validateIndianMobileNumber(phoneInput?.value || '');
+            if (!result.valid) {
+                if (phoneWrapper) {
+                    phoneWrapper.style.borderColor = '#ff4444';
+                    setTimeout(() => { phoneWrapper.style.borderColor = 'rgba(255,255,255,.3)'; }, 1600);
+                }
+                if (phoneError) {
+                    phoneError.textContent = result.message;
+                    phoneError.style.display = 'block';
+                }
+                phoneInput?.focus();
+                return;
+            }
+            if (phoneError) phoneError.style.display = 'none';
+            circlePhoneNumber = result.normalized;
+            localStorage.setItem('circle_v2_phone_number', circlePhoneNumber);
+            await finishCircleProfileRegistration();
+        }
+
+        async function finishCircleProfileRegistration() {
+            const nameValidation = validateCircleDisplayName(userName);
+            const phoneValidation = validateIndianMobileNumber(circlePhoneNumber);
+            if (!nameValidation.valid || !profilePhotoDataUrl || !phoneValidation.valid) {
+                await showOnboardingProfileStep();
+                showToast('Please complete your name, profile picture and phone number.');
+                return;
+            }
+
+            userName = nameValidation.normalized;
+            circlePhoneNumber = phoneValidation.normalized;
             localStorage.setItem('circle_v2_user_registered', 'true');
             if (!localStorage.getItem('circle_v2_user_registered_at')) {
                 localStorage.setItem('circle_v2_user_registered_at', new Date().toISOString());
             }
             recordCircleDonationActiveDay();
-            localStorage.setItem('circle_v2_username', nameVal);
+            localStorage.setItem('circle_v2_username', userName);
             localStorage.setItem('circle_v2_user_id', circleUserId);
             localStorage.setItem('circle_v2_profile_photo_data_url', profilePhotoDataUrl);
-            userName = nameVal;
+            localStorage.setItem('circle_v2_phone_number', circlePhoneNumber);
+            circleReturningUser = Boolean(localStorage.getItem('circle_v2_user_registered') === 'true');
             refreshMoreProfileUI();
 
-            /*
-             * This is intentionally non-blocking: a slow/failed analytics or
-             * profile-upload request must never prevent the student entering Circle.
-             */
+            /* Profile data is sent to the Users tab. Analytics failure never blocks entry. */
             void logToGoogleSheets({
                 type: 'user_profile',
                 timestamp: new Date().toISOString(),
                 userId: circleUserId,
                 name: userName,
+                phoneNumber: circlePhoneNumber,
                 profilePhoto: {
                     fileName: 'profile.jpg',
                     mimeType: 'image/jpeg',
@@ -9118,21 +9379,16 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
 
             const nameStep = document.getElementById('intro-name-step');
             const welcome = document.getElementById('intro-welcome');
-
             nameStep.classList.add('anim-exit');
             await sleep(1200);
             nameStep.classList.add('hidden');
-
             welcome.textContent = formatText("Welcome to Circle AI, {{Name}}.", userName);
             welcome.classList.remove('hidden');
             await sleep(50);
             welcome.classList.remove('anim-enter');
-
             await sleep(1800);
-
             welcome.classList.add('anim-exit');
             await sleep(1200);
-
             document.getElementById('onboarding-layer').classList.add('hidden');
             await startMainInterface();
             switchCircleMode('ask');
@@ -9141,7 +9397,6 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             const installPromptShownKey = 'circle_v2_install_registration_prompt_shown_v1';
             if (!isRunningAsInstalledPWA() && localStorage.getItem(installPromptShownKey) !== 'true') {
                 localStorage.setItem(installPromptShownKey, 'true');
-                // Let the Ask screen appear first; installation remains entirely optional.
                 setTimeout(() => {
                     if (!isRunningAsInstalledPWA()) showInstallModal();
                 }, 1200);
@@ -9613,10 +9868,12 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
         function openProfileModal() {
             const modal = document.getElementById('profile-modal');
             const nameInput = document.getElementById('profile-edit-name');
+            const phoneDisplay = document.getElementById('profile-edit-phone');
             const photoPreview = document.getElementById('profile-edit-photo-preview');
             if (!modal) return;
             profileEditPhotoDataUrl = profilePhotoDataUrl || '';
             if (nameInput) nameInput.value = userName || '';
+            if (phoneDisplay) phoneDisplay.value = circlePhoneNumber ? '+91 ' + circlePhoneNumber : 'Not provided';
             if (photoPreview) {
                 if (profileEditPhotoDataUrl) photoPreview.src = profileEditPhotoDataUrl;
                 else photoPreview.removeAttribute('src');
@@ -10002,6 +10259,7 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             }
             void logToGoogleSheets({
                 type:'user_profile', timestamp:new Date().toISOString(), userId:circleUserId, name:userName,
+                phoneNumber:circlePhoneNumber,
                 profilePhoto:{ fileName:'profile.jpg', mimeType:'image/jpeg', dataUrl:profilePhotoDataUrl }
             });
             closeProfileModal();
@@ -10210,6 +10468,29 @@ You can watch the relevant video lectures in **Circle AI → Learn** by selectin
             document.getElementById('name-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') submitName();
             });
+            const onboardingPhoneInput = document.getElementById('onboarding-phone-input');
+            const onboardingPhoneSubmit = document.getElementById('phone-submit');
+            if (onboardingPhoneSubmit) onboardingPhoneSubmit.addEventListener('click', submitOnboardingPhoneNumber);
+            if (onboardingPhoneInput) {
+                onboardingPhoneInput.addEventListener('paste', event => {
+                    const pastedText = event.clipboardData?.getData('text') || '';
+                    if (!pastedText) return;
+                    event.preventDefault();
+                    // Process the full clipboard value before the maxlength=10 constraint,
+                    // so pasting a number that includes +91 still keeps the correct 10 digits.
+                    onboardingPhoneInput.value = normalizeIndianMobileInput(pastedText);
+                    onboardingPhoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                onboardingPhoneInput.addEventListener('input', () => {
+                    const digits = onboardingPhoneInput.value.replace(/\D/g, '').slice(0, 10);
+                    if (onboardingPhoneInput.value !== digits) onboardingPhoneInput.value = digits;
+                    const error = document.getElementById('phone-upload-error');
+                    if (error) error.style.display = 'none';
+                });
+                onboardingPhoneInput.addEventListener('keydown', event => {
+                    if (event.key === 'Enter') submitOnboardingPhoneNumber();
+                });
+            }
 
             const chatInput = document.getElementById('chat-input');
             const chatSubmit = document.getElementById('chat-submit');
@@ -10224,7 +10505,6 @@ const settingsBtn = document.getElementById('settings-btn');
 const installBtn = document.getElementById('install-btn');
             const installCloseBtn = document.getElementById('install-close');
             const pwaInstallBtn = document.getElementById('pwa-install-btn');
-            const installContinueBtn = document.getElementById('install-continue-btn');
             
             const shareBtn = document.getElementById('share-btn');
             
@@ -10256,13 +10536,6 @@ settingsBtn.addEventListener('click', toggleSettings);
                 closeInstallModal();
             });
             pwaInstallBtn.addEventListener('click', handleInstallClick);
-            installContinueBtn.addEventListener('click', () => {
-                const environment = getInstallEnvironment();
-                setInstallStorage('circle_v2_install_choice_v1', 'continue-without-installing');
-                setInstallStorage('circle_v2_install_choice_environment_v1', environment);
-                setInstallStorage(`circle_v2_install_choice_v2_${environment}`, 'continue-without-installing');
-                closeInstallModal();
-            });
             
             shareBtn.addEventListener('click', handleShare);
             
