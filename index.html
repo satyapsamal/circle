@@ -9412,17 +9412,16 @@ Thank you for learning and growing with The Circle.` ,
             const phoneError = document.getElementById('phone-upload-error');
             const result = validateIndianMobileNumber(phoneInput?.value || '');
             if (!result.valid) {
-                if (phoneWrapper) {
-                    phoneWrapper.style.borderColor = '#ff4444';
-                    setTimeout(() => { phoneWrapper.style.borderColor = 'rgba(255,255,255,.3)'; }, 1600);
-                }
+                if (phoneWrapper) phoneWrapper.style.borderColor = '#ff4444';
+                // Keep validation feedback visual only: red underline, no reason text.
                 if (phoneError) {
-                    phoneError.textContent = result.message;
-                    phoneError.style.display = 'block';
+                    phoneError.textContent = '';
+                    phoneError.style.display = 'none';
                 }
                 phoneInput?.focus();
                 return;
             }
+            if (phoneWrapper) phoneWrapper.style.borderColor = 'rgba(255,255,255,.3)';
             if (phoneError) phoneError.style.display = 'none';
             circlePhoneNumber = result.normalized;
             localStorage.setItem('circle_v2_phone_number', circlePhoneNumber);
@@ -10574,7 +10573,9 @@ Thank you for learning and growing with The Circle.` ,
                     const digits = onboardingPhoneInput.value.replace(/\D/g, '').slice(0, 10);
                     if (onboardingPhoneInput.value !== digits) onboardingPhoneInput.value = digits;
                     const error = document.getElementById('phone-upload-error');
+                    const wrapper = document.getElementById('phone-wrapper');
                     if (error) error.style.display = 'none';
+                    if (wrapper) wrapper.style.borderColor = 'rgba(255,255,255,.3)';
                 });
                 onboardingPhoneInput.addEventListener('keydown', event => {
                     if (event.key === 'Enter') submitOnboardingPhoneNumber();
