@@ -8042,7 +8042,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                     ' heyyy ', ' yo ', ' hi circle ', ' hello circle ', ' hey circle ', ' hi satya ', 
                     ' hello satya ', ' hey satya '
                 ],
-                markdown: `` // Handled dynamically in matchIntent
+                markdown: `` // Legacy placeholder; handled by the Natural Conversation Layer
             },
             {
                 id: 'end_term_exam_allowed_items',
@@ -8439,13 +8439,6 @@ Thank you for learning and growing with The Circle.` ,
             "Looking for a short breathing exercise or wellbeing support, {{Name}}?"
         ];
 
-        const casualResponses = [
-            "Hey {{Name}}. What are you stuck on today?",
-            "Hi {{Name}}. What would you like to understand?",
-            "Hey {{Name}}. Got a question?",
-            "Hello {{Name}}. Ask away."
-        ];
-
         const circleRecommendations = [
             "Need more help? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**, a student-led BBA community for learning, resources, and peer discussion.",
             "Still stuck? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)** for peer learning, resources, revision sessions, and academic discussions.",
@@ -8454,6 +8447,215 @@ Thank you for learning and growing with The Circle.` ,
             "Need help beyond this answer? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)** to learn, share, and grow with other BBA students.",
             "Want to study with your peers? Join **[BBA Circle](https://chat.whatsapp.com/HPvD6l3vpgkF9ABUZXS3My)**."
         ];
+
+
+        /*******************************************************
+         * NATURAL CONVERSATION LAYER
+         * Kept separate from academic intent matching. This layer
+         * handles short social turns and remembers the last useful
+         * answer so acknowledgements and repeat requests feel natural.
+         *******************************************************/
+        let naturalConversationContext = createNaturalConversationContext();
+
+        function createNaturalConversationContext() {
+            return {
+                lastUserMessage: '',
+                lastIntentId: null,
+                lastAssistantAskedQuestion: false,
+                lastSubstantiveUserMessage: '',
+                lastSubstantiveMarkdown: '',
+                lastSubstantiveSources: [],
+                lastSubstantiveIntentId: null,
+                lastReplyByType: {},
+                turnCount: 0
+            };
+        }
+
+        function resetNaturalConversationContext() {
+            naturalConversationContext = createNaturalConversationContext();
+        }
+
+        function normalizeNaturalConversationText(query) {
+            return String(query || '')
+                .normalize('NFKC')
+                .toLowerCase()
+                .replace(/[’‘`]/g, "'")
+                .replace(/([a-z])\1{2,}/g, '$1')
+                .replace(/[^\p{L}\p{N}\s']/gu, ' ')
+                .replace(/'/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function chooseNaturalConversationReply(type, replies) {
+            const previousReply = naturalConversationContext.lastReplyByType[type];
+            const alternatives = replies.filter(reply => reply !== previousReply);
+            const pool = alternatives.length ? alternatives : replies;
+            const selected = pool[Math.floor(Math.random() * pool.length)];
+            naturalConversationContext.lastReplyByType[type] = selected;
+            return selected;
+        }
+
+        function getNaturalConversationResponse(query) {
+            const rawText = String(query || '').trim();
+            const text = normalizeNaturalConversationText(rawText);
+            const punctuationOnlyQuestion = !text && /[?¿]/.test(rawText);
+            const emojiOnlyLaughter = /^(?:😂|🤣|😄|😆|😁|😅)+$/u.test(rawText);
+            let type = null;
+            let markdown = '';
+            let sources = [];
+
+            // More specific conversational expressions are checked before single-word replies.
+            if (/^(?:(?:hi|hey|hello)(?:\s+(?:circle|ai|there|satya))?\s+)?(?:how are you(?: doing)?|how are u|hows it going|how have you been|whats up(?: with you)?|wassup|what is up|what are you up to|what is going on|whats going on|you good|hows life|how is life)(?:\s+(?:circle|ai|satya))?$/.test(text)) {
+                type = 'smalltalk';
+                markdown = chooseNaturalConversationReply(type, [
+                    "I'm doing well and ready to help. How are things going with your studies?",
+                    "All good here. What's on your mind today?",
+                    "Doing well. What would you like to discuss?"
+                ]);
+            } else if (/^(?:im good|im fine|doing good|doing fine|all good|im doing well|i am doing well|im doing okay|im okay|i am okay|fine thanks|good thanks)$/.test(text)) {
+                type = 'status_update';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Good to hear. What would you like to work on today?",
+                    "Glad to hear that. What's on your mind?"
+                ]);
+            } else if (/^(?:are you there|you there|anyone there|circle are you there|are you active|are you listening)$/.test(text)) {
+                type = 'attention';
+                markdown = chooseNaturalConversationReply(type, [
+                    "I'm here. What do you need help with?",
+                    "Yes, I'm here. What would you like to ask?"
+                ]);
+            } else if (/^(?:(?:ok|okay|alright|cool)\s+)?(?:bye+|bye bye|goodbye|good bye|see you|see ya|see you later|see you soon|cya|take care|good night|goodnight|night|gn|sleep well|have a good day|have a nice day|talk later|catch you later|until next time|milte hain|milte hai|chalta hu|chalta hoon|chalti hu|i have to go|gotta go|i am leaving)(?:\s+(?:circle|everyone|all))?$/.test(text)) {
+                type = 'farewell';
+                markdown = chooseNaturalConversationReply(type, [
+                    "See you. Good luck with your studies.",
+                    "Take care. Come back whenever you need help with your BBA work.",
+                    "Goodbye. Hope the rest of your day goes well."
+                ]);
+            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:thank you|thanks?|thank u|thx|ty|tysm|many thanks|much appreciated|appreciate it)(?:\s+(?:a lot|so much|again|for that|for this|for your help|for helping|for explaining|for the notes|for the explanation))?$/.test(text)) {
+                type = 'gratitude';
+                markdown = chooseNaturalConversationReply(type, [
+                    "You're welcome. Let me know when you need help with another BBA-related query.",
+                    "You're welcome. That's what I'm here for.",
+                    "No problem. We can continue whenever you need help."
+                ]);
+            } else if (/^(?:you are|youre|ur)\s+(?:great|awesome|amazing|helpful|the best|smart|brilliant)(?:\s+(?:circle|ai))?$/.test(text) || /^(?:great job|well done|nice work|brilliant|awesome|amazing|good job|that was helpful|perfect answer|you nailed it)$/.test(text)) {
+                type = 'compliment';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Thank you. Let's keep the focus on what you need to get done.",
+                    "Thanks. What should we work on next?"
+                ]);
+            } else if (/^(?:sorry|sry|my bad|my apologies|i apologise|i apologize|apologies|sorry about that|oops|pardon me)$/.test(text)) {
+                type = 'apology';
+                markdown = chooseNaturalConversationReply(type, [
+                    "No need to apologise. What would you like to work through?",
+                    "That's alright. We can continue from here."
+                ]);
+            } else if (/^(?:repeat|repeat that|say that again|can you repeat|could you repeat|can you explain again|explain again|repeat please|once again|one more time|again please|i missed that|what did you say|come again|please repeat)$/.test(text)) {
+                type = 'repeat';
+                if (naturalConversationContext.lastSubstantiveMarkdown) {
+                    markdown = "Certainly. Here's the previous answer again:\n\n" + naturalConversationContext.lastSubstantiveMarkdown;
+                    sources = naturalConversationContext.lastSubstantiveSources.slice();
+                } else {
+                    markdown = "There isn't an earlier answer in this chat to repeat. Send the question again, and I'll take it from there.";
+                }
+            } else if (/^(?:simplify|make it simple|make it simpler|explain simply|explain in simple words|in simple words|easy language|explain in easy words|break it down|can you break it down|samjhao|samjha do|simple mein samjhao|easy mein samjhao)$/.test(text)) {
+                type = 'simplify';
+                markdown = "Certainly. Which part should I explain in simpler words? You can mention the heading, step, or sentence.";
+            } else if (/^(?:i dont understand|i dont get it|dont understand|dont get it|not clear|im confused|confused|i dont know|idk|not sure|what do you mean|huh|what|samajh nahi aya|samajh nahi aaya|samajh nahi aayi|samajh nahi raha|samajh nahi rahi|clear nahi hua|clear nahi hai)$/.test(text) || punctuationOnlyQuestion) {
+                type = 'confusion';
+                markdown = naturalConversationContext.lastSubstantiveMarkdown
+                    ? "That's alright. Tell me which part was unclear, and I'll help you work through it step by step."
+                    : "That's alright. Tell me what you're trying to understand, and I'll help you work through it.";
+            } else if (/^(?:wait|brb|one sec|one second|hold on|just a minute|give me a moment|ek minute|ruko|ruk jao)$/.test(text)) {
+                type = 'wait';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Sure. Take your time.",
+                    "No problem. I'll be here when you're ready."
+                ]);
+            } else if (/^(?:(?:ha){2,}|(?:he){2,}|(?:lol|lo){2,}|lmao|rofl)$/.test(text) || emojiOnlyLaughter) {
+                type = 'laughter';
+                markdown = chooseNaturalConversationReply(type, [
+                    "What did I miss?",
+                    "Glad that made you laugh. What's next?"
+                ]);
+            } else if (/^(?:help|help me|i need help|can you help|can you help me|please help|need help|help needed)$/.test(text)) {
+                type = 'help_request';
+                markdown = "Sure. Tell me what you're trying to do. I can help with BBA programme information, examinations, study resources, and Circle AI features.";
+            } else if (/^(?:continue|go on|tell me more|more details|elaborate|what else|and then|next|carry on|aage batao|aur batao)$/.test(text)) {
+                type = 'followup';
+                markdown = naturalConversationContext.lastSubstantiveMarkdown
+                    ? "Sure. Which part of the previous answer would you like me to expand on?"
+                    : "What would you like me to continue with? Send the topic or question, and I'll take it from there.";
+            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:yes|yeah|yep|yup|sure|absolutely|definitely|correct|of course|haan|han|haan ji|han ji|ha|haa|bilkul|ji|yes please|yeah please)$/.test(text)) {
+                type = 'agreement';
+                markdown = naturalConversationContext.lastAssistantAskedQuestion
+                    ? "Great. Let's go ahead. What detail should we start with?"
+                    : chooseNaturalConversationReply(type, [
+                        "Great. Let's keep going.",
+                        "Alright. What would you like to work on next?"
+                    ]);
+            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:no|nope|nah|not really|not now|no thanks|nahi|nahi yaar|na|bilkul nahi)$/.test(text)) {
+                type = 'disagreement';
+                markdown = naturalConversationContext.lastAssistantAskedQuestion
+                    ? "No problem. We can take a different approach. What would work better for you?"
+                    : "Understood. What would you prefer instead?";
+            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:ok|okay|okey|k|kk|alright|all right|got it|gotcha|understood|i see|makes sense|noted|cool|fine|fair enough|right|great|perfect|nice|sounds good|no problem|no worries|youre welcome|thik hai|theek hai|accha|acha|achha|samajh gaya|samajh gayi|samajh gya|samajh gyi|theek|thik|hmm|hmmm|hm|sure thing)$/.test(text)) {
+                type = 'acknowledgement';
+                markdown = naturalConversationContext.lastAssistantAskedQuestion
+                    ? "Alright. Take your time. You can share the details whenever you're ready."
+                    : chooseNaturalConversationReply(type, [
+                        "Got it. Let me know what you'd like to look at next.",
+                        "Alright. We can move to the next point whenever you're ready.",
+                        "Understood. What's next?"
+                    ]);
+            } else if (/^(?:im back|i am back|back again)$/.test(text)) {
+                type = 'welcome_back';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Welcome back, {{Name}}. What would you like to work on?",
+                    "Good to have you back. What can I help you with?"
+                ]);
+            } else if (/^(?:hi+|hello+|hey+|yo|hiya|hola|namaste|namaskar|sup|gm|good morning|morning|good afternoon|afternoon|good evening|evening|good day)(?:\s+(?:circle|ai|there|satya|team|everyone|sir|maam))?$/.test(text)) {
+                type = 'greeting';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Hi {{Name}}. What would you like to work on today?",
+                    "Hey {{Name}}. What can I help you find?",
+                    "Hello {{Name}}. What are we figuring out today?",
+                    "Hi. Ask me about your BBA programme, examinations, or study resources."
+                ]);
+            } else {
+                return null;
+            }
+
+            return {
+                markdown: markdown,
+                sources: sources,
+                intentId: 'natural_' + type,
+                severity: 'none',
+                isConversational: true,
+                conversationType: type
+            };
+        }
+
+        function rememberNaturalConversationTurn(query, responseData) {
+            naturalConversationContext.lastUserMessage = query;
+            naturalConversationContext.lastIntentId = responseData.intentId || null;
+            naturalConversationContext.turnCount += 1;
+
+            // Keep the last knowledge-base/fallback answer available for repeat requests.
+            if (!responseData.isConversational) {
+                naturalConversationContext.lastSubstantiveUserMessage = query;
+                naturalConversationContext.lastSubstantiveMarkdown = responseData.markdown || '';
+                naturalConversationContext.lastSubstantiveSources = Array.isArray(responseData.sources)
+                    ? responseData.sources.map(source => ({ ...source }))
+                    : [];
+                naturalConversationContext.lastSubstantiveIntentId = responseData.intentId || null;
+            }
+
+            const answerLines = String(responseData.markdown || '').trim().split(/\n+/).filter(Boolean);
+            const finalAnswerLine = answerLines.length ? answerLines[answerLines.length - 1].trim() : '';
+            naturalConversationContext.lastAssistantAskedQuestion = /\?\s*(?:\*{1,2}|`{1,3})?\s*$/.test(finalAnswerLine);
+        }
 
 
         /*******************************************************
@@ -10803,6 +11005,7 @@ settingsBtn.addEventListener('click', toggleSettings);
             
             await sleep(600);
             chatContainer.innerHTML = '';
+            resetNaturalConversationContext();
             
             isChatMode = false;
             
@@ -11023,8 +11226,6 @@ settingsBtn.addEventListener('click', toggleSettings);
             const chatInput = document.getElementById('chat-input');
             const query = chatInput.value.trim();
             if (!query) return;
-            registerCircleBundlePrompt();
-            
             // Stop any ongoing speech when a new query is submitted
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -11047,7 +11248,10 @@ settingsBtn.addEventListener('click', toggleSettings);
             syncAskUtilityVisibility();
             
             logAskPromptToGoogleSheets(query);
-            
+
+            const responseData = matchIntent(query);
+            if (!responseData.isConversational) registerCircleBundlePrompt();
+
             isProcessing = true;
 
             appendUserMessage(query);
@@ -11066,8 +11270,11 @@ settingsBtn.addEventListener('click', toggleSettings);
                 currentModel = 'swift';
             }
 
-            // Adjust delay based on model
-            if (currentModel === 'swift') {
+            // Natural conversation should feel immediate regardless of selected model.
+            // Academic responses retain the existing Swift/Core timing behaviour.
+            if (responseData.isConversational) {
+                await sleep(220);
+            } else if (currentModel === 'swift') {
                 await sleep(500);
             } else {
                 await sleep(6000);
@@ -11078,8 +11285,6 @@ settingsBtn.addEventListener('click', toggleSettings);
             const processEndTime = performance.now();
             const elapsedSeconds = ((processEndTime - processStartTime) / 1000).toFixed(2);
             
-            const responseData = matchIntent(query);
-
             const aiContainer = document.createElement('div');
             aiContainer.className = 'msg-ai font-conversational';
             document.getElementById('chat-container').appendChild(aiContainer);
@@ -11087,7 +11292,7 @@ settingsBtn.addEventListener('click', toggleSettings);
             const personalizedMarkdown = formatText(responseData.markdown, userName);
             let finalCombinedMarkdown = personalizedMarkdown;
             
-            if (responseData.intentId !== 'student_wellbeing') {
+            if (!responseData.isConversational && responseData.intentId !== 'student_wellbeing') {
                 const recIdx = Math.floor(Math.random() * circleRecommendations.length);
                 const recommendationText = circleRecommendations[recIdx];
                 finalCombinedMarkdown += "\n\n" + recommendationText;
@@ -11126,11 +11331,13 @@ settingsBtn.addEventListener('click', toggleSettings);
             }
             
             // Only add metadata to normal answers (not Dream Labs triggers to avoid messy UI during terminal flow)
-            if (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe') {
+            if (!responseData.isConversational &&
+                (responseData.intentId !== 'student_wellbeing' || responseData.severity === 'severe')) {
                 appendResponseMetadata(aiContainer, elapsedSeconds, finalCombinedMarkdown, currentModel);
                 smartScrollToBottom();
             }
 
+            rememberNaturalConversationTurn(query, responseData);
             isProcessing = false;
             showCircleBundleNudgeIfPending();
 
@@ -12697,24 +12904,31 @@ setInterval(() => {
          *******************************************************/
         function matchIntent(query) {
             ensureAskDataLoaded();
+
+            // Exact conversational messages are handled before keyword scoring.
+            // Mixed messages such as "Hi, where are the notes?" continue to the
+            // academic matcher because they are not exact social expressions.
+            const naturalResponse = getNaturalConversationResponse(query);
+            if (naturalResponse) return naturalResponse;
+
             const normalizedQuery = query.toLowerCase().replace(/[^\w\s-]/gi, ' ');
-            const paddedQuery = " " + normalizedQuery + " "; 
             let matchedIntents = [];
+            const conversationalIntentIds = new Set([
+                'casual_conversation',
+                'casual_intent',
+                'thanks_intent',
+                'goodbye_intent'
+            ]);
 
             knowledgeBase.forEach(intent => {
+                // Legacy conversation entries remain in the data for compatibility,
+                // but are no longer scored as ordinary academic keyword intents.
+                if (conversationalIntentIds.has(intent.id)) return;
+
                 let score = 0;
                 let severity = 'none';
 
-                if (intent.id === 'casual_conversation') {
-                    intent.keywords.forEach(kw => {
-                        if (paddedQuery.includes(kw)) {
-                            score += kw.length;
-                        }
-                    });
-                    if (score >= 3) {
-                        matchedIntents.push({ intent: intent, score: score, severity: severity });
-                    }
-                } else if (intent.id === 'student_wellbeing') {
+                if (intent.id === 'student_wellbeing') {
                     let isSevere = false;
                     let isGeneral = false;
 
@@ -12747,7 +12961,7 @@ setInterval(() => {
                 } else {
                     intent.keywords.forEach(kw => {
                         if (normalizedQuery.includes(kw.toLowerCase())) {
-                            score += kw.length; 
+                            score += kw.length;
                         }
                     });
                     if (score >= 3) {
@@ -12760,11 +12974,6 @@ setInterval(() => {
             });
 
             if (matchedIntents.length > 0) {
-                let hasSubstantive = matchedIntents.some(m => m.intent.id !== 'casual_conversation' && m.score >= 3);
-                if (hasSubstantive) {
-                    matchedIntents = matchedIntents.filter(m => m.intent.id !== 'casual_conversation');
-                }
-
                 matchedIntents.sort((a, b) => b.score - a.score);
 
                 // Practice handbook queries should never be mixed with the generic
@@ -12772,14 +12981,14 @@ setInterval(() => {
                 if (matchedIntents[0].intent.id === 'practice_handbooks') {
                     matchedIntents = matchedIntents.filter(m => m.intent.id !== 'course_resources');
                 }
-                
+
                 let topMatches = [matchedIntents[0]];
                 if (matchedIntents.length > 1) {
                     let secondMatch = matchedIntents[1];
                     if (secondMatch.score >= 4 && secondMatch.intent.id !== topMatches[0].intent.id) {
                         let topIsWellbeing = topMatches[0].intent.id === 'student_wellbeing';
                         let secondIsWellbeing = secondMatch.intent.id === 'student_wellbeing';
-                        
+
                         if (!topIsWellbeing && !secondIsWellbeing &&
                             topMatches[0].intent.id !== 'msq_marking_scheme' &&
                             topMatches[0].intent.id !== 'practice_handbooks') {
@@ -12787,28 +12996,31 @@ setInterval(() => {
                         }
                     }
                 }
-                
+
                 topMatches.forEach(m => {
-                    if (m.intent.id === 'casual_conversation') {
-                        m.intent.markdown = casualResponses[Math.floor(Math.random() * casualResponses.length)];
-                    } else if (m.intent.id === 'student_wellbeing') {
-                        m.intent.markdown = m.severity === 'severe' ? m.intent.markdown_severe : m.intent.markdown_general;
+                    if (m.intent.id === 'student_wellbeing') {
+                        m.intent.markdown = m.severity === 'severe'
+                            ? m.intent.markdown_severe
+                            : m.intent.markdown_general;
                     }
                 });
 
                 let finalMarkdown = topMatches.map(m => m.intent.markdown).join('\n\n');
                 let finalSources = [];
-                
                 topMatches.forEach(m => {
-                    if (m.intent.sources) {
-                        finalSources = finalSources.concat(m.intent.sources);
-                    }
+                    if (m.intent.sources) finalSources = finalSources.concat(m.intent.sources);
                 });
-                
-                return { markdown: finalMarkdown, sources: finalSources, intentId: topMatches[0].intent.id, severity: topMatches[0].severity };
+
+                return {
+                    markdown: finalMarkdown,
+                    sources: finalSources,
+                    intentId: topMatches[0].intent.id,
+                    severity: topMatches[0].severity,
+                    isConversational: false
+                };
             }
 
-            return { ...fallbackResponse, intentId: 'fallback', severity: 'none' };
+            return { ...fallbackResponse, intentId: 'fallback', severity: 'none', isConversational: false };
         }
 
         /*******************************************************
