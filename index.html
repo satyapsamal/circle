@@ -8451,9 +8451,10 @@ Thank you for learning and growing with The Circle.` ,
 
         /*******************************************************
          * NATURAL CONVERSATION LAYER
-         * Kept separate from academic intent matching. This layer
-         * handles short social turns and remembers the last useful
-         * answer so acknowledgements and repeat requests feel natural.
+         * A lightweight, context-aware conversational router.
+         * It recognises informal English and Hinglish, handles
+         * short follow-ups, and leaves substantive questions to
+         * the academic intent engine.
          *******************************************************/
         let naturalConversationContext = createNaturalConversationContext();
 
@@ -8461,7 +8462,10 @@ Thank you for learning and growing with The Circle.` ,
             return {
                 lastUserMessage: '',
                 lastIntentId: null,
+                lastConversationType: null,
                 lastAssistantAskedQuestion: false,
+                lastAssistantQuestionText: '',
+                lastAssistantQuestionKind: 'none',
                 lastSubstantiveUserMessage: '',
                 lastSubstantiveMarkdown: '',
                 lastSubstantiveSources: [],
@@ -8476,15 +8480,89 @@ Thank you for learning and growing with The Circle.` ,
         }
 
         function normalizeNaturalConversationText(query) {
-            return String(query || '')
+            let text = String(query || '')
                 .normalize('NFKC')
                 .toLowerCase()
                 .replace(/[’‘`]/g, "'")
                 .replace(/([a-z])\1{2,}/g, '$1')
+                .replace(/\bok+ay+\b|\bok+ey+\b/g, 'okay')
                 .replace(/[^\p{L}\p{N}\s']/gu, ' ')
                 .replace(/'/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
+
+            // Common chat abbreviations and speech-like spellings.
+            text = text
+                .replace(/\bhw\s+r\s+u\b/g, 'how are you')
+                .replace(/\bhow\s+ar\s+u\b/g, 'how are you')
+                .replace(/\bhow\s+are\s+yu\b/g, 'how are you')
+                .replace(/\bhow\s+r\s+ya\b/g, 'how are you')
+                .replace(/\bhow\s+ya\s+doin\b/g, 'how are you doing')
+                .replace(/\bhow\s+r\s+u\s+doin\b/g, 'how are you doing')
+                .replace(/\bhow\s+are\s+u\s+doin\b/g, 'how are you doing')
+                .replace(/\bhow\s+r\s+u\b/g, 'how are you')
+                .replace(/\bhow\s+are\s+u\b/g, 'how are you')
+                .replace(/\bhow\s+u\s+doing\b/g, 'how are you doing')
+                .replace(/\bhow\s+you\s+doing\b/g, 'how are you doing')
+                .replace(/\bhow\s+ya\s+doing\b/g, 'how are you doing')
+                .replace(/\bhow\s+are\s+ya\b/g, 'how are you')
+                .replace(/\bhowre\s+you\b/g, 'how are you')
+                .replace(/\bc\s+u(?:\s+later)?\b/g, 'see you later')
+                .replace(/\btc\b/g, 'take care')
+                .replace(/\bttyl\b/g, 'talk later')
+                .replace(/\bgtg\b/g, 'gotta go')
+                .replace(/\bhru\b/g, 'how are you')
+                .replace(/\bwhatsup\b|\bwassup\b|\bwatsup\b|\bsup\b/g, 'what is up')
+                .replace(/\bthnx\b/g, 'thanks')
+                .replace(/\bwhats\s+up\b/g, 'what is up')
+                .replace(/\bhows\s+it\s+going\b/g, 'how is it going')
+                .replace(/\bhows\s+life\b/g, 'how is life')
+                .replace(/\bhows\s+everything\b/g, 'how is everything')
+                .replace(/\bhows\s+your\s+day\b/g, 'how is your day')
+                .replace(/\bhows\s+it\s+hanging\b/g, 'how is it hanging')
+                .replace(/\bwhats\s+good\b/g, 'what is good')
+                .replace(/\bwhat\s+are\s+you\s+upto\b/g, 'what are you up to')
+                .replace(/\bwhat\s+you\s+doing\b/g, 'what are you doing')
+                .replace(/\bwhat\s+you\s+up\s+to\b/g, 'what are you up to')
+                .replace(/\bhbu\b/g, 'how about you')
+                .replace(/\bhow\s+bout\s+you\b/g, 'how about you')
+                .replace(/\bwbu\b/g, 'what about you')
+                .replace(/\bwyd\b/g, 'what are you doing')
+                .replace(/\bim\b/g, 'i am')
+                .replace(/\bive\b/g, 'i have')
+                .replace(/\bur\b/g, 'you are')
+                .replace(/\bu\b/g, 'you')
+                .replace(/\br\b/g, 'are')
+                .replace(/\bpls\b|\bplz\b/g, 'please')
+                .replace(/\bidk\b/g, 'i do not know')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            return text;
+        }
+
+        function stripNaturalConversationWrappers(text) {
+            let core = String(text || '').trim();
+            if (/^(?:hi|hey|hello|hiya|yo)\s+(?:there|everyone|guys|team|folks|all)$/.test(core)) return core;
+            core = core.replace(/^(?:hi|hey|hello|hiya|yo)\s+there\s+/, '');
+            core = core.replace(/^(?:(?:oh+|ah+|hmm+|well|so)\s+)+/, '');
+            const wrappers = '(?:hey|hi|hello|hiya|yo|bro|brother|dude|buddy|mate|man|my friend|friend|bestie|fam|dear|boss|madam|yaar|bhai|bhaiya|sir|maam|mam|ji|please|everyone|guys|team|folks)';
+            const insertedVocatives = '(?:bro|brother|dude|buddy|mate|man|yaar|bhai|bhaiya|sir|maam|mam|madam|boss|ji|bestie|fam)';
+
+            // Strip polite openers and casual vocatives at the edges. Remove only
+            // obvious vocatives from the middle, never content words such as "friend"
+            // or "everyone" that may be part of a genuine question.
+            for (let i = 0; i < 3; i++) {
+                const before = core;
+                core = core.replace(new RegExp('^(?:' + wrappers + ')\\s+', 'i'), '');
+                core = core.replace(new RegExp('\\s+(?:' + wrappers + ')$', 'i'), '');
+                core = core.replace(new RegExp('\\s+(?:' + insertedVocatives + ')\\s+', 'gi'), ' ');
+                if (core === before) break;
+            }
+
+            // Remove a time-of-day salutation only when another conversational question follows.
+            core = core.replace(/^(?:good morning|morning|good afternoon|afternoon|good evening|evening)\s+(?:(?:everyone|guys|team|folks|all)\s+)?(?=(?:how|what|are you|you good|kya|kaise)\b)/, '');
+            return core.replace(/\s+/g, ' ').trim();
         }
 
         function chooseNaturalConversationReply(type, replies) {
@@ -8496,137 +8574,41 @@ Thank you for learning and growing with The Circle.` ,
             return selected;
         }
 
-        function getNaturalConversationResponse(query) {
-            const rawText = String(query || '').trim();
-            const text = normalizeNaturalConversationText(rawText);
-            const punctuationOnlyQuestion = !text && /[?¿]/.test(rawText);
-            const emojiOnlyLaughter = /^(?:😂|🤣|😄|😆|😁|😅)+$/u.test(rawText);
-            let type = null;
-            let markdown = '';
-            let sources = [];
+        function isStandaloneNaturalSmallTalkMessage(text) {
+            // Detect the social phrase itself, then allow only conversational
+            // modifiers around it. Any remaining content (for example, an exam
+            // question or a request for notes) is passed to academic matching.
+            const phrasePatterns = [
+                /\bhow are you(?: doing| feeling)?\b/g,
+                /\bhow have you been(?: doing)?\b/g,
+                /\bhow is (?:it going|everything(?: going)?|your day(?: going)?|life)\b/g,
+                /\bhow are things(?: going)?\b/g,
+                /\bhow was (?:your day|everything)\b/g,
+                /\bwhat is (?:up(?: with you)?|new|happening|going on|good)\b/g,
+                /\bwhat is up(?: with you)?\b/g,
+                /\bwhat are you (?:up to|doing)\b/g,
+                /\bhow goes it\b/g,
+                /\b(?:are you|you) (?:good|okay|alright)\b/g,
+                /\bhope you are (?:well|doing well|doing good|fine)\b/g
+            ];
 
-            // More specific conversational expressions are checked before single-word replies.
-            if (/^(?:(?:hi|hey|hello)(?:\s+(?:circle|ai|there|satya))?\s+)?(?:how are you(?: doing)?|how are u|hows it going|how have you been|whats up(?: with you)?|wassup|what is up|what are you up to|what is going on|whats going on|you good|hows life|how is life)(?:\s+(?:circle|ai|satya))?$/.test(text)) {
-                type = 'smalltalk';
-                markdown = chooseNaturalConversationReply(type, [
-                    "I'm doing well and ready to help. How are things going with your studies?",
-                    "All good here. What's on your mind today?",
-                    "Doing well. What would you like to discuss?"
-                ]);
-            } else if (/^(?:im good|im fine|doing good|doing fine|all good|im doing well|i am doing well|im doing okay|im okay|i am okay|fine thanks|good thanks)$/.test(text)) {
-                type = 'status_update';
-                markdown = chooseNaturalConversationReply(type, [
-                    "Good to hear. What would you like to work on today?",
-                    "Glad to hear that. What's on your mind?"
-                ]);
-            } else if (/^(?:are you there|you there|anyone there|circle are you there|are you active|are you listening)$/.test(text)) {
-                type = 'attention';
-                markdown = chooseNaturalConversationReply(type, [
-                    "I'm here. What do you need help with?",
-                    "Yes, I'm here. What would you like to ask?"
-                ]);
-            } else if (/^(?:(?:ok|okay|alright|cool)\s+)?(?:bye+|bye bye|goodbye|good bye|see you|see ya|see you later|see you soon|cya|take care|good night|goodnight|night|gn|sleep well|have a good day|have a nice day|talk later|catch you later|until next time|milte hain|milte hai|chalta hu|chalta hoon|chalti hu|i have to go|gotta go|i am leaving)(?:\s+(?:circle|everyone|all))?$/.test(text)) {
-                type = 'farewell';
-                markdown = chooseNaturalConversationReply(type, [
-                    "See you. Good luck with your studies.",
-                    "Take care. Come back whenever you need help with your BBA work.",
-                    "Goodbye. Hope the rest of your day goes well."
-                ]);
-            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:thank you|thanks?|thank u|thx|ty|tysm|many thanks|much appreciated|appreciate it)(?:\s+(?:a lot|so much|again|for that|for this|for your help|for helping|for explaining|for the notes|for the explanation))?$/.test(text)) {
-                type = 'gratitude';
-                markdown = chooseNaturalConversationReply(type, [
-                    "You're welcome. Let me know when you need help with another BBA-related query.",
-                    "You're welcome. That's what I'm here for.",
-                    "No problem. We can continue whenever you need help."
-                ]);
-            } else if (/^(?:you are|youre|ur)\s+(?:great|awesome|amazing|helpful|the best|smart|brilliant)(?:\s+(?:circle|ai))?$/.test(text) || /^(?:great job|well done|nice work|brilliant|awesome|amazing|good job|that was helpful|perfect answer|you nailed it)$/.test(text)) {
-                type = 'compliment';
-                markdown = chooseNaturalConversationReply(type, [
-                    "Thank you. Let's keep the focus on what you need to get done.",
-                    "Thanks. What should we work on next?"
-                ]);
-            } else if (/^(?:sorry|sry|my bad|my apologies|i apologise|i apologize|apologies|sorry about that|oops|pardon me)$/.test(text)) {
-                type = 'apology';
-                markdown = chooseNaturalConversationReply(type, [
-                    "No need to apologise. What would you like to work through?",
-                    "That's alright. We can continue from here."
-                ]);
-            } else if (/^(?:repeat|repeat that|say that again|can you repeat|could you repeat|can you explain again|explain again|repeat please|once again|one more time|again please|i missed that|what did you say|come again|please repeat)$/.test(text)) {
-                type = 'repeat';
-                if (naturalConversationContext.lastSubstantiveMarkdown) {
-                    markdown = "Certainly. Here's the previous answer again:\n\n" + naturalConversationContext.lastSubstantiveMarkdown;
-                    sources = naturalConversationContext.lastSubstantiveSources.slice();
-                } else {
-                    markdown = "There isn't an earlier answer in this chat to repeat. Send the question again, and I'll take it from there.";
-                }
-            } else if (/^(?:simplify|make it simple|make it simpler|explain simply|explain in simple words|in simple words|easy language|explain in easy words|break it down|can you break it down|samjhao|samjha do|simple mein samjhao|easy mein samjhao)$/.test(text)) {
-                type = 'simplify';
-                markdown = "Certainly. Which part should I explain in simpler words? You can mention the heading, step, or sentence.";
-            } else if (/^(?:i dont understand|i dont get it|dont understand|dont get it|not clear|im confused|confused|i dont know|idk|not sure|what do you mean|huh|what|samajh nahi aya|samajh nahi aaya|samajh nahi aayi|samajh nahi raha|samajh nahi rahi|clear nahi hua|clear nahi hai)$/.test(text) || punctuationOnlyQuestion) {
-                type = 'confusion';
-                markdown = naturalConversationContext.lastSubstantiveMarkdown
-                    ? "That's alright. Tell me which part was unclear, and I'll help you work through it step by step."
-                    : "That's alright. Tell me what you're trying to understand, and I'll help you work through it.";
-            } else if (/^(?:wait|brb|one sec|one second|hold on|just a minute|give me a moment|ek minute|ruko|ruk jao)$/.test(text)) {
-                type = 'wait';
-                markdown = chooseNaturalConversationReply(type, [
-                    "Sure. Take your time.",
-                    "No problem. I'll be here when you're ready."
-                ]);
-            } else if (/^(?:(?:ha){2,}|(?:he){2,}|(?:lol|lo){2,}|lmao|rofl)$/.test(text) || emojiOnlyLaughter) {
-                type = 'laughter';
-                markdown = chooseNaturalConversationReply(type, [
-                    "What did I miss?",
-                    "Glad that made you laugh. What's next?"
-                ]);
-            } else if (/^(?:help|help me|i need help|can you help|can you help me|please help|need help|help needed)$/.test(text)) {
-                type = 'help_request';
-                markdown = "Sure. Tell me what you're trying to do. I can help with BBA programme information, examinations, study resources, and Circle AI features.";
-            } else if (/^(?:continue|go on|tell me more|more details|elaborate|what else|and then|next|carry on|aage batao|aur batao)$/.test(text)) {
-                type = 'followup';
-                markdown = naturalConversationContext.lastSubstantiveMarkdown
-                    ? "Sure. Which part of the previous answer would you like me to expand on?"
-                    : "What would you like me to continue with? Send the topic or question, and I'll take it from there.";
-            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:yes|yeah|yep|yup|sure|absolutely|definitely|correct|of course|haan|han|haan ji|han ji|ha|haa|bilkul|ji|yes please|yeah please)$/.test(text)) {
-                type = 'agreement';
-                markdown = naturalConversationContext.lastAssistantAskedQuestion
-                    ? "Great. Let's go ahead. What detail should we start with?"
-                    : chooseNaturalConversationReply(type, [
-                        "Great. Let's keep going.",
-                        "Alright. What would you like to work on next?"
-                    ]);
-            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:no|nope|nah|not really|not now|no thanks|nahi|nahi yaar|na|bilkul nahi)$/.test(text)) {
-                type = 'disagreement';
-                markdown = naturalConversationContext.lastAssistantAskedQuestion
-                    ? "No problem. We can take a different approach. What would work better for you?"
-                    : "Understood. What would you prefer instead?";
-            } else if (/^(?:(?:ok|okay|alright)\s+)?(?:ok|okay|okey|k|kk|alright|all right|got it|gotcha|understood|i see|makes sense|noted|cool|fine|fair enough|right|great|perfect|nice|sounds good|no problem|no worries|youre welcome|thik hai|theek hai|accha|acha|achha|samajh gaya|samajh gayi|samajh gya|samajh gyi|theek|thik|hmm|hmmm|hm|sure thing)$/.test(text)) {
-                type = 'acknowledgement';
-                markdown = naturalConversationContext.lastAssistantAskedQuestion
-                    ? "Alright. Take your time. You can share the details whenever you're ready."
-                    : chooseNaturalConversationReply(type, [
-                        "Got it. Let me know what you'd like to look at next.",
-                        "Alright. We can move to the next point whenever you're ready.",
-                        "Understood. What's next?"
-                    ]);
-            } else if (/^(?:im back|i am back|back again)$/.test(text)) {
-                type = 'welcome_back';
-                markdown = chooseNaturalConversationReply(type, [
-                    "Welcome back, {{Name}}. What would you like to work on?",
-                    "Good to have you back. What can I help you with?"
-                ]);
-            } else if (/^(?:hi+|hello+|hey+|yo|hiya|hola|namaste|namaskar|sup|gm|good morning|morning|good afternoon|afternoon|good evening|evening|good day)(?:\s+(?:circle|ai|there|satya|team|everyone|sir|maam))?$/.test(text)) {
-                type = 'greeting';
-                markdown = chooseNaturalConversationReply(type, [
-                    "Hi {{Name}}. What would you like to work on today?",
-                    "Hey {{Name}}. What can I help you find?",
-                    "Hello {{Name}}. What are we figuring out today?",
-                    "Hi. Ask me about your BBA programme, examinations, or study resources."
-                ]);
-            } else {
-                return null;
-            }
+            let remaining = String(text || '');
+            let matchedPhrase = false;
+            phrasePatterns.forEach(pattern => {
+                if (pattern.test(remaining)) matchedPhrase = true;
+                remaining = remaining.replace(pattern, ' ');
+                pattern.lastIndex = 0;
+            });
 
+            if (!matchedPhrase) return false;
+            remaining = remaining
+                .replace(/\b(?:and|also|so|well|today|now|right now|these days|lately|at the moment|doing|feeling|going|good|fine|all|okay|ok|alright|bro|brother|dude|buddy|mate|man|my friend|friend|bestie|fam|dear|yaar|bhai|bhaiya|sir|maam|mam|madam|boss|ji|please|thanks|thank you|with|you|are|how|is|everything|things|day|life|up|to)\b/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return remaining.length === 0;
+        }
+
+        function buildNaturalConversationResponse(type, markdown, sources = []) {
             return {
                 markdown: markdown,
                 sources: sources,
@@ -8637,12 +8619,306 @@ Thank you for learning and growing with The Circle.` ,
             };
         }
 
+        function getNaturalConversationResponse(query) {
+            const rawText = String(query || '').trim();
+            const normalized = normalizeNaturalConversationText(rawText);
+            const text = stripNaturalConversationWrappers(normalized);
+            const emojiOnlyLaughter = /^(?:😂|🤣|😄|😆|😁|😅|😹)+$/u.test(rawText.replace(/\s/g, ''));
+            const emojiOnlyPositive = /^(?:👍|👌|🙏|❤️|❤|💯|🙌|👏|✅|🤝)+$/u.test(rawText.replace(/\s/g, ''));
+            const punctuationOnlyQuestion = !normalized && /[?¿]/.test(rawText);
+            const hasPreviousAnswer = Boolean(naturalConversationContext.lastSubstantiveMarkdown);
+            let markdown = '';
+            let type = '';
+            let sources = [];
+
+            if (!text && !emojiOnlyLaughter && !emojiOnlyPositive && !punctuationOnlyQuestion) return null;
+
+            // 1. Small talk. The expression may contain informal wording, a greeting,
+            //    a time reference, or a casual suffix such as "bro" or "yaar".
+            if (/^(?:all good|everything good|everything okay|everything alright)$/.test(text) && /\?\s*$/.test(rawText)) {
+                type = 'smalltalk';
+                markdown = chooseNaturalConversationReply(type, [
+                    "All good here. What's on your mind?",
+                    "Doing well, thanks for checking. What would you like to discuss?"
+                ]);
+            } else if (isStandaloneNaturalSmallTalkMessage(text) || /^(?:(?:so|well|and)\s+)?(?:how are you(?: doing)?|how have you been|how have you been doing|how was your day|how was everything|how is it going|how are things(?: going)?|how is everything(?: going)?|how is your day(?: going)?|how is life|how is your day been|hope you are well|hope you are doing well|hope all is well|hope all is good|are you okay|you okay|are you alright|you alright|everything good|everything okay|everything alright|all good|how is it hanging|how do you do|what is good|what is up(?: with you)?|what are you up to|what are you doing|what is going on|what is happening|what is new|anything new|how have things been|you good|how goes it|kya haal hai|kya haal chaal hai|kaise ho|kaise hain|kaisa hai|kaisi ho|sab kaise ho|sab theek hai|sab badhiya|sab badiya|aur bata|aur batao|kya chal raha hai|kya scene hai|kya scene|sab theek|sab badhiya hai|sab badiya hai)(?:\s+(?:today|these days|lately|going|with you))?$/.test(text)) {
+                type = 'smalltalk';
+                markdown = chooseNaturalConversationReply(type, [
+                    "I'm doing well and ready to help. How are things going with you?",
+                    "All good here. What's on your mind today?",
+                    "Doing well, thanks for asking. What would you like to discuss?",
+                    "I'm here and ready to help. How's your day going?"
+                ]);
+            }
+            // 2. A reciprocal question, usually after Circle AI has asked how the user is.
+            else if (/^(?:what about you|and you|how about you|wbu)$/.test(text)) {
+                type = 'reciprocal';
+                markdown = chooseNaturalConversationReply(type, [
+                    "I'm doing well, thanks for asking. What would you like to talk about?",
+                    "All good here. I'm ready whenever you need a hand.",
+                    "Doing well. What's on your mind?"
+                ]);
+            }
+            // 3. User gives a status update, optionally returning the question.
+            else if (/^(?:(?:(?:i am)\s+)?(?:good|fine|great|doing good|doing well|doing fine|doing okay|doing great|feeling good|feeling fine|not bad|not too bad|pretty good|pretty well|all good|alright|well)|i am (?:okay|ok|alright))(?:\s+(?:thanks|thank you))?(?:\s+(?:and you|what about you|how about you|how are you))?$/.test(text)) {
+                type = 'status_update';
+                if (/(?:and you|what about you|how about you|how are you)$/.test(text)) {
+                    markdown = chooseNaturalConversationReply(type + '_reciprocal', [
+                        "Glad to hear that. I'm doing well too, and I'm ready to help.",
+                        "Good to hear. All good here as well. What's on your mind?"
+                    ]);
+                } else {
+                    markdown = chooseNaturalConversationReply(type, [
+                    "Good to hear. What would you like to work on today?",
+                    "Glad to hear that. What's on your mind?",
+                    "Nice. What can I help you with?"
+                    ]);
+                }
+            }
+            // 4. Low-detail social updates after a greeting or small-talk question.
+            else if (/^(?:nothing much|not much|same old|same as usual|just chilling|just relaxing|nothing really|same old same old)$/.test(text)) {
+                type = 'casual_update';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Fair enough. Anything you'd like to work on, or are you just having a look around?",
+                    "Sounds relaxed. We can pick a topic whenever you're ready.",
+                    "No problem. Is there anything you'd like help finding today?"
+                ]);
+            } else if (/^(?:i am bored|im bored|bored|feeling bored|got nothing to do)$/.test(text)) {
+                type = 'boredom';
+                markdown = "We could make the time useful. Want to explore a BBA topic, find a learning resource, or work through a quick question?";
+            }
+            // 5. Availability and attention checks.
+            else if (/^(?:are you there|you there|anyone there|is anyone there|are you active|are you listening|can you hear me|hello are you there|still there)$/.test(text)) {
+                type = 'attention';
+                markdown = chooseNaturalConversationReply(type, [
+                    "I'm here. What do you need help with?",
+                    "Yes, I'm here. What would you like to ask?",
+                    "Still here. Send me what you're working on."
+                ]);
+            }
+            // 6. A user may reply "you're welcome" after Circle AI thanks them.
+            else if (/^(?:you are welcome|youre welcome|no need to thank me|dont mention it|my pleasure)$/.test(text)) {
+                type = 'courtesy';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Thanks. I appreciate it. What can I help you with next?",
+                    "Appreciate that. What's next?"
+                ]);
+            }
+            // 7. Farewells. Handle combinations such as "okay bye bro" and "gn yaar".
+            else if (/^(?:(?:ok|okay|alright|cool)(?:\s+(?:then|so))?\s+)?(?:bye+|bye bye|goodbye|good bye|see you|see ya|see you later|see ya later|see you soon|cya|take care|good night and take care|good night take care|good night|goodnight|night|gn|sleep well|have a good day|have a nice day|talk later|ttyl|talk soon|catch you later|until next time|alvida|phir milenge|fir milenge|kal milte hain|milte hain|milte hai|chalta hu|chalta hoon|chalti hu|i have to go|gotta go|i am leaving|i should go|signing off)$/.test(text)) {
+                type = 'farewell';
+                markdown = chooseNaturalConversationReply(type, [
+                    "See you. Good luck with your studies.",
+                    "Take care. Come back whenever you need help with your BBA work.",
+                    "Goodbye. Hope the rest of your day goes well.",
+                    "See you later. We'll pick it up whenever you're back."
+                ]);
+            }
+            // 8. Gratitude, including short forms and informal suffixes.
+            else if (/^(?:(?:ok|okay|alright|cool)(?:\s+(?:then|so))?\s+)?(?:thank you|thanks?|thank u|thx|thnx|ty|tysm|shukriya|sukriya|dhanyavaad|dhanyawad|many thanks|much appreciated|appreciate it|i appreciate it)(?:\s+(?:a lot|so much|again|for that|for this|for your help|for helping|for explaining|for the notes|for the explanation))?$/.test(text)) {
+                type = 'gratitude';
+                markdown = chooseNaturalConversationReply(type, [
+                    "You're welcome. Let me know when you need help with another BBA-related query.",
+                    "You're welcome. That's what I'm here for.",
+                    "No problem. We can continue whenever you need help.",
+                    "Happy to help. What's next?"
+                ]);
+            }
+            // 9. Compliments and positive feedback.
+            else if (/^(?:(?:you are|youre|ur)\s+)?(?:great|awesome|amazing|helpful|the best|smart|brilliant|fantastic|excellent)(?:\s+(?:circle|ai|bro))?$/.test(text) || /^(?:great job|well done|nice work|brilliant|awesome|amazing|good job|that was helpful|that helped|perfect answer|you nailed it|love this|lovely|nice one)$/.test(text)) {
+                type = 'compliment';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Thank you. Let's keep the focus on what you need to get done.",
+                    "Thanks. What should we work on next?",
+                    "Appreciate that. What would you like to tackle next?"
+                ]);
+            }
+            // 10. Apologies.
+            else if (/^(?:sorry|sry|my bad|my apologies|i apologise|i apologize|apologies|sorry about that|oops|pardon me|forgive me|maaf karna|maaf kardo|maafi chahta hu|maafi chahti hu)$/.test(text)) {
+                type = 'apology';
+                markdown = chooseNaturalConversationReply(type, [
+                    "No need to apologise. What would you like to work through?",
+                    "That's alright. We can continue from here.",
+                    "No worries. What would you like to do next?"
+                ]);
+            }
+            // 11. Reciprocal courtesy such as "you too" or "same to you".
+            else if (/^(?:you too|same to you|same here|me too|likewise|you as well)$/.test(text)) {
+                type = 'reciprocal_courtesy';
+                markdown = naturalConversationContext.lastConversationType === 'farewell'
+                    ? "Thanks. You take care too."
+                    : chooseNaturalConversationReply(type, [
+                        "Thanks. What would you like to look at next?",
+                        "Likewise. What's on your mind?"
+                    ]);
+            }
+            // 12. Repeat the last substantive answer, keeping its source links.
+            else if (/^(?:repeat|repeat that|say that again|can you repeat|could you repeat|can you explain again|explain again|repeat please|once again|one more time|again please|i missed that|what did you say|come again|please repeat|send that again)$/.test(text)) {
+                type = 'repeat';
+                if (hasPreviousAnswer) {
+                    markdown = "Certainly. Here's the previous answer again:\n\n" + naturalConversationContext.lastSubstantiveMarkdown;
+                    sources = naturalConversationContext.lastSubstantiveSources.slice();
+                } else {
+                    markdown = "There isn't an earlier answer in this chat to repeat. Send the question again, and I'll take it from there.";
+                }
+            }
+            // 13. Requests to simplify or change the explanation style.
+            else if (/^(?:simplify|make it simple|make it simpler|explain simply|explain in simple words|in simple words|easy language|explain in easy words|break it down|can you break it down|samjhao|samjha do|simple mein samjhao|easy mein samjhao|hindi mein samjhao|hinglish mein samjhao|explain in hindi|explain in hinglish|in short|make it shorter|summarise that|summarize that)$/.test(text)) {
+                type = 'simplify';
+                markdown = hasPreviousAnswer
+                    ? "Sure. Which part of my previous answer should I simplify? You can mention the heading, step, or sentence."
+                    : "Sure. Send me the topic or passage, and tell me whether you prefer simple English, Hindi, or Hinglish.";
+            }
+            // 14. Confusion and clarification signals.
+            else if (/^(?:i do not understand|i dont understand|i dont get it|dont understand|dont get it|not clear|im confused|i am confused|confused|i do not know|not sure|what do you mean|huh|samajh nahi aya|samajh nahi aaya|samajh nahi aayi|samajh nahi raha|samajh nahi rahi|clear nahi hua|clear nahi hai|matlab)$/.test(text) || punctuationOnlyQuestion) {
+                type = 'confusion';
+                markdown = hasPreviousAnswer
+                    ? "That's alright. Which part of my previous answer was unclear? Point me to the sentence or idea, and I'll break it down."
+                    : "That's alright. Tell me what you're trying to understand, and I'll help you work through it.";
+            }
+            // 15. Waiting / temporary pause.
+            else if (/^(?:wait|brb|one sec|one second|hold on|just a minute|give me a moment|ek minute|ruko|ruk jao|wait a moment|just a sec)$/.test(text)) {
+                type = 'wait';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Sure. Take your time.",
+                    "No problem. I'll be here when you're ready.",
+                    "Of course. Continue whenever you're ready."
+                ]);
+            }
+            // 16. Laughter and positive emoji reactions.
+            else if (/^(?:(?:ha){2,}|(?:he){2,}|(?:lol|lo){2,}|lmao|rofl|haha|hehe)$/.test(text) || emojiOnlyLaughter) {
+                type = 'laughter';
+                markdown = chooseNaturalConversationReply(type, [
+                    "What did I miss?",
+                    "Glad that made you laugh. What's next?",
+                    "Fair enough. What are we looking at next?"
+                ]);
+            } else if (emojiOnlyPositive) {
+                type = 'positive_reaction';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Got it.",
+                    "Alright. Let me know what you'd like to do next.",
+                    "Understood."
+                ]);
+            }
+            // 17. General help request.
+            else if (/^(?:help|help me|i need help|can you help|can you help me|please help|need help|help needed|i need your help)$/.test(text)) {
+                type = 'help_request';
+                markdown = "Sure. Tell me what you're trying to do. I can help with BBA programme information, examinations, study resources, and Circle AI features.";
+            }
+            // 18. Contextual follow-ups that would otherwise often fall into fallback.
+            //     This is intentionally limited to short references. Detailed questions
+            //     are left for the academic matcher below.
+            else if (/^(?:why|why though|how so|how|what|when|where|which|and|then|so|really|meaning|meaning please|example|examples|give example|give me an example|one example|can you explain this|can you explain that|can you explain it|can you explain the first one|can you explain the second one|explain this|explain that|explain it|can you elaborate|what do you mean by that|why is this|why is that|why so|what is this|what is that|what is it|give examples|another example|one more example|elaborate|elaborate on that|expand on that|what about this|what about that|what about it|what about the first one|what about first one|what about the first|what about first|what about the second one|what about second one|what about the second|what about second|what about the third one|what about third one|what about the third|what about third|what about the last one|what about the other one|what about the other|how about the second|how about the first|which was the second one|what is the second one|explain the first one|explain the second one|explain the third one|the other one|other option|this option|that option|this point|that point|option one|option two|option 1|option 2|point one|point two|point 1|point 2|second one|third one|first one|last one|the first one|the second one|the third one|the last one|that one|this one|that|this|it|and then what|then what|what next|now what|what should i do|what should we do|next step|why is that|how come|is that so|are you sure)$/.test(text)) {
+                type = 'contextual_followup';
+                if (hasPreviousAnswer) {
+                    markdown = chooseNaturalConversationReply(type, [
+                        "I can clarify that. Which specific point in my previous answer are you referring to?",
+                        "Sure. Tell me which sentence, option, or idea you mean, and I'll explain it further.",
+                        "Let's unpack it. Are you asking about the main point or one particular detail from my previous answer?"
+                    ]);
+                } else {
+                    markdown = "Could you add a little more detail or send the topic you're referring to? I'll take it from there.";
+                }
+            }
+            // 19. Continue / expand requests.
+            else if (/^(?:continue|go on|tell me more|more details|elaborate more|what else|and then|next|carry on|aage batao|aur batao|go ahead|keep going)$/.test(text)) {
+                type = 'followup';
+                markdown = hasPreviousAnswer
+                    ? "Sure. Which part of the previous answer would you like me to expand on?"
+                    : "What would you like me to continue with? Send the topic or question, and I'll take it from there.";
+            }
+            // 20. Non-committal responses.
+            else if (/^(?:maybe|maybe later|not sure yet|i will think about it|let me think|i guess|probably|i think so)$/.test(text)) {
+                type = 'uncertain';
+                markdown = chooseNaturalConversationReply(type, [
+                    "That's fine. Take your time and let me know when you're ready.",
+                    "No rush. We can decide whenever you have a clearer idea."
+                ]);
+            }
+            // 21. Agreement.
+            else if (/^(?:(?:ok|okay|alright|cool)\s+)?(?:yes|yeah|yep|yup|sure|absolutely|definitely|correct|of course|haan|han|haan ji|han ji|ha|haa|bilkul|ji|yes please|yeah please|sounds good|works for me|that works|lets do it|let us do it|go for it|please proceed|lets begin|deal|bet|i agree)$/.test(text)) {
+                type = 'agreement';
+                if (naturalConversationContext.lastAssistantAskedQuestion) {
+                    markdown = naturalConversationContext.lastAssistantQuestionKind === 'yes_no'
+                        ? "Great. Let's go ahead with that. Share any details I should take into account."
+                        : "Alright. Please share the detail or option you have in mind, and we'll continue from there.";
+                } else {
+                    markdown = chooseNaturalConversationReply(type, [
+                        "Great. Let's keep going.",
+                        "Alright. What would you like to work on next?",
+                        "Sounds good. What's next?"
+                    ]);
+                }
+            }
+            // 22. Disagreement.
+            else if (/^(?:(?:ok|okay|alright)\s+)?(?:no|nope|nah|not really|not now|no thanks|never mind|nevermind|forget it|leave it|doesnt matter|nahi|nahi yaar|na|bilkul nahi|that does not work|that wont work)$/.test(text)) {
+                type = 'disagreement';
+                markdown = naturalConversationContext.lastAssistantAskedQuestion
+                    ? "No problem. We can take a different approach. What would work better for you?"
+                    : "Understood. What would you prefer instead?";
+            }
+            // 23. Acknowledgements, including casual spellings.
+            else if (/^(?:(?:ok|okay|alright)\s+)?(?:ok|okay|okey|k|kk|alright|all right|got it|gotcha|understood|i see|makes sense|noted|cool|fine|fair enough|right|great|perfect|nice|sounds good|no problem|no worries|you are welcome|youre welcome|thik hai|theek hai|accha|acha|achha|samajh gaya|samajh gayi|samajh gya|samajh gyi|theek|thik|hmm|hmmm|hm|sure thing|okay then|alright then|aha|uh huh|uh-huh|i understand|i got it|done|deal|no worries|dont worry|koi baat nahi|koi na)$/.test(text)) {
+                type = 'acknowledgement';
+                markdown = naturalConversationContext.lastAssistantAskedQuestion
+                    ? "No rush. You can answer the question above whenever you're ready, or send your next question."
+                    : chooseNaturalConversationReply(type, [
+                        "Got it. Let me know what you'd like to look at next.",
+                        "Alright. We can move to the next point whenever you're ready.",
+                        "Understood. What's next?",
+                        "Okay. I'm following."
+                    ]);
+            }
+            // 24. Welcome back.
+            else if (/^(?:im back|i am back|back again|im here again|im back now)$/.test(text)) {
+                type = 'welcome_back';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Welcome back, {{Name}}. What would you like to work on?",
+                    "Good to have you back. What can I help you with?",
+                    "Welcome back. Where should we pick up?"
+                ]);
+            }
+            // 25. Casual greetings, including time-of-day greetings and Hinglish.
+            else if (/^(?:hi+|hello+|hey+|yo|hiya|hola|namaste|namaskar|pranam|sup|gm|good morning|morning|good afternoon|afternoon|good evening|evening|good day|howdy|nice to meet you|pleased to meet you|long time no see|good to see you|just saying hi|kya haal|kaise chal raha hai|kaisa chal raha hai)(?:\s+(?:there|everyone|guys|team|folks|all))?$/.test(text)) {
+                type = 'greeting';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Hi {{Name}}. What would you like to work on today?",
+                    "Hey {{Name}}. What can I help you find?",
+                    "Hello {{Name}}. What are we figuring out today?",
+                    "Hi. Ask me about your BBA programme, examinations, or study resources.",
+                    "Hey. What are you working on today?"
+                ]);
+            }
+            // 26. Low-risk conversational identity questions.
+            else if (/^(?:are you human|are you a human|are you real|are you a bot|are you ai|are you an ai|are you a robot|are you chatgpt|do you use chatgpt|who are you|what are you|what is your name|whats your name|what can you do|what can you help me with|what can i ask you|what do you do)$/.test(text)) {
+                type = 'identity';
+                markdown = "I'm Circle AI, a digital assistant built to help BBA students find programme information, examination updates, syllabus and exam-pattern details, study resources, recorded lectures, and learning materials. I'm not a human. This version of Circle AI uses its website knowledge base and programmed response rules rather than a live ChatGPT conversation model.";
+            }
+            // 27. Conversation invitation.
+            else if (/^(?:can we talk|lets talk|let us talk|just chatting|i want to chat|wanna chat|talk to me|are you free|can i ask you something|can i ask a question|i have a question|i want to ask something|quick question|got a question)$/.test(text)) {
+                type = 'chat_invitation';
+                markdown = chooseNaturalConversationReply(type, [
+                    "Sure. What's on your mind?",
+                    "Of course. What would you like to talk about?",
+                    "We can talk. What's happening?"
+                ]);
+            }
+            else {
+                return null;
+            }
+
+            return buildNaturalConversationResponse(type, markdown, sources);
+        }
+
         function rememberNaturalConversationTurn(query, responseData) {
             naturalConversationContext.lastUserMessage = query;
             naturalConversationContext.lastIntentId = responseData.intentId || null;
+            naturalConversationContext.lastConversationType = responseData.conversationType || null;
             naturalConversationContext.turnCount += 1;
 
-            // Keep the last knowledge-base/fallback answer available for repeat requests.
+            // Preserve the latest non-conversational answer and its sources for
+            // repeat, clarification, and follow-up messages.
             if (!responseData.isConversational) {
                 naturalConversationContext.lastSubstantiveUserMessage = query;
                 naturalConversationContext.lastSubstantiveMarkdown = responseData.markdown || '';
@@ -8652,11 +8928,24 @@ Thank you for learning and growing with The Circle.` ,
                 naturalConversationContext.lastSubstantiveIntentId = responseData.intentId || null;
             }
 
-            const answerLines = String(responseData.markdown || '').trim().split(/\n+/).filter(Boolean);
-            const finalAnswerLine = answerLines.length ? answerLines[answerLines.length - 1].trim() : '';
-            naturalConversationContext.lastAssistantAskedQuestion = /\?\s*(?:\*{1,2}|`{1,3})?\s*$/.test(finalAnswerLine);
-        }
+            // Ignore question marks inside Markdown links, URLs, or embedded HTML.
+            // They are source syntax, not questions asked by Circle AI.
+            const answerText = String(responseData.markdown || '')
+                .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, '$1')
+                .replace(/https?:\/\/\S+/g, '')
+                .replace(/<[^>]*>/g, ' ')
+                .trim();
+            const questionMatches = answerText.match(/[^\n?]*\?/g) || [];
+            naturalConversationContext.lastAssistantQuestionText = questionMatches.length
+                ? questionMatches[questionMatches.length - 1].trim()
+                : '';
+            naturalConversationContext.lastAssistantAskedQuestion = Boolean(naturalConversationContext.lastAssistantQuestionText);
 
+            const questionStart = naturalConversationContext.lastAssistantQuestionText.toLowerCase();
+            naturalConversationContext.lastAssistantQuestionKind = /^(?:would you|do you|did you|can you|could you|should you|is it|are you|have you|will you|shall we|is there|are there)\b/.test(questionStart)
+                ? 'yes_no'
+                : (naturalConversationContext.lastAssistantAskedQuestion ? 'open' : 'none');
+        }
 
         /*******************************************************
          * INFINITE SUGGESTION PILL SYSTEM
