@@ -6701,7 +6701,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
             </div>
             <div class="donation-reminder-copy">
                 <span class="donation-reminder-title">Support Circle AI</span>
-                <span class="donation-reminder-subtitle"><strong class="donation-runway-warning">Circle AI currently has funding for fewer than 30 days of operations.</strong> If it has been useful to you, a voluntary contribution can help extend its runway.</span>
+                <span class="donation-reminder-subtitle">If Circle AI has been useful to you, a voluntary contribution helps support its continued availability.</span>
             </div>
             <button id="donation-reminder-action" class="donation-reminder-action" type="button">Support</button>
             <button id="donation-reminder-close" class="donation-reminder-close" type="button" aria-label="Close donation reminder">×</button>
@@ -6712,7 +6712,7 @@ body.circle-ask-mode #learn-layer .circle-learn-disclaimer {
                 <div class="donation-modal-head">
                     <div>
                         <h2 id="donation-modal-title" class="donation-modal-title">Support Circle AI</h2>
-                        <p class="donation-modal-subtitle">Circle AI is a student-led initiative, and <strong class="donation-runway-warning">current funding covers fewer than 30 days of operations.</strong> If it has been useful to you, a voluntary contribution can help extend its runway.</p>
+                        <p class="donation-modal-subtitle">Circle AI is a student-led initiative. If it has been useful to you, a voluntary contribution helps support its continued availability.</p>
                     </div>
                     <button id="donation-modal-close" class="donation-modal-close" type="button" aria-label="Close donation window">×</button>
                 </div>
@@ -8619,6 +8619,7 @@ Thank you for learning and growing with The Circle.` ,
         }
 
         function createCircleLibraryPromotion() {
+            if (!isCircleOneShotPromoActive()) return null;
             const message = "Hi Satya! I'm interested in The Circle One-Shot Notes Bundle for ₹249. Could you please share the free sample notes and payment details so I can make an informed decision?";
             const card = document.createElement('section');
             card.className = 'circle-library-promo-card';
@@ -8662,8 +8663,9 @@ Thank you for learning and growing with The Circle.` ,
             const list = document.getElementById('circle-library-note-list');
             if (!list) return;
             list.replaceChildren();
-            // This promotional resource is always first and is not stored with user notes.
-            list.appendChild(createCircleLibraryPromotion());
+            // This promotional resource is pinned only until its fixed expiry; it is not stored with user notes.
+            const promotion = createCircleLibraryPromotion();
+            if (promotion) list.appendChild(promotion);
             const entries = getCircleLibraryEntries();
 
             if (!entries.length) {
@@ -9047,6 +9049,7 @@ Thank you for learning and growing with The Circle.` ,
             setupEventListeners();
             setupCircleLibraryUI();
             setupDonationUI();
+            scheduleCircleOneShotPromoExpiry();
             refreshInstallControls();
 
             if (hasCompleteLocalProfile) {
@@ -9481,6 +9484,7 @@ Thank you for learning and growing with The Circle.` ,
             await startMainInterface();
             switchCircleMode('ask');
             startCircleDonationUsageTracker();
+            scheduleDonationNudge();
 
             const installPromptShownKey = 'circle_v2_install_registration_prompt_shown_v1';
             if (!isRunningAsInstalledPWA() && localStorage.getItem(installPromptShownKey) !== 'true') {
@@ -9760,21 +9764,36 @@ Thank you for learning and growing with The Circle.` ,
             return (hash >>> 0).toString(16);
         }
 
+        function getCircleISTDateKey(date = new Date()) {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+            const part = type => parts.find(item => item.type === type)?.value || '';
+            return `${part('year')}-${part('month')}-${part('day')}`;
+        }
+
         function showProfileReminder() {
             if (!circleReturningUser || !profilePhotoDataUrl) return;
 
+            const reminderDateKey = 'circle_v2_profile_reminder_last_shown_ist';
+            const todayIST = getCircleISTDateKey();
             try {
-                /* One display per browser session, but never permanently dismiss.
-                   The reminder remains eligible in every new session until the
-                   profile picture has actually been changed. */
-                if (sessionStorage.getItem('circle_v2_profile_reminder_session') === 'true') return;
-
+                /* Show at most once per IST calendar day until the student changes the photo. */
                 const currentFingerprint = getProfileReminderPhotoFingerprint(profilePhotoDataUrl);
                 const acknowledgedFingerprint = localStorage.getItem('circle_v2_profile_reminder_photo');
                 if (acknowledgedFingerprint && acknowledgedFingerprint === currentFingerprint) return;
-
-                sessionStorage.setItem('circle_v2_profile_reminder_session', 'true');
-            } catch (_) {}
+                if (localStorage.getItem(reminderDateKey) === todayIST) return;
+                localStorage.setItem(reminderDateKey, todayIST);
+            } catch (_) {
+                // Storage fallback can limit repeats within this tab if persistent storage is unavailable.
+                try {
+                    if (sessionStorage.getItem(reminderDateKey) === todayIST) return;
+                    sessionStorage.setItem(reminderDateKey, todayIST);
+                } catch (_) {}
+            }
 
             const reminder = document.getElementById('profile-reminder');
             if (!reminder) return;
@@ -10826,36 +10845,101 @@ settingsBtn.addEventListener('click', toggleSettings);
         /*******************************************************
          * 9. CHAT INTERACTION LOGIC
          *******************************************************/
+        // One-Shot Notes promotions expire permanently at 11:59 PM IST on 15 November 2026.
+        const CIRCLE_ONE_SHOT_PROMO_EXPIRY_MS = Date.parse('2026-11-15T23:59:00+05:30');
         const CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY = 'circle_bundle_nudge_prompt_count_session_v1';
         const CIRCLE_BUNDLE_NUDGE_PENDING_KEY = 'circle_bundle_nudge_pending_session_v1';
         const CIRCLE_BUNDLE_NUDGE_SHOWN_KEY = 'circle_bundle_nudge_shown_session_v1';
+        const CIRCLE_DONATION_ACTION_SESSION_KEY = 'circle_donation_popup_action_session_v1';
         let circleBundleNudgePromptCountFallback = 0;
         let circleBundleNudgePendingFallback = false;
         let circleBundleNudgeShownFallback = false;
+        let circleDonationActionFallback = false;
+        let circleOneShotPromoExpiryTimer = null;
+
+        function removeExpiredCircleOneShotPromotions() {
+            const banner = document.getElementById('circle-bundle-nudge');
+            if (banner) banner.remove();
+            document.querySelectorAll('.circle-library-promo-card').forEach(card => card.remove());
+            try {
+                sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
+                sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY, 'true');
+            } catch (_) {
+                circleBundleNudgePendingFallback = false;
+                circleBundleNudgeShownFallback = true;
+            }
+        }
+
+        function isCircleOneShotPromoActive() {
+            if (Date.now() < CIRCLE_ONE_SHOT_PROMO_EXPIRY_MS) return true;
+            removeExpiredCircleOneShotPromotions();
+            return false;
+        }
+
+        function scheduleCircleOneShotPromoExpiry() {
+            const enforceExpiry = () => {
+                if (!isCircleOneShotPromoActive()) {
+                    if (circleOneShotPromoExpiryTimer) {
+                        clearTimeout(circleOneShotPromoExpiryTimer);
+                        circleOneShotPromoExpiryTimer = null;
+                    }
+                    return;
+                }
+                const remaining = CIRCLE_ONE_SHOT_PROMO_EXPIRY_MS - Date.now();
+                if (circleOneShotPromoExpiryTimer) clearTimeout(circleOneShotPromoExpiryTimer);
+                circleOneShotPromoExpiryTimer = setTimeout(enforceExpiry, Math.max(25, remaining + 25));
+            };
+
+            enforceExpiry();
+            // Re-check immediately when a backgrounded tab or PWA becomes active again.
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') enforceExpiry();
+            });
+            window.addEventListener('focus', enforceExpiry);
+        }
 
         function registerCircleBundlePrompt() {
-            /* Every submitted Ask prompt earns one notes-nudge display after its response. */
+            if (!isCircleOneShotPromoActive()) return;
+            /* Only the first Ask prompt in a tab session can queue the notes reminder. */
             try {
                 const previous = Number(sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY) || '0');
                 const nextCount = (Number.isFinite(previous) && previous > 0 ? previous : 0) + 1;
                 sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PROMPT_COUNT_KEY, String(nextCount));
-                sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY, 'true');
+
+                const alreadyShown = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) === 'true';
+                const alreadyPending = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true';
+                if (nextCount === 1 && !alreadyShown) {
+                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY, 'true');
+                } else if (nextCount > 1 && !alreadyShown && !alreadyPending) {
+                    // A page updated mid-session should not show a second notes promotion
+                    // when the user has already submitted a prompt in this same session.
+                    sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY, 'true');
+                }
             } catch (_) {
                 circleBundleNudgePromptCountFallback += 1;
-                circleBundleNudgePendingFallback = true;
+                if (circleBundleNudgePromptCountFallback === 1 && !circleBundleNudgeShownFallback) {
+                    circleBundleNudgePendingFallback = true;
+                } else if (!circleBundleNudgePendingFallback) {
+                    circleBundleNudgeShownFallback = true;
+                }
             }
         }
 
         function showCircleBundleNudgeIfPending() {
+            if (!isCircleOneShotPromoActive()) return;
             let shouldShow = false;
             try {
-                shouldShow = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true';
-                if (shouldShow) sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
+                shouldShow = sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY) === 'true' &&
+                    sessionStorage.getItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY) !== 'true' &&
+                    sessionStorage.getItem(CIRCLE_DONATION_ACTION_SESSION_KEY) === 'true';
             } catch (_) {
-                shouldShow = circleBundleNudgePendingFallback;
-                if (shouldShow) circleBundleNudgePendingFallback = false;
+                shouldShow = circleBundleNudgePendingFallback &&
+                    !circleBundleNudgeShownFallback && circleDonationActionFallback;
             }
-            if (!shouldShow) return;
+
+            // Never place the notes banner over the donation modal itself.
+            const donationModal = document.getElementById('donation-modal');
+            if (!shouldShow || (donationModal && donationModal.classList.contains('show'))) return;
 
             let nudge = document.getElementById('circle-bundle-nudge');
             const isAlreadyVisible = Boolean(nudge && nudge.classList.contains('show') &&
@@ -10900,14 +10984,19 @@ settingsBtn.addEventListener('click', toggleSettings);
                 close.addEventListener('click', () => {
                     nudge.classList.remove('show');
                     nudge.setAttribute('aria-hidden', 'true');
-                    /* Give the Support Circle AI reminder its own turn after this banner closes. */
-                    if (typeof resumeDonationNudgeAfterBundleDismissal === 'function') {
-                        resumeDonationNudgeAfterBundleDismissal();
-                    }
                 });
 
                 nudge.append(icon, copy, action, close);
                 document.body.appendChild(nudge);
+            }
+
+            /* Consume the queued first-prompt reminder exactly once per tab session. */
+            try {
+                sessionStorage.removeItem(CIRCLE_BUNDLE_NUDGE_PENDING_KEY);
+                sessionStorage.setItem(CIRCLE_BUNDLE_NUDGE_SHOWN_KEY, 'true');
+            } catch (_) {
+                circleBundleNudgePendingFallback = false;
+                circleBundleNudgeShownFallback = true;
             }
 
             /* Reuse the same banner after dismissal instead of creating duplicates. */
@@ -12860,6 +12949,7 @@ setInterval(() => {
         let circleDonationAmount = CIRCLE_DONATION_DEFAULT_AMOUNT;
         let circleDonationMinimumInputTimer = null;
         let circleDonationNudgeTimer = null;
+        let circleDonationNudgeShownFallback = false;
         let circleDonationNudgeDeferredByBundle = false;
         let circleDonationNudgeWasVisibleBeforeBundle = false;
         let circleDonationSupportEngagementTimer = null;
@@ -13037,6 +13127,14 @@ setInterval(() => {
             if (!modal) return;
             closeMoreMenu();
 
+            // Opening the donation window is an explicit action and consumes the
+            // automatic donation reminder for this tab session.
+            if (circleDonationNudgeTimer) {
+                clearTimeout(circleDonationNudgeTimer);
+                circleDonationNudgeTimer = null;
+            }
+            markDonationNudgeShownThisSession();
+
             if (circleDonationSupportEngagementTimer) {
                 clearTimeout(circleDonationSupportEngagementTimer);
                 circleDonationSupportEngagementTimer = null;
@@ -13049,6 +13147,7 @@ setInterval(() => {
             void modal.offsetWidth;
             modal.classList.add('show');
             modal.setAttribute('aria-hidden', 'false');
+            markCircleDonationActionThisSession();
 
             // Load the QR library only when the user opens Support Circle AI.
             ensureQRCodeLibrary().then(() => {
@@ -13096,6 +13195,7 @@ setInterval(() => {
 
             setTimeout(() => {
                 if (!modal.classList.contains('show')) modal.classList.add('hidden');
+                showCircleBundleNudgeIfPending();
             }, 250);
         }
 
@@ -13113,7 +13213,17 @@ setInterval(() => {
         function markDonationNudgeShownThisSession() {
             try {
                 sessionStorage.setItem(CIRCLE_DONATION_NUDGE_SESSION_KEY, 'true');
-            } catch (_) {}
+            } catch (_) {
+                circleDonationNudgeShownFallback = true;
+            }
+        }
+
+        function markCircleDonationActionThisSession() {
+            try {
+                sessionStorage.setItem(CIRCLE_DONATION_ACTION_SESSION_KEY, 'true');
+            } catch (_) {
+                circleDonationActionFallback = true;
+            }
         }
 
         function migrateLegacyCircleDonationCooldown() {
@@ -13135,17 +13245,19 @@ setInterval(() => {
         }
 
         function shouldShowDonationNudgeForSession() {
+            if (circleDonationNudgeShownFallback) return false;
             try {
                 migrateLegacyCircleDonationCooldown();
-                /* Dismissals are respected for this tab session only. The next new session
-                   can show an automatic prompt unless a seven-day engagement cooldown applies. */
+                /* The automatic donation reminder is limited to one display per tab session. */
                 if (sessionStorage.getItem(CIRCLE_DONATION_NUDGE_SESSION_KEY) === 'true') return false;
                 const cooldownUntil = Number(localStorage.getItem(CIRCLE_DONATION_SUPPORT_COOLDOWN_KEY) || 0);
                 if (Number.isFinite(cooldownUntil) && Date.now() < cooldownUntil) return false;
                 if (Number.isFinite(cooldownUntil) && cooldownUntil > 0 && Date.now() >= cooldownUntil) {
                     localStorage.removeItem(CIRCLE_DONATION_SUPPORT_COOLDOWN_KEY);
                 }
-            } catch (_) {}
+            } catch (_) {
+                return !circleDonationNudgeShownFallback;
+            }
             return true;
         }
 
@@ -13271,33 +13383,9 @@ setInterval(() => {
         }
 
         function maybeOpenPersonalizedDonationWindow() {
-            if (localStorage.getItem('circle_v2_user_registered') !== 'true' || !String(userName || '').trim() || !shouldShowDonationNudgeForSession()) return;
-
-            const today = getCircleLocalDateKey();
-            try {
-                if (localStorage.getItem(CIRCLE_DONATION_PERSONALIZED_SHOWN_DAY_KEY) === today) return;
-            } catch (_) {}
-
-            const thresholdSeconds = getCircleDonationPersonalizedThresholdSeconds();
-            if (thresholdSeconds === null || getCircleDonationUsageForDate(today) < thresholdSeconds) return;
-
-            /* Do not layer the full support window over another modal or the profile reminder. */
-            const profileReminder = document.getElementById('profile-reminder');
-            const profileVisible = profileReminder && profileReminder.classList.contains('show');
-            const otherModalOpen = document.querySelector(
-                '.modal.show, .settings-modal.show, #settings-modal.show, #install-modal.show, #profile-edit-modal.show, #profile-crop-modal.show'
-            );
-            const donationModal = document.getElementById('donation-modal');
-            if (profileVisible || (otherModalOpen && otherModalOpen !== donationModal) ||
-                (donationModal && donationModal.classList.contains('show'))) {
-                return;
-            }
-
-            /* One automatic support window per local day and no second auto prompt in this tab session. */
-            try { localStorage.setItem(CIRCLE_DONATION_PERSONALIZED_SHOWN_DAY_KEY, today); } catch (_) {}
-            markDonationNudgeShownThisSession();
-            persistCircleDonationUsageData();
-            openDonationModal(true);
+            // Automatic personalized full-screen donation popups are disabled.
+            // All automatic donation promotion now uses the single session-scoped reminder.
+            return;
         }
 
         function recordCircleDonationUsageTick() {
@@ -13371,10 +13459,14 @@ setInterval(() => {
             circleDonationUsageTrackerTimer = setInterval(recordCircleDonationUsageTick, 1000);
         }
 
+        function isCircleDonationPromptEligible() {
+            return localStorage.getItem('circle_v2_user_registered') === 'true' && Boolean(String(userName || '').trim());
+        }
+
         function showDonationNudge(restorePreviouslyVisible = false) {
-            if (!circleReturningUser || (!restorePreviouslyVisible && !shouldShowDonationNudgeForSession())) return;
+            if (!isCircleDonationPromptEligible() || (!restorePreviouslyVisible && !shouldShowDonationNudgeForSession())) return;
             circleDonationNudgeTimer = null;
-            /* The One-Shot Notes banner takes priority. Its close handler resumes this nudge after 5 seconds. */
+            /* Defensive guard: never stack the donation reminder over the notes banner. */
             if (isCircleBundleNudgeVisible()) {
                 if (restorePreviouslyVisible) circleDonationNudgeWasVisibleBeforeBundle = true;
                 else circleDonationNudgeDeferredByBundle = true;
@@ -13403,10 +13495,7 @@ setInterval(() => {
         }
 
         function scheduleDonationNudge() {
-            if (!circleReturningUser || !shouldShowDonationNudgeForSession()) return;
-            /* After the baseline is ready, let the personalised threshold choose when
-               to open the full support window instead of showing both prompts in one visit. */
-            if (isCircleDonationPersonalizedModeReady()) return;
+            if (!isCircleDonationPromptEligible() || !shouldShowDonationNudgeForSession()) return;
             if (isCircleBundleNudgeVisible()) {
                 circleDonationNudgeDeferredByBundle = true;
                 if (circleDonationNudgeTimer) {
@@ -13429,7 +13518,11 @@ setInterval(() => {
             const reminderAction = document.getElementById('donation-reminder-action');
             if (reminderAction) reminderAction.addEventListener('click', () => openDonationModal(true));
             const reminderClose = document.getElementById('donation-reminder-close');
-            if (reminderClose) reminderClose.addEventListener('click', dismissDonationNudge);
+            if (reminderClose) reminderClose.addEventListener('click', () => {
+                dismissDonationNudge();
+                markCircleDonationActionThisSession();
+                showCircleBundleNudgeIfPending();
+            });
             const modalClose = document.getElementById('donation-modal-close');
             if (modalClose) modalClose.addEventListener('click', closeDonationModal);
 
